@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Istiqomah Grosir Stock</string>
+    <string name="title_activity_main">Istiqomah Grosir Stock</string>
+    <string name="package_name">com.istiqomah.grosirstock</string>
+    <string name="custom_url_scheme">com.istiqomah.grosirstock</string>
+</resources>

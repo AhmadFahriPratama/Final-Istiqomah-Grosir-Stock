@@ -1,0 +1,597 @@
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import {
+  Plus,
+  Search,
+  Camera,
+  Layers,
+  Eye,
+  EyeOff,
+  Share2,
+  FileText,
+  Clock,
+  Barcode,
+  Edit2,
+  User,
+  MapPin,
+  KeyRound,
+  ShoppingBag,
+  Shirt,
+  Armchair,
+  Package,
+} from 'lucide-react';
+import type { FloorId, StockItem, UserAccount } from '../types/stock';
+import { FLOOR_DEFINITIONS } from '../types/stock';
+import { StockStorageEngine } from '../services/db';
+import { ReportService } from '../services/reports';
+import { soundEffects } from '../utils/audio';
+import { SkeletonLoader } from '../components/SkeletonLoader';
+import { OfflineBadge } from '../components/OfflineBadge';
+import { BarcodeScannerModal } from '../components/BarcodeScannerModal';
+import { StockAdjustModal } from '../components/StockAdjustModal';
+import { ItemFormModal } from '../components/ItemFormModal';
+import { CategoryManagerModal } from '../components/CategoryManagerModal';
+import { FloorExportImportModal } from '../components/FloorExportImportModal';
+import { TextReportModal } from '../components/TextReportModal';
+import { ChangePasswordModal } from '../components/ChangePasswordModal';
+
+interface FloorViewProps {
+  floorId: FloorId;
+  onOpenAdmin: () => void;
+}
+
+const FLOOR_ICONS: Record<FloorId, typeof ShoppingBag> = {
+  '1': ShoppingBag,
+  '2': Shirt,
+  '3': Armchair,
+  '4': Package,
+};
+
+export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
+  const floorInfo = FLOOR_DEFINITIONS[floorId];
+  const FloorIconComponent = FLOOR_ICONS[floorId] || Package;
+
+  // User & Auth State
+  const [currentUser, setCurrentUser] = useState<UserAccount | null>(() =>
+    StockStorageEngine.getCurrentUser()
+  );
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+
+  // Data State
+  const [floorData, setFloorData] = useState(() => StockStorageEngine.getFloorData(floorId));
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Filters & Controls
+  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [hideOutOfStock, setHideOutOfStock] = useState<boolean>(true);
+  const [showRecentMutations, setShowRecentMutations] = useState<boolean>(false);
+
+  // Modals
+  const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false);
+  const [adjustingItem, setAdjustingItem] = useState<StockItem | null>(null);
+  const [editingItem, setEditingItem] = useState<StockItem | null>(null);
+  const [isItemFormOpen, setIsItemFormOpen] = useState<boolean>(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState<boolean>(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
+  const [reportText, setReportText] = useState<string>('');
+
+  const refreshData = useCallback(() => {
+    const data = StockStorageEngine.getFloorData(floorId);
+    setFloorData(data);
+    setCurrentUser(StockStorageEngine.getCurrentUser());
+  }, [floorId]);
+
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      refreshData();
+      setIsLoading(false);
+    }, 80);
+
+    const handleStorageEvent = (e: Event) => {
+      const customEvent = e as CustomEvent<{ floorId: FloorId }>;
+      if (customEvent.detail?.floorId === floorId) {
+        refreshData();
+      }
+    };
+
+    const handleUserChanged = (e: Event) => {
+      const custom = e as CustomEvent<{ user: UserAccount | null }>;
+      setCurrentUser(custom.detail?.user || null);
+    };
+
+    window.addEventListener('istiqomah_stock_updated', handleStorageEvent);
+    window.addEventListener('istiqomah_user_changed', handleUserChanged);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('istiqomah_stock_updated', handleStorageEvent);
+      window.removeEventListener('istiqomah_user_changed', handleUserChanged);
+    };
+  }, [floorId, refreshData]);
+
+  const filteredItems = useMemo(() => {
+    return floorData.items.filter((item) => {
+      if (selectedCategory !== 'ALL' && item.category !== selectedCategory) {
+        return false;
+      }
+      if (hideOutOfStock && item.quantity <= 0) {
+        return false;
+      }
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase().trim();
+        const matchesName = item.name.toLowerCase().includes(query);
+        const matchesBarcode = item.barcode?.toLowerCase().includes(query);
+        const matchesLocation = item.locationDetails?.toLowerCase().includes(query);
+        const matchesNotes = item.notes?.toLowerCase().includes(query);
+        return matchesName || matchesBarcode || matchesLocation || matchesNotes;
+      }
+      return true;
+    });
+  }, [floorData.items, selectedCategory, hideOutOfStock, searchQuery]);
+
+  const outOfStockCount = useMemo(() => {
+    return floorData.items.filter((item) => {
+      if (selectedCategory !== 'ALL' && item.category !== selectedCategory) return false;
+      return item.quantity <= 0;
+    }).length;
+  }, [floorData.items, selectedCategory]);
+
+  const handleBarcodeScanned = (scannedCode: string) => {
+    setIsScannerOpen(false);
+    const found = floorData.items.find(
+      (it) => it.barcode && it.barcode.trim().toLowerCase() === scannedCode.toLowerCase()
+    );
+
+    if (found) {
+      soundEffects.playScanBeep();
+      setAdjustingItem(found);
+    } else {
+      soundEffects.playClickSound();
+      setSearchQuery(scannedCode);
+    }
+  };
+
+  const handleStockAdjustConfirm = (delta: number, reason: string) => {
+    if (adjustingItem) {
+      StockStorageEngine.adjustStock(floorId, adjustingItem.id, delta, reason);
+      refreshData();
+    }
+  };
+
+  const handleSaveItem = (
+    itemData: Omit<StockItem, 'id' | 'createdAt' | 'updatedAt'>,
+    editId?: string
+  ) => {
+    if (editId) {
+      StockStorageEngine.updateItem(floorId, {
+        ...itemData,
+        id: editId,
+        createdAt: editingItem?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    } else {
+      StockStorageEngine.addItem(floorId, itemData);
+    }
+    refreshData();
+  };
+
+  const handleDeleteItem = (itemId: string) => {
+    soundEffects.playClickSound();
+    StockStorageEngine.deleteItem(floorId, itemId);
+    refreshData();
+  };
+
+  const handleAddCategory = (catName: string) => {
+    StockStorageEngine.addCategory(floorId, catName);
+    refreshData();
+  };
+  const handleRemoveCategory = (catName: string) => {
+    StockStorageEngine.removeCategory(floorId, catName);
+    refreshData();
+  };
+
+  const handleOpenReport = () => {
+    soundEffects.playClickSound();
+    const text = ReportService.generateFloorReport(floorId);
+    setReportText(text);
+    setIsReportModalOpen(true);
+  };
+
+  return (
+    <div className="min-h-screen pb-28 pt-3 px-3 max-w-md mx-auto space-y-3">
+      {/* Header Bar */}
+      <header className="flex items-center justify-between py-1 px-0.5">
+        <div className="flex items-center gap-2.5">
+          {/* Remade Sleek Vector Floor Badge */}
+          <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center shadow-xs">
+            <FloorIconComponent size={18} className="stroke-[2.2]" />
+          </div>
+
+          <div>
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-sm font-extrabold text-black leading-tight">
+                {floorInfo.name}
+              </h1>
+              <span className="text-[10px] font-medium text-zinc-500">
+                ({floorInfo.subtitle})
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 font-medium">
+              <span>{floorData.items.length} item</span>
+              {currentUser && (
+                <>
+                  <span>-</span>
+                  <button
+                    onClick={() => setIsPasswordModalOpen(true)}
+                    className="text-black font-semibold hover:underline flex items-center gap-0.5"
+                    title="Ubah Password"
+                  >
+                    <User size={10} />
+                    <span>{currentUser.name}</span>
+                    <KeyRound size={9} className="text-zinc-400 ml-0.5" />
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <OfflineBadge />
+
+          <button
+            onClick={() => {
+              soundEffects.playClickSound();
+              setIsExportModalOpen(true);
+            }}
+            className="p-2 rounded-xl bg-white border border-zinc-200 text-zinc-700 hover:border-black touch-press"
+            title="Sinkronisasi & Multi-HP"
+          >
+            <Share2 size={14} />
+          </button>
+
+          <button
+            onClick={handleOpenReport}
+            className="p-2 rounded-xl bg-white border border-zinc-200 text-zinc-700 hover:border-black touch-press"
+            title="Laporan Teks"
+          >
+            <FileText size={14} />
+          </button>
+        </div>
+      </header>
+
+      {/* Search & Camera Bar */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search size={14} className="absolute left-3 top-2.5 text-zinc-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={`Cari barang di ${floorInfo.name}...`}
+            className="w-full pl-9 pr-8 py-2 text-xs bg-white border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-medium placeholder:text-zinc-400"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-2 text-xs text-zinc-400 hover:text-black"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        <button
+          onClick={() => {
+            soundEffects.playClickSound();
+            setIsScannerOpen(true);
+          }}
+          className="p-2 bg-black hover:bg-zinc-800 text-white rounded-xl touch-press flex items-center gap-1"
+          title="Scan Kamera"
+        >
+          <Camera size={16} />
+        </button>
+      </div>
+
+      {/* Category Pills Switcher */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between px-0.5">
+          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+            Jenis Barang
+          </span>
+          <button
+            onClick={() => {
+              soundEffects.playClickSound();
+              setIsCategoryModalOpen(true);
+            }}
+            className="text-[10px] font-semibold text-zinc-600 hover:text-black flex items-center gap-1"
+          >
+            <Layers size={11} /> Kelola Jenis
+          </button>
+        </div>
+
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5 no-scrollbar">
+          <button
+            onClick={() => {
+              soundEffects.playClickSound();
+              setSelectedCategory('ALL');
+            }}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all touch-press ${
+              selectedCategory === 'ALL'
+                ? 'bg-black text-white'
+                : 'bg-white text-zinc-600 border border-zinc-200 hover:border-black'
+            }`}
+          >
+            Semua ({floorData.items.length})
+          </button>
+
+          {floorData.categories.map((cat) => {
+            const count = floorData.items.filter((it) => it.category === cat).length;
+            const isSelected = selectedCategory === cat;
+            return (
+              <button
+                key={cat}
+                onClick={() => {
+                  soundEffects.playClickSound();
+                  setSelectedCategory(cat);
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all touch-press flex items-center gap-1.5 ${
+                  isSelected
+                    ? 'bg-black text-white'
+                    : 'bg-white text-zinc-600 border border-zinc-200 hover:border-black'
+                }`}
+              >
+                <span>{cat}</span>
+                <span
+                  className={`text-[9px] px-1.5 py-0.2 rounded-md ${
+                    isSelected ? 'bg-zinc-800 text-white' : 'bg-zinc-100 text-zinc-500'
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Out of Stock Toggle & Add Button */}
+      <div className="flex items-center justify-between bg-white border border-zinc-200 rounded-xl p-2 px-3">
+        <button
+          onClick={() => {
+            soundEffects.playClickSound();
+            setHideOutOfStock(!hideOutOfStock);
+          }}
+          className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-600 hover:text-black"
+        >
+          {hideOutOfStock ? <EyeOff size={13} /> : <Eye size={13} />}
+          <span>{hideOutOfStock ? 'Sembunyikan Habis' : 'Tampilkan Habis'}</span>
+          {outOfStockCount > 0 && (
+            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-md bg-zinc-100 text-zinc-700">
+              {outOfStockCount}
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => {
+            soundEffects.playClickSound();
+            setEditingItem(null);
+            setIsItemFormOpen(true);
+          }}
+          className="px-2.5 py-1.5 bg-black hover:bg-zinc-800 text-white rounded-lg text-[11px] font-bold flex items-center gap-1 touch-press"
+        >
+          <Plus size={13} /> Tambah Barang
+        </button>
+      </div>
+
+      {/* Stock Items List */}
+      <div>
+        {isLoading ? (
+          <SkeletonLoader count={4} />
+        ) : filteredItems.length === 0 ? (
+          <div className="bg-white border border-dashed border-zinc-300 rounded-2xl p-7 text-center space-y-2">
+            <h4 className="text-xs font-bold text-zinc-700">Tidak ada barang ditemukan</h4>
+            <p className="text-[11px] text-zinc-400 max-w-xs mx-auto">
+              {searchQuery
+                ? `Tidak ada hasil untuk "${searchQuery}"`
+                : hideOutOfStock && outOfStockCount > 0
+                ? `${outOfStockCount} barang habis disembunyikan`
+                : 'Belum ada barang di kategori ini.'}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {filteredItems.map((item) => {
+              const isOutOfStock = item.quantity <= 0;
+              const isLowStock = !isOutOfStock && item.quantity <= item.minStock;
+
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => {
+                    soundEffects.playClickSound();
+                    setAdjustingItem(item);
+                  }}
+                  className="bg-white rounded-xl p-3.5 border border-zinc-200 hover:border-black cursor-pointer transition-all flex items-center justify-between shadow-xs touch-press group"
+                >
+                  {/* Item Details */}
+                  <div className="min-w-0 flex-1 pr-3">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-zinc-100 text-zinc-700">
+                        {item.category}
+                      </span>
+                      {item.barcode && (
+                        <span className="text-[9px] text-zinc-400 font-mono flex items-center gap-0.5">
+                          <Barcode size={10} /> {item.barcode}
+                        </span>
+                      )}
+                      {item.locationDetails && (
+                        <span className="text-[9px] text-zinc-400 flex items-center gap-0.5">
+                          <MapPin size={9} />
+                          {item.locationDetails}
+                        </span>
+                      )}
+                    </div>
+
+                    <h3 className="text-xs font-bold text-black mt-1 truncate group-hover:text-black">
+                      {item.name}
+                    </h3>
+
+                    {/* Stock Alert Label */}
+                    {isOutOfStock ? (
+                      <span className="text-[9px] font-bold text-zinc-900 block mt-0.5">
+                        [Stok Habis / 0]
+                      </span>
+                    ) : isLowStock ? (
+                      <span className="text-[9px] font-medium text-zinc-500 block mt-0.5">
+                        [Stok Menipis: Min {item.minStock} {item.unit}]
+                      </span>
+                    ) : null}
+                  </div>
+
+                  {/* Stock Quantity Badge & Edit Action */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="text-right">
+                      <span className="text-sm font-extrabold text-black font-mono block">
+                        {item.quantity}
+                      </span>
+                      <span className="text-[9px] text-zinc-400 block -mt-0.5 font-medium">
+                        {item.unit}
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        soundEffects.playClickSound();
+                        setEditingItem(item);
+                        setIsItemFormOpen(true);
+                      }}
+                      className="p-1.5 text-zinc-300 hover:text-black hover:bg-zinc-100 rounded-lg transition-colors"
+                      title="Edit Data Barang"
+                    >
+                      <Edit2 size={13} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Recent Mutations Toggle */}
+      <div className="pt-2">
+        <button
+          onClick={() => {
+            soundEffects.playClickSound();
+            setShowRecentMutations(!showRecentMutations);
+          }}
+          className="w-full flex items-center justify-between text-xs font-bold text-zinc-600 p-2 rounded-xl bg-white border border-zinc-200"
+        >
+          <span className="flex items-center gap-1.5">
+            <Clock size={13} className="text-zinc-500" />
+            Riwayat Mutasi {floorInfo.name} ({floorData.mutations.length})
+          </span>
+          <span className="text-[10px] text-black">
+            {showRecentMutations ? 'Tutup' : 'Lihat'}
+          </span>
+        </button>
+
+        {showRecentMutations && (
+          <div className="mt-2 space-y-1 max-h-52 overflow-y-auto">
+            {floorData.mutations.length === 0 ? (
+              <p className="text-xs text-zinc-400 py-3 text-center italic">
+                Belum ada riwayat mutasi
+              </p>
+            ) : (
+              floorData.mutations.slice(0, 15).map((m) => (
+                <div
+                  key={m.id}
+                  className="bg-white border border-zinc-200 p-2 rounded-lg text-xs flex items-center justify-between"
+                >
+                  <div className="min-w-0 pr-2">
+                    <span className="font-bold text-black block truncate">
+                      {m.itemName}
+                    </span>
+                    <span className="text-[10px] text-zinc-400 block">
+                      {m.reason} {m.userName ? `- ${m.userName}` : ''}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-mono font-bold text-xs text-black">
+                      {m.type === 'IN' ? `+${m.amount}` : `-${m.amount}`}
+                    </span>
+                    <span className="text-[9px] text-zinc-400 block">
+                      {m.prevStock} -&gt; {m.newStock}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Modals */}
+      <BarcodeScannerModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        onScan={handleBarcodeScanned}
+      />
+
+      <StockAdjustModal
+        isOpen={!!adjustingItem}
+        item={adjustingItem}
+        onClose={() => setAdjustingItem(null)}
+        onConfirm={handleStockAdjustConfirm}
+      />
+
+      <ItemFormModal
+        isOpen={isItemFormOpen}
+        itemToEdit={editingItem}
+        categories={floorData.categories}
+        onClose={() => {
+          setIsItemFormOpen(false);
+          setEditingItem(null);
+        }}
+        onSave={handleSaveItem}
+        onDelete={handleDeleteItem}
+      />
+
+      <CategoryManagerModal
+        isOpen={isCategoryModalOpen}
+        floorName={floorInfo.name}
+        categories={floorData.categories}
+        onClose={() => setIsCategoryModalOpen(false)}
+        onAddCategory={handleAddCategory}
+        onRemoveCategory={handleRemoveCategory}
+      />
+
+      <FloorExportImportModal
+        isOpen={isExportModalOpen}
+        floorId={floorId}
+        onClose={() => setIsExportModalOpen(false)}
+        onDataChanged={refreshData}
+      />
+
+      <TextReportModal
+        isOpen={isReportModalOpen}
+        title={`Laporan Stok ${floorInfo.name}`}
+        reportText={reportText}
+        onClose={() => setIsReportModalOpen(false)}
+      />
+
+      {currentUser && (
+        <ChangePasswordModal
+          isOpen={isPasswordModalOpen}
+          currentUser={currentUser}
+          onClose={() => setIsPasswordModalOpen(false)}
+          onSuccess={(updated) => setCurrentUser(updated)}
+        />
+      )}
+    </div>
+  );
+};
