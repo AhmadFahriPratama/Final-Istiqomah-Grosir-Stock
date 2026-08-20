@@ -24,7 +24,6 @@ import { TelegramService } from '../services/telegram';
 import { ReportService } from '../services/reports';
 import { soundEffects } from '../utils/audio';
 import { TextReportModal } from '../components/TextReportModal';
-import confetti from 'canvas-confetti';
 
 interface AdminDashboardProps {
   onSelectFloor: (floorId: FloorId) => void;
@@ -140,7 +139,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
       setTelegramStatus(res.message);
       if (res.success) {
         soundEffects.playBackupSent();
-        confetti({ particleCount: 50, spread: 70, origin: { y: 0.5 } });
       }
     } catch (e) {
       setTelegramStatus('Gagal kirim: ' + String(e));
@@ -163,7 +161,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
     downloadAnchor.remove();
 
     soundEffects.playBackupSent();
-    confetti({ particleCount: 30, spread: 50, origin: { y: 0.7 } });
   };
 
   const handleFullFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -21,6 +21,9 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
   const [isScanning, setIsScanning] = useState(false);
   const [torchOn, setTorchOn] = useState(false);
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
+  const [cameraList, setCameraList] = useState<Array<{ id: string; label: string }>>([]);
+  const [selectedCameraIndex, setSelectedCameraIndex] = useState<number>(0);
+  
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const readerElementId = 'istiqomah-barcode-reader';
 
@@ -54,6 +57,28 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
         await stopScanner();
       }
 
+      // 1. Explicitly request camera permissions if available in modern browsers / WebView
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: facingMode } },
+          });
+          // Immediately release test stream so Html5Qrcode can bind to the camera
+          stream.getTracks().forEach((track) => track.stop());
+        } catch (permErr) {
+          console.warn('Direct getUserMedia test:', permErr);
+        }
+      }
+
+      // 2. Query available camera devices
+      let cameras: Array<{ id: string; label: string }> = [];
+      try {
+        cameras = await Html5Qrcode.getCameras();
+        setCameraList(cameras);
+      } catch (camErr) {
+        console.warn('getCameras error:', camErr);
+      }
+
       const html5QrCode = new Html5Qrcode(readerElementId, {
         formatsToSupport: [
           Html5QrcodeSupportedFormats.QR_CODE,
@@ -70,35 +95,68 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
       scannerRef.current = html5QrCode;
 
       const config = {
-        fps: 15,
-        qrbox: { width: 250, height: 160 },
+        fps: 20,
+        qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
+          const minEdgePercentage = 0.75;
+          const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+          const qrboxSize = Math.floor(minEdge * minEdgePercentage);
+          return {
+            width: qrboxSize,
+            height: Math.floor(qrboxSize * 0.65),
+          };
+        },
         aspectRatio: 1.0,
       };
 
-      await html5QrCode.start(
-        { facingMode: facingMode },
-        config,
-        (decodedText) => {
-          handleDetected(decodedText);
-        },
-        () => {}
-      );
+      // Select camera device or fallback to facingMode
+      if (cameras.length > 0) {
+        // Try finding back camera first
+        let targetCamId = cameras[0].id;
+        const rearCamIndex = cameras.findIndex(
+          (c) =>
+            c.label.toLowerCase().includes('back') ||
+            c.label.toLowerCase().includes('rear') ||
+            c.label.toLowerCase().includes('environment') ||
+            c.label.toLowerCase().includes('belakang')
+        );
+
+        if (facingMode === 'environment' && rearCamIndex >= 0) {
+          targetCamId = cameras[rearCamIndex].id;
+          setSelectedCameraIndex(rearCamIndex);
+        } else if (cameras[selectedCameraIndex]) {
+          targetCamId = cameras[selectedCameraIndex].id;
+        }
+
+        await html5QrCode.start(
+          targetCamId,
+          config,
+          (decodedText) => handleDetected(decodedText),
+          () => {}
+        );
+      } else {
+        await html5QrCode.start(
+          { facingMode: facingMode },
+          config,
+          (decodedText) => handleDetected(decodedText),
+          () => {}
+        );
+      }
 
       setIsScanning(true);
     } catch (err) {
       console.error('Camera start failed:', err);
       setCameraError(
-        'Kamera tidak dapat diakses. Gunakan input manual di bawah.'
+        'Kamera belum aktif / izin ditolak. Pastikan izin kamera telah disetujui, atau masukkan barcode manual.'
       );
       setIsScanning(false);
     }
-  }, [facingMode, handleDetected, stopScanner]);
+  }, [facingMode, selectedCameraIndex, handleDetected, stopScanner]);
 
   useEffect(() => {
     if (isOpen) {
       const timer = setTimeout(() => {
         startScanner();
-      }, 300);
+      }, 250);
       return () => {
         clearTimeout(timer);
         stopScanner();
@@ -109,15 +167,22 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
   }, [isOpen, startScanner, stopScanner]);
 
   const handleFlipCamera = async () => {
-    const nextMode = facingMode === 'environment' ? 'user' : 'environment';
-    setFacingMode(nextMode);
+    soundEffects.playClickSound();
+    if (cameraList.length > 1) {
+      const nextIndex = (selectedCameraIndex + 1) % cameraList.length;
+      setSelectedCameraIndex(nextIndex);
+    } else {
+      const nextMode = facingMode === 'environment' ? 'user' : 'environment';
+      setFacingMode(nextMode);
+    }
     await stopScanner();
     setTimeout(() => {
       startScanner();
-    }, 200);
+    }, 150);
   };
 
   const handleToggleTorch = async () => {
+    soundEffects.playClickSound();
     if (scannerRef.current && isScanning) {
       try {
         const nextTorch = !torchOn;
@@ -180,6 +245,12 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
             <div className="p-6 text-center text-white space-y-2">
               <AlertCircle size={28} className="mx-auto text-zinc-400" />
               <p className="text-xs text-zinc-300">{cameraError}</p>
+              <button
+                onClick={() => startScanner()}
+                className="mt-2 px-3 py-1.5 bg-white text-black text-xs font-bold rounded-lg touch-press"
+              >
+                Coba Lagi
+              </button>
             </div>
           )}
 
