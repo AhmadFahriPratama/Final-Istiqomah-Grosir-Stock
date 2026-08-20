@@ -5,6 +5,9 @@ on:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build Android APK
@@ -42,11 +45,25 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Rename APK for Easy Identification
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk ./Istiqomah-Grosir-Stock.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Istiqomah-Grosir-Stock-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: ./Istiqomah-Grosir-Stock.apk
           if-no-files-found: error
+
+      - name: Upload APK to Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
+        with:
+          tag_name: v1.0.0
+          name: "Istiqomah Grosir Stock v1.0.0 (Release APK)"
+          files: ./Istiqomah-Grosir-Stock.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
