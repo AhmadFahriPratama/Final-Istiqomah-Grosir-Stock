@@ -167,8 +167,8 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
 
         {/* Toast Alert */}
         {userToast && (
-          <div className="mx-3 mt-2 p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-1.5 shrink-0">
-            <CheckCircle size={14} className="text-emerald-600" />
+          <div className="mx-3 mt-2 p-2 rounded-xl bg-black text-white border border-zinc-800 text-xs font-semibold flex items-center gap-1.5 shrink-0 shadow-lg">
+            <CheckCircle size={14} className="text-white" />
             <span>{userToast}</span>
           </div>
         )}
@@ -340,7 +340,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
                   {u.name.toLowerCase() !== 'fahri' && (
                     <button
                       onClick={() => handleDeleteUserAccount(u.id, u.name)}
-                      className="p-1.5 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                      className="p-1.5 text-zinc-400 hover:text-black hover:bg-zinc-200 rounded-lg transition-colors"
                       title="Hapus Akun"
                     >
                       <Trash2 size={14} />

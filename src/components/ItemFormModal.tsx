@@ -12,7 +12,6 @@ import {
 import type { StockItem } from '../types/stock';
 import { BarcodeScannerModal } from './BarcodeScannerModal';
 import { soundEffects } from '../utils/audio';
-import confetti from 'canvas-confetti';
 
 interface ItemFormModalProps {
   isOpen: boolean;
@@ -121,7 +120,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
 
     if (!itemToEdit) {
       soundEffects.playItemCreated();
-      confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
     } else {
       soundEffects.playClickSound();
     }

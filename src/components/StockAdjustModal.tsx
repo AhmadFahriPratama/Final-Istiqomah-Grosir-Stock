@@ -27,7 +27,7 @@ export const StockAdjustModal: React.FC<StockAdjustModalProps> = ({
   const effectiveDelta = mode === 'ADD' ? Math.abs(delta) : -Math.abs(delta);
   const projectedStock = Math.max(0, currentStock + effectiveDelta);
 
-  const quickPresets = [1, 5, 10, 20, 50, 100];
+  const quickPresets = [1, 5, 10, 12, 24, 50, 100];
   const commonReasons =
     mode === 'ADD'
       ? ['Restock dari Gudang', 'Barang Masuk', 'Retur', 'Koreksi Stok']
@@ -161,7 +161,8 @@ export const StockAdjustModal: React.FC<StockAdjustModalProps> = ({
                       : 'bg-white text-zinc-600 border-zinc-200 hover:border-black'
                   }`}
                 >
-                  +{val}
+                  {mode === 'ADD' ? `+${val}` : `-${val}`}
+                  {val === 12 ? ' (Lusin)' : val === 24 ? ' (Dus)' : ''}
                 </button>
               ))}
             </div>

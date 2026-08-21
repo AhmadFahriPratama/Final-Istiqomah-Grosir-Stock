@@ -14,7 +14,6 @@ import { FLOOR_DEFINITIONS } from '../types/stock';
 import { StockStorageEngine } from '../services/db';
 import { TelegramService } from '../services/telegram';
 import { soundEffects } from '../utils/audio';
-import confetti from 'canvas-confetti';
 
 interface FloorExportImportModalProps {
   isOpen: boolean;
@@ -62,7 +61,6 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
     downloadAnchor.remove();
 
     soundEffects.playBackupSent();
-    confetti({ particleCount: 30, spread: 50, origin: { y: 0.7 } });
   };
 
   const handleSendTelegram = async () => {
@@ -76,7 +74,6 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
       setTelegramStatus(res.message);
       if (res.success) {
         soundEffects.playBackupSent();
-        confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
       } else {
         alert(res.message);
       }
@@ -133,7 +130,6 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
 
     if (result.success) {
       soundEffects.playBackupSent();
-      confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
       onDataChanged();
       setPendingFileContent(null);
     }

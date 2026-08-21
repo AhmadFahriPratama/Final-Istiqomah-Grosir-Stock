@@ -463,36 +463,36 @@ const BarcodeScannerView: React.FC<{
               <div className="w-5 h-5 border-b-[3px] border-r-[3px] border-white rounded-br-lg" />
             </div>
 
-            {/* Animated scan line */}
+            {/* Animated scan line - Luxury Platinum/White */}
             <div
               className="absolute animate-laser-sweep"
               style={{
                 left: '16%',
                 right: '16%',
                 height: '2px',
-                background: 'linear-gradient(90deg, transparent, #34d399 30%, #34d399 70%, transparent)',
-                boxShadow: '0 0 12px 2px rgba(52,211,153,0.8)',
+                background: 'linear-gradient(90deg, transparent, #ffffff 30%, #ffffff 70%, transparent)',
+                boxShadow: '0 0 12px 2px rgba(255,255,255,0.85)',
               }}
             />
 
-            {/* Flash overlay on detection */}
+            {/* Flash overlay on detection - Soft Silver Light */}
             {flash && (
-              <div className="absolute inset-0 bg-emerald-500/40 backdrop-blur-xs transition-opacity duration-150" />
+              <div className="absolute inset-0 bg-white/35 backdrop-blur-xs transition-opacity duration-150" />
             )}
 
             {/* Status text */}
             <div className="absolute bottom-3 left-0 right-0 text-center">
-              <span className="text-[10px] text-white font-medium bg-black/75 backdrop-blur-md px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 border border-white/10 shadow-lg">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[10px] text-white font-medium bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 border border-white/20 shadow-lg">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                 {continuous ? 'Scan barcode - auto simpan' : 'Arahkan barcode produk ke bingkai'}
               </span>
             </div>
 
-            {/* Last detected code badge */}
+            {/* Last detected code badge - Elegant High-Contrast Monochrome */}
             {lastCode && (
               <div className="absolute top-3 left-3 right-3 text-center">
-                <div className="bg-emerald-600 text-white text-[11px] font-mono font-bold px-3 py-1 rounded-lg inline-flex items-center gap-1.5 shadow-lg border border-emerald-400">
-                  <CheckCircle2 size={13} />
+                <div className="bg-black text-white text-[11px] font-mono font-bold px-3 py-1 rounded-lg inline-flex items-center gap-1.5 shadow-2xl border border-zinc-500">
+                  <CheckCircle2 size={13} className="text-white" />
                   <span>{lastCode}</span>
                 </div>
               </div>
@@ -509,7 +509,7 @@ const BarcodeScannerView: React.FC<{
             }}
             className={`absolute top-2.5 right-2.5 w-8 h-8 rounded-full backdrop-blur-md flex items-center justify-center transition-colors z-30 touch-press ${
               torchOn
-                ? 'bg-amber-400 text-black font-bold shadow-[0_0_12px_rgba(251,191,36,0.8)]'
+                ? 'bg-white text-black font-bold shadow-[0_0_12px_rgba(255,255,255,0.9)]'
                 : 'bg-black/60 text-white hover:bg-black/80 border border-white/10'
             }`}
             title={torchOn ? 'Matikan senter' : 'Nyalakan senter'}

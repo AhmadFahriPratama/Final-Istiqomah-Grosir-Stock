@@ -130,14 +130,14 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
             <div
               className={`p-3 rounded-2xl border text-xs font-semibold flex items-center gap-2 ${
                 importStatus.success
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                  : 'bg-rose-50 border-rose-200 text-rose-800'
+                  ? 'bg-black text-white border-zinc-800 shadow-md'
+                  : 'bg-zinc-100 text-zinc-900 border-zinc-300'
               }`}
             >
               {importStatus.success ? (
-                <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+                <CheckCircle2 size={16} className="text-white shrink-0" />
               ) : (
-                <AlertTriangle size={16} className="text-rose-600 shrink-0" />
+                <AlertTriangle size={16} className="text-zinc-800 shrink-0" />
               )}
               <span>{importStatus.message}</span>
             </div>
@@ -193,12 +193,12 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
 
           {/* Danger Zone: Reset all data */}
           <div className="pt-2 border-t border-zinc-200">
-            <span className="text-[10px] font-bold text-rose-600 uppercase tracking-wider block mb-1.5">
-              Area Bahaya (Reset Data)
+            <span className="text-[10px] font-bold text-zinc-800 uppercase tracking-wider block mb-1.5">
+              Area Reset Data (Koreksi Total)
             </span>
             <button
               onClick={handleClearAllData}
-              className="w-full py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-800 border border-rose-200 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 touch-press transition-colors"
+              className="w-full py-2.5 bg-zinc-900 hover:bg-black text-white border border-black rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 touch-press transition-colors shadow-xs"
             >
               <Trash2 size={14} /> Kosongkan Semua Produk & Jenis (Reset ke 0)
             </button>

@@ -98,34 +98,34 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
   const getActionBadge = (m: MutationLog) => {
     if (m.actionType === 'ITEM_ADD' || (m.type === 'IN' && m.prevStock === 0)) {
       return {
-        bg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        bg: 'bg-black text-white border-black shadow-xs',
         icon: PlusCircle,
         label: `+${m.amount} (Item Baru)`,
       };
     }
     if (m.actionType === 'ITEM_DELETE') {
       return {
-        bg: 'bg-rose-50 text-rose-700 border-rose-200',
+        bg: 'bg-zinc-100 text-zinc-900 border-zinc-300',
         icon: Trash2,
         label: `Hapus Item`,
       };
     }
     if (m.actionType === 'ITEM_UPDATE' || m.type === 'ADJUST') {
       return {
-        bg: 'bg-blue-50 text-blue-700 border-blue-200',
+        bg: 'bg-white text-zinc-800 border-zinc-300',
         icon: Edit3,
         label: `Koreksi Data`,
       };
     }
     if (m.type === 'IN') {
       return {
-        bg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        bg: 'bg-zinc-900 text-white border-zinc-900 shadow-xs',
         icon: ArrowDownLeft,
         label: `+${m.amount} Unit`,
       };
     }
     return {
-      bg: 'bg-rose-50 text-rose-700 border-rose-200',
+      bg: 'bg-zinc-100 text-zinc-900 border-zinc-300',
       icon: ArrowUpRight,
       label: `-${m.amount} Unit`,
     };
@@ -255,9 +255,9 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
               Total: <strong className="text-black font-mono">{filteredMutations.length}</strong> aktivitas
             </span>
             <div className="flex items-center gap-2">
-              <span className="text-emerald-700 font-bold font-mono">+{totalInQty} in</span>
+              <span className="text-zinc-900 font-bold font-mono">+{totalInQty} in</span>
               <span>•</span>
-              <span className="text-rose-700 font-bold font-mono">-{totalOutQty} out</span>
+              <span className="text-zinc-600 font-bold font-mono">-{totalOutQty} out</span>
             </div>
           </div>
         </div>

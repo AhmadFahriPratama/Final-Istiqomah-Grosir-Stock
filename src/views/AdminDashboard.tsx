@@ -226,7 +226,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <h3 className="text-xs font-bold text-black">Riwayat Perubahan User</h3>
-                  <span className="text-[9px] font-bold bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-200">
+                  <span className="text-[9px] font-bold bg-black text-white px-1.5 py-0.5 rounded border border-black">
                     Live Audit
                   </span>
                 </div>
@@ -281,11 +281,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
                 <div className="flex items-center gap-2">
                   <h3 className="text-xs font-bold text-black">Telegram & Auto-Backup</h3>
                   {settings.telegram.autoBackup ? (
-                    <span className="text-[9px] font-bold bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-200 flex items-center gap-0.5">
+                    <span className="text-[9px] font-bold bg-black text-white px-1.5 py-0.5 rounded border border-black flex items-center gap-0.5">
                       <CheckCircle2 size={9} /> Aktif
                     </span>
                   ) : (
-                    <span className="text-[9px] font-bold bg-zinc-100 text-zinc-500 px-1.5 py-0.5 rounded border border-zinc-200">
+                    <span className="text-[9px] font-bold bg-zinc-100 text-zinc-600 px-1.5 py-0.5 rounded border border-zinc-200">
                       Nonaktif
                     </span>
                   )}

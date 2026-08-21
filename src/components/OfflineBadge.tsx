@@ -35,23 +35,23 @@ export const OfflineBadge: React.FC = () => {
       onClick={handleManualCheck}
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold transition-all border touch-press shadow-xs ${
         isOnline
-          ? 'bg-zinc-900 text-white border-zinc-800 hover:bg-black'
-          : 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100'
+          ? 'bg-black text-white border-zinc-800 hover:bg-zinc-900'
+          : 'bg-zinc-100 text-zinc-800 border-zinc-300 hover:bg-zinc-200'
       }`}
-      title={isOnline ? 'Terhubung ke Internet (Klik untuk cek)' : 'Mode Offline / Tidak Ada Internet (Klik untuk cek)'}
+      title={isOnline ? 'Terhubung ke Internet (Klik untuk cek)' : 'Mode Offline / Tanpa Internet (Klik untuk cek)'}
     >
       <span
         className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-          isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-amber-500 animate-ping'
+          isOnline ? 'bg-white animate-pulse' : 'bg-zinc-500'
         }`}
       />
       {isOnline ? (
         <span className="flex items-center gap-1">
-          <Wifi size={11} className="text-emerald-400" /> Online
+          <Wifi size={11} className="text-white" /> Online
         </span>
       ) : (
-        <span className="flex items-center gap-1 font-extrabold text-amber-900">
-          <WifiOff size={11} className="text-amber-700" /> Offline
+        <span className="flex items-center gap-1 font-bold text-zinc-900">
+          <WifiOff size={11} className="text-zinc-600" /> Offline
         </span>
       )}
     </button>
