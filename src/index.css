@@ -56,8 +56,54 @@
   background-color: rgba(0, 0, 0, 0.65);
 }
 
-#reader video {
-  border-radius: 16px;
+#reader video,
+#istiqomah-barcode-reader video {
+  border-radius: 0px;
   object-fit: cover;
   width: 100% !important;
+  height: 100% !important;
+}
+
+#istiqomah-barcode-reader {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+}
+
+#istiqomah-barcode-reader img[alt="Info icon"] {
+  display: none !important;
+}
+
+@keyframes scanner-laser-sweep {
+  0% {
+    top: 6%;
+    opacity: 0.8;
+  }
+  50% {
+    top: 94%;
+    opacity: 1;
+  }
+  100% {
+    top: 6%;
+    opacity: 0.8;
+  }
+}
+
+.animate-laser-sweep {
+  animation: scanner-laser-sweep 2s ease-in-out infinite;
+}
+
+@keyframes focus-ripple {
+  0% {
+    transform: scale(0.6);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+.animate-focus-ripple {
+  animation: focus-ripple 0.6s ease-out forwards;
 }

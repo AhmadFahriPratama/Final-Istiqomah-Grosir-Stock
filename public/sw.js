@@ -1,6 +1,6 @@
-const CACHE_NAME = 'istiqomah-stock-v2';
+const CACHE_NAME = 'istiqomah-stock-v3';
 
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
   self.skipWaiting();
 });
 

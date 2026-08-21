@@ -88,32 +88,48 @@ StockStorageEngine.saveUser({
 });
 console.log('✓ Self-service password change verified 100%.');
 
-// Test 3: Floor Structure & Initialization
-console.log('\nTest 3: Verifying 4 Floors Structure');
+// Test 3: Floor Structure & Initialization (0 Default Items & Categories)
+console.log('\nTest 3: Verifying 4 Floors Clean Slate (0 Products & 0 Categories)');
 const floor1 = StockStorageEngine.getFloorData('1');
 const floor2 = StockStorageEngine.getFloorData('2');
 const floor3 = StockStorageEngine.getFloorData('3');
 const floor4 = StockStorageEngine.getFloorData('4');
 
 console.assert(floor1.floorId === '1' && floor2.floorId === '2' && floor3.floorId === '3' && floor4.floorId === '4', 'Floor ID mismatch');
+console.assert(floor1.items.length === 0, 'Floor 1 items must be 0');
+console.assert(floor2.items.length === 0, 'Floor 2 items must be 0');
+console.assert(floor3.items.length === 0, 'Floor 3 items must be 0');
+console.assert(floor4.items.length === 0, 'Floor 4 items must be 0');
+console.assert(floor1.categories.length === 0, 'Floor 1 categories must be 0');
 console.assert(FLOOR_DEFINITIONS['1'].subtitle === 'Kebutuhan', 'Floor 1 subtitle mismatch');
 console.assert(FLOOR_DEFINITIONS['2'].subtitle === 'Pakaian', 'Floor 2 subtitle mismatch');
 console.assert(FLOOR_DEFINITIONS['3'].subtitle === 'Perabotan', 'Floor 3 subtitle mismatch');
 console.assert(FLOOR_DEFINITIONS['4'].subtitle === 'Gudang', 'Floor 4 subtitle mismatch');
-console.log('✓ 4 floors verified.');
+console.log('✓ 4 floors verified with clean slate (0 products, 0 categories).');
 
-// Test 4: Stock Adjustments with Staff Tagging
-console.log('\nTest 4: Stock Adjustment with Staff Tagging (Fahri)');
+// Test 4: Manual Item Creation & Stock Adjustments with Staff Tagging
+console.log('\nTest 4: Manual Item Creation & Stock Adjustment with Staff Tagging (Fahri)');
 StockStorageEngine.setCurrentUser(fahri);
-const item = floor2.items[0];
-const initialStock = item.quantity;
-const res = StockStorageEngine.adjustStock('2', item.id, 10, 'Restock Barang');
+
+// Manually add an item
+const createdItem = StockStorageEngine.addItem('2', {
+  name: 'Baju Koko Polos Putih L',
+  category: 'Baju Pria',
+  barcode: '8991234567890',
+  quantity: 20,
+  minStock: 5,
+  unit: 'Pcs',
+  locationDetails: 'Rak 2A',
+});
+
+const initialStock = createdItem.quantity;
+const res = StockStorageEngine.adjustStock('2', createdItem.id, 10, 'Restock Barang');
 console.assert(res.success === true, 'Adjust stock failed');
 console.assert(res.newStock === initialStock + 10, 'New stock mismatch');
 
 const f2Updated = StockStorageEngine.getFloorData('2');
 console.assert(f2Updated.mutations[0].userName === 'Fahri', 'Mutation author should be Fahri');
-console.log('✓ Stock adjustment recorded under logged-in staff.');
+console.log('✓ Manual item creation and stock adjustment recorded under logged-in staff.');
 
 // Test 5: Export / Import JSON & Reports
 console.log('\nTest 5: Export / Import JSON & Reports Generation');

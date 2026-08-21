@@ -14,29 +14,7 @@ const STORAGE_PREFIX = 'istiqomah_stock_floor_';
 const ADMIN_CONFIG_KEY = 'istiqomah_stock_admin_config';
 const CURRENT_USER_KEY = 'istiqomah_current_user';
 
-const INITIAL_SEED_ITEMS: Record<FloorId, Omit<StockItem, 'id' | 'createdAt' | 'updatedAt'>[]> = {
-  '1': [
-    { name: 'Tisu Paseo 250s 2 Ply', category: 'Tisu', barcode: '8992751111111', quantity: 45, minStock: 10, unit: 'Pack', locationDetails: 'Rak A1' },
-    { name: 'Tisu Basah Mitu Antiseptic 50s', category: 'Tisu', barcode: '8992751222222', quantity: 0, minStock: 5, unit: 'Pack', locationDetails: 'Rak A1' },
-    { name: 'Kacamata Baca Plus +1.50', category: 'Kacamata', barcode: '8993001333333', quantity: 12, minStock: 3, unit: 'Pcs', locationDetails: 'Etalase' },
-    { name: 'Sabun Mandi Lifebuoy Total 10 450ml', category: 'Sabun & Cuci', barcode: '8999999444444', quantity: 18, minStock: 6, unit: 'Pouch', locationDetails: 'Rak B2' },
-  ],
-  '2': [
-    { name: 'Kemeja Pria Polos Lengan Panjang L', category: 'Baju Pria', barcode: '8994001555555', quantity: 25, minStock: 5, unit: 'Pcs', locationDetails: 'Gantungan A' },
-    { name: 'Gamis Katun Rayon All Size', category: 'Baju Wanita', barcode: '8994001666666', quantity: 14, minStock: 4, unit: 'Pcs', locationDetails: 'Gantungan B' },
-    { name: 'Celana Chino Panjang Pria 32', category: 'Celana', barcode: '8994001777777', quantity: 8, minStock: 3, unit: 'Pcs', locationDetails: 'Rak C1' },
-    { name: 'Jilbab Segi Empat Voal Premium', category: 'Jilbab & Aksesoris', barcode: '8994001888888', quantity: 50, minStock: 10, unit: 'Pcs', locationDetails: 'Etalase Jilbab' },
-  ],
-  '3': [
-    { name: 'Wajan Frypan Teflon 24cm', category: 'Peralatan Dapur', barcode: '8995001999999', quantity: 9, minStock: 2, unit: 'Pcs', locationDetails: 'Rak Dapur 1' },
-    { name: 'Sapu Lantai Ijuk Standar', category: 'Alat Kebersihan', barcode: '8995002000000', quantity: 20, minStock: 5, unit: 'Pcs', locationDetails: 'Area Kebersihan' },
-    { name: 'Toples Plastik Set 3 in 1', category: 'Plastik & Wadah', barcode: '8995002111111', quantity: 15, minStock: 4, unit: 'Set', locationDetails: 'Rak Wadah' },
-  ],
-  '4': [
-    { name: 'Master Kardus Tisu Paseo (Isi 24)', category: 'Kardus Master', barcode: '8996002222222', quantity: 30, minStock: 5, unit: 'Karton', locationDetails: 'Palet Gudang A' },
-    { name: 'Stok Cadangan Kemeja Pria', category: 'Stok Cadangan Lt 2', barcode: '8996002333333', quantity: 100, minStock: 20, unit: 'Pcs', locationDetails: 'Rak Gudang B3' },
-  ],
-};
+const CLEAN_SLATE_FLAG = 'istiqomah_data_clean_slate_v2';
 
 export const DEFAULT_ADMIN_SETTINGS: AdminSettings = {
   adminPasswordHash: 'balrev123@',
@@ -55,21 +33,46 @@ export const DEFAULT_ADMIN_SETTINGS: AdminSettings = {
 };
 
 export class StockStorageEngine {
+  static checkAndApplyCleanSlate(): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const alreadyCleaned = localStorage.getItem(CLEAN_SLATE_FLAG);
+      if (!alreadyCleaned) {
+        const floors: FloorId[] = ['1', '2', '3', '4'];
+        let hasDummyData = false;
+        for (const fId of floors) {
+          const raw = localStorage.getItem(`${STORAGE_PREFIX}${fId}`);
+          if (
+            raw &&
+            (raw.includes('8992751111111') ||
+              raw.includes('Tisu Paseo') ||
+              raw.includes('Kemeja Pria Polos') ||
+              raw.includes('Wajan Frypan'))
+          ) {
+            hasDummyData = true;
+            break;
+          }
+        }
+
+        if (hasDummyData) {
+          this.clearAllFloorData();
+        }
+        localStorage.setItem(CLEAN_SLATE_FLAG, 'true');
+      }
+    } catch {
+      // storage access note
+    }
+  }
+
   static getFloorData(floorId: FloorId): FloorData {
+    this.checkAndApplyCleanSlate();
     const key = `${STORAGE_PREFIX}${floorId}`;
     const raw = localStorage.getItem(key);
     if (!raw) {
-      const seedItems = (INITIAL_SEED_ITEMS[floorId] || []).map((item, idx) => ({
-        ...item,
-        id: `item_${floorId}_${idx + 1}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }));
-
       const initialData: FloorData = {
         floorId,
-        categories: [...FLOOR_DEFINITIONS[floorId].defaultCategories],
-        items: seedItems,
+        categories: [],
+        items: [],
         mutations: [],
         lastUpdated: new Date().toISOString(),
       };
@@ -82,13 +85,38 @@ export class StockStorageEngine {
     } catch {
       const fallback: FloorData = {
         floorId,
-        categories: [...FLOOR_DEFINITIONS[floorId].defaultCategories],
+        categories: [],
         items: [],
         mutations: [],
         lastUpdated: new Date().toISOString(),
       };
       return fallback;
     }
+  }
+
+  static clearAllFloorData(): void {
+    const floors: FloorId[] = ['1', '2', '3', '4'];
+    floors.forEach((fId) => {
+      const emptyData: FloorData = {
+        floorId: fId,
+        categories: [],
+        items: [],
+        mutations: [],
+        lastUpdated: new Date().toISOString(),
+      };
+      this.saveFloorData(fId, emptyData);
+    });
+  }
+
+  static clearFloorData(floorId: FloorId): void {
+    const emptyData: FloorData = {
+      floorId,
+      categories: [],
+      items: [],
+      mutations: [],
+      lastUpdated: new Date().toISOString(),
+    };
+    this.saveFloorData(floorId, emptyData);
   }
 
   static saveFloorData(floorId: FloorId, data: FloorData): void {

@@ -14,28 +14,28 @@ export const FLOOR_DEFINITIONS: Record<FloorId, FloorInfo> = {
     name: 'Lantai 1',
     subtitle: 'Kebutuhan',
     iconName: 'ShoppingBag',
-    defaultCategories: ['Tisu', 'Kacamata', 'Sabun & Cuci', 'Sembako Ringan', 'Kebutuhan Harian'],
+    defaultCategories: [],
   },
   '2': {
     id: '2',
     name: 'Lantai 2',
     subtitle: 'Pakaian',
     iconName: 'Shirt',
-    defaultCategories: ['Baju Pria', 'Baju Wanita', 'Pakaian Anak', 'Celana', 'Jilbab & Aksesoris'],
+    defaultCategories: [],
   },
   '3': {
     id: '3',
     name: 'Lantai 3',
     subtitle: 'Perabotan',
     iconName: 'Armchair',
-    defaultCategories: ['Peralatan Dapur', 'Alat Kebersihan', 'Plastik & Wadah', 'Dekorasi Rumah', 'Perabot Kamar'],
+    defaultCategories: [],
   },
   '4': {
     id: '4',
     name: 'Lantai 4',
     subtitle: 'Gudang',
     iconName: 'Package',
-    defaultCategories: ['Stok Cadangan Lt 1', 'Stok Cadangan Lt 2', 'Stok Cadangan Lt 3', 'Kardus Master', 'Barang Transit'],
+    defaultCategories: [],
   },
 };
 

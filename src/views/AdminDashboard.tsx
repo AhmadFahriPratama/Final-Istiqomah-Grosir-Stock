@@ -672,6 +672,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
           </div>
         </div>
 
+        <div className="pt-1">
+          <button
+            onClick={() => {
+              soundEffects.playClickSound();
+              const confirmed = window.confirm(
+                'Apakah Anda yakin ingin MENGOSONGKAN SEMUA DATA (0 produk & 0 jenis) di seluruh lantai?\n\nTindakan ini akan mengosongkan seluruh stok agar dapat diisi manual dari awal.'
+              );
+              if (confirmed) {
+                StockStorageEngine.clearAllFloorData();
+                refreshAll();
+                soundEffects.playLockSound();
+                setImportStatus({
+                  success: true,
+                  message: 'Semua produk dan jenis lantai berhasil di-0 kan.',
+                });
+                setTimeout(() => setImportStatus(null), 4000);
+              }
+            }}
+            className="w-full py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 hover:text-black border border-zinc-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 touch-press transition-colors"
+          >
+            <Trash2 size={13} /> Kosongkan Semua Produk & Jenis (Reset ke 0)
+          </button>
+        </div>
+
         {importStatus && (
           <div className="p-2 rounded-lg bg-zinc-100 text-xs text-black">
             {importStatus.message}
