@@ -76,21 +76,21 @@
 
 @keyframes scanner-laser-sweep {
   0% {
-    top: 6%;
+    top: 30%;
     opacity: 0.8;
   }
   50% {
-    top: 94%;
+    top: 70%;
     opacity: 1;
   }
   100% {
-    top: 6%;
+    top: 30%;
     opacity: 0.8;
   }
 }
 
 .animate-laser-sweep {
-  animation: scanner-laser-sweep 2s ease-in-out infinite;
+  animation: scanner-laser-sweep 1.8s ease-in-out infinite;
 }
 
 @keyframes focus-ripple {
