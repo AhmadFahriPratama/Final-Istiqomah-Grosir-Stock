@@ -64,6 +64,8 @@ export interface MutationLog {
   reason: string;
   timestamp: string;
   userName?: string;
+  floorId?: FloorId;
+  actionType?: 'STOCK_IN' | 'STOCK_OUT' | 'STOCK_ADJUST' | 'ITEM_ADD' | 'ITEM_UPDATE' | 'ITEM_DELETE';
 }
 
 export interface FloorData {

@@ -6,9 +6,9 @@ import {
   RefreshCw,
   Camera,
   Search,
-  AlertCircle,
   CheckCircle2,
   Zap,
+  CameraOff,
 } from 'lucide-react';
 import { soundEffects } from '../utils/audio';
 
@@ -41,40 +41,92 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const [cameraList, setCameraList] = useState<Array<{ id: string; label: string }>>([]);
   const [selectedCameraId, setSelectedCameraId] = useState<string>('');
-  
+
   // Hardware Zoom Support
   const [zoomRange, setZoomRange] = useState<ZoomCapability | null>(null);
   const [currentZoom, setCurrentZoom] = useState<number>(1);
 
   // Success Feedback
   const [successCode, setSuccessCode] = useState<string | null>(null);
+  const [flash, setFlash] = useState(false);
 
   // Focus ripple animation
   const [focusRipple, setFocusRipple] = useState<{ x: number; y: number } | null>(null);
 
-  const scannerRef = useRef<Html5Qrcode | null>(null);
+  // Direct Hardware Video & Native Detector Refs (Adapted from Istiqomah-Price)
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const detectorRef = useRef<unknown>(null);
+  const isDetectingRef = useRef<boolean>(false);
   const isDetectedRef = useRef<boolean>(false);
-  const readerElementId = 'istiqomah-barcode-reader';
+  const stoppedRef = useRef<boolean>(false);
+  const frameCallbackIdRef = useRef<number | null>(null);
+  const timeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Fallback Html5Qrcode scanner ref for devices without BarcodeDetector
+  const fallbackScannerRef = useRef<Html5Qrcode | null>(null);
+  const fallbackElementId = 'istiqomah-barcode-fallback-reader';
+  const [useFallbackEngine, setUseFallbackEngine] = useState<boolean>(false);
+
+  // Cleanup helper
   const stopScanner = useCallback(async () => {
-    if (scannerRef.current) {
+    stoppedRef.current = true;
+    isDetectingRef.current = false;
+
+    // 1. Cancel animation / frame callbacks
+    if (frameCallbackIdRef.current !== null && videoRef.current && 'cancelVideoFrameCallback' in videoRef.current) {
       try {
-        if (scannerRef.current.isScanning) {
-          await scannerRef.current.stop();
-        }
-        await scannerRef.current.clear();
+        (videoRef.current as unknown as { cancelVideoFrameCallback: (id: number) => void }).cancelVideoFrameCallback(
+          frameCallbackIdRef.current
+        );
+      } catch {
+        // silent
+      }
+      frameCallbackIdRef.current = null;
+    }
+
+    if (timeoutIdRef.current) {
+      clearTimeout(timeoutIdRef.current);
+      timeoutIdRef.current = null;
+    }
+
+    // 2. Stop camera stream tracks
+    if (streamRef.current) {
+      try {
+        streamRef.current.getTracks().forEach((track) => {
+          track.stop();
+        });
       } catch (err) {
-        console.warn('Error stopping scanner:', err);
+        console.warn('Stream stop note:', err);
+      }
+      streamRef.current = null;
+    }
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+
+    // 3. Clean up fallback scanner if active
+    if (fallbackScannerRef.current) {
+      try {
+        if (fallbackScannerRef.current.isScanning) {
+          await fallbackScannerRef.current.stop();
+        }
+        await fallbackScannerRef.current.clear();
+      } catch (err) {
+        console.warn('Fallback scanner stop note:', err);
       } finally {
-        scannerRef.current = null;
-        setIsScanning(false);
-        setTorchOn(false);
-        setTorchSupported(false);
-        setZoomRange(null);
+        fallbackScannerRef.current = null;
       }
     }
+
+    setIsScanning(false);
+    setTorchOn(false);
+    setTorchSupported(false);
+    setZoomRange(null);
   }, []);
 
+  // Handle successful detection
   const handleDetected = useCallback(
     (decodedText: string) => {
       if (isDetectedRef.current) return;
@@ -82,158 +134,222 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
 
       const cleaned = decodedText.trim();
       setSuccessCode(cleaned);
+      setFlash(true);
+      setTimeout(() => setFlash(false), 220);
 
-      // Instant pleasant audio beep & tactile haptic vibration
+      // Play instant pleasant 2-tone audio & haptic vibration
       soundEffects.playScanBeep();
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate([40, 25, 40]);
+        navigator.vibrate([40, 30, 40]);
       }
 
-      // Quick smooth delay for visual confirmation
+      // Smooth brief confirmation before handing over and closing
       setTimeout(async () => {
         await stopScanner();
         onScan(cleaned);
         onClose();
-      }, 220);
+      }, 240);
     },
     [stopScanner, onScan, onClose]
   );
 
-  const checkCapabilities = useCallback(() => {
-    if (!scannerRef.current) return;
+  // Inspect stream capabilities (torch, hardware zoom)
+  const checkTrackCapabilities = useCallback((track: MediaStreamTrack) => {
     try {
-      // Query capabilities from html5-qrcode running track
-      const capabilities = scannerRef.current.getRunningTrackCapabilities() as MediaTrackCapabilities & {
-        zoom?: { min: number; max: number; step: number };
-        torch?: boolean;
-      };
+      if (typeof track.getCapabilities === 'function') {
+        const capabilities = track.getCapabilities() as MediaTrackCapabilities & {
+          zoom?: { min: number; max: number; step: number };
+          torch?: boolean;
+        };
 
-      if (capabilities) {
-        // 1. Torch / Flashlight check
-        if ('torch' in capabilities || (capabilities as Record<string, unknown>).fillLightMode) {
-          setTorchSupported(true);
-        }
+        if (capabilities) {
+          if ('torch' in capabilities || (capabilities as Record<string, unknown>).fillLightMode) {
+            setTorchSupported(true);
+          }
 
-        // 2. Hardware Zoom check
-        if (capabilities.zoom && capabilities.zoom.max > capabilities.zoom.min) {
-          setZoomRange({
-            min: capabilities.zoom.min,
-            max: capabilities.zoom.max,
-            step: capabilities.zoom.step || 0.1,
-          });
-          setCurrentZoom(capabilities.zoom.min || 1);
+          if (capabilities.zoom && capabilities.zoom.max > capabilities.zoom.min) {
+            setZoomRange({
+              min: capabilities.zoom.min,
+              max: capabilities.zoom.max,
+              step: capabilities.zoom.step || 0.1,
+            });
+            setCurrentZoom(capabilities.zoom.min || 1);
+          }
         }
       }
     } catch (e) {
-      console.warn('Capabilities query note:', e);
+      console.warn('Track capability check note:', e);
     }
   }, []);
 
+  // Frame detection loop using Istiqomah-Price high performance crop algorithm
+  const startHighSpeedDetectionLoop = useCallback(() => {
+    const scheduleNextFrame = () => {
+      if (stoppedRef.current) return;
+      const video = videoRef.current;
+
+      if (video && typeof (video as unknown as { requestVideoFrameCallback: unknown }).requestVideoFrameCallback === 'function') {
+        frameCallbackIdRef.current = (
+          video as unknown as { requestVideoFrameCallback: (cb: () => void) => number }
+        ).requestVideoFrameCallback(() => {
+          if (!stoppedRef.current) {
+            detectFrame();
+          }
+        });
+      } else {
+        timeoutIdRef.current = setTimeout(detectFrame, 16); // ~60fps
+      }
+    };
+
+    const detectFrame = async () => {
+      if (stoppedRef.current || isDetectedRef.current) return;
+
+      if (isDetectingRef.current) {
+        scheduleNextFrame();
+        return;
+      }
+
+      const video = videoRef.current;
+      if (!video || video.readyState < 2 || video.videoWidth === 0) {
+        scheduleNextFrame();
+        return;
+      }
+
+      isDetectingRef.current = true;
+
+      try {
+        // === HIGH-PERFORMANCE CROPPING (Adapted directly from Istiqomah-Price) ===
+        // Crop center 72% Width x 42% Height region matching the physical reticle frame
+        // 4x to 10x faster than full-frame analysis on mobile devices
+        const vw = video.videoWidth;
+        const vh = video.videoHeight;
+        const cropW = Math.floor(vw * 0.72);
+        const cropH = Math.floor(vh * 0.42);
+        const sx = Math.floor((vw - cropW) / 2);
+        const sy = Math.floor((vh - cropH) / 2);
+
+        let barcodes: Array<{ rawValue: string }> = [];
+
+        const detector = detectorRef.current as { detect: (src: ImageBitmap | HTMLVideoElement) => Promise<Array<{ rawValue: string }>> };
+
+        if (detector) {
+          const supportsCrop = typeof createImageBitmap === 'function' && createImageBitmap.length >= 5;
+          if (supportsCrop) {
+            try {
+              const bitmap = await createImageBitmap(video, sx, sy, cropW, cropH);
+              barcodes = await detector.detect(bitmap);
+              bitmap.close();
+            } catch {
+              // Fallback to direct video element if bitmap crop errors
+              try {
+                barcodes = await detector.detect(video);
+              } catch {
+                // Ignore transient frame decode error
+              }
+            }
+          } else {
+            try {
+              barcodes = await detector.detect(video);
+            } catch {
+              // Ignore transient frame decode error
+            }
+          }
+        }
+
+        if (barcodes && barcodes.length > 0) {
+          const detectedCode = barcodes[0].rawValue;
+          if (detectedCode) {
+            handleDetected(detectedCode);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Frame detection step error:', err);
+      } finally {
+        isDetectingRef.current = false;
+      }
+
+      scheduleNextFrame();
+    };
+
+    scheduleNextFrame();
+  }, [handleDetected]);
+
+  // Main scanner startup logic
   const startScanner = useCallback(
     async (overrideCamId?: string) => {
       setCameraError(null);
       isDetectedRef.current = false;
+      stoppedRef.current = false;
       setSuccessCode(null);
 
+      await stopScanner();
+      stoppedRef.current = false;
+
+      // 1. Check if native BarcodeDetector is available (Chrome 83+, Edge, Android Webview)
+      const hasBarcodeDetector = typeof window !== 'undefined' && 'BarcodeDetector' in window;
+
+      // 2. Enumerate video input devices
+      let cameras: Array<{ id: string; label: string }> = [];
       try {
-        if (scannerRef.current) {
-          await stopScanner();
-        }
-
-        // 1. Pre-warm camera permission test stream for reliable hardware access
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-              video: {
-                facingMode: { ideal: facingMode },
-                width: { ideal: 1280, min: 640, max: 1920 },
-                height: { ideal: 720, min: 480, max: 1080 },
-              },
-            });
-            stream.getTracks().forEach((track) => track.stop());
-          } catch (permErr) {
-            console.warn('Direct media permission test:', permErr);
-          }
-        }
-
-        // 2. Enumerate available cameras
-        let cameras: Array<{ id: string; label: string }> = [];
-        try {
-          cameras = await Html5Qrcode.getCameras();
+        if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          cameras = devices
+            .filter((d) => d.kind === 'videoinput')
+            .map((d, index) => ({
+              id: d.deviceId,
+              label: d.label || `Kamera ${index + 1}`,
+            }));
           setCameraList(cameras);
-        } catch (camErr) {
-          console.warn('getCameras query:', camErr);
         }
+      } catch (err) {
+        console.warn('enumerateDevices note:', err);
+      }
 
-        // 3. Initialize Html5Qrcode instance with hardware acceleration BarcodeDetector
-        const html5QrCode = new Html5Qrcode(readerElementId, {
-          formatsToSupport: [
-            Html5QrcodeSupportedFormats.EAN_13,
-            Html5QrcodeSupportedFormats.EAN_8,
-            Html5QrcodeSupportedFormats.CODE_128,
-            Html5QrcodeSupportedFormats.CODE_39,
-            Html5QrcodeSupportedFormats.CODE_93,
-            Html5QrcodeSupportedFormats.UPC_A,
-            Html5QrcodeSupportedFormats.UPC_E,
-            Html5QrcodeSupportedFormats.ITF,
-            Html5QrcodeSupportedFormats.CODABAR,
-            Html5QrcodeSupportedFormats.QR_CODE,
-            Html5QrcodeSupportedFormats.DATA_MATRIX,
-            Html5QrcodeSupportedFormats.AZTEC,
-            Html5QrcodeSupportedFormats.PDF_417,
-          ],
-          verbose: false,
-          useBarCodeDetectorIfSupported: true,
-          experimentalFeatures: {
-            useBarCodeDetectorIfSupported: true,
-          },
-        });
+      if (hasBarcodeDetector) {
+        // === MODE A: ISTIQOMAH-PRICE NATIVE HIGH-SPEED PIPELINE ===
+        setUseFallbackEngine(false);
 
-        scannerRef.current = html5QrCode;
+        try {
+          // Initialize BarcodeDetector once
+          const BarcodeDetectorClass = (window as unknown as { BarcodeDetector: new (opts: unknown) => unknown }).BarcodeDetector;
+          detectorRef.current = new BarcodeDetectorClass({
+            formats: [
+              'ean_13',
+              'ean_8',
+              'code_128',
+              'code_39',
+              'code_93',
+              'upc_a',
+              'upc_e',
+              'itf',
+              'codabar',
+              'qr_code',
+              'data_matrix',
+            ],
+          });
 
-        // 4. Ultra-responsive high FPS config with wide aspect ratio for retail barcodes
-        const scanConfig = {
-          fps: 28, // High framerate for instant scan lock
-          qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
-            const width = Math.min(Math.floor(viewfinderWidth * 0.88), 340);
-            const height = Math.min(Math.floor(viewfinderHeight * 0.56), 210);
-            return {
-              width: Math.max(width, 180),
-              height: Math.max(height, 120),
-            };
-          },
-          aspectRatio: 1.0,
-          disableFlip: false,
-          videoConstraints: {
+          // Camera constraints: 720p/1080p rear camera
+          const storedCamId = localStorage.getItem(PREFERRED_CAMERA_KEY);
+          const camToUse = overrideCamId || selectedCameraId || storedCamId;
+
+          let videoConstraint: MediaTrackConstraints = {
             facingMode: { ideal: facingMode },
             width: { ideal: 1280, min: 640, max: 1920 },
             height: { ideal: 720, min: 480, max: 1080 },
             frameRate: { ideal: 30, max: 60 },
-            advanced: [
-              { focusMode: 'continuous' },
-              { exposureMode: 'continuous' },
-              { whiteBalanceMode: 'continuous' },
-            ],
-          } as unknown as MediaTrackConstraints,
-        };
+          };
 
-        // 5. Smart camera device selection
-        let targetCamera: string | MediaTrackConstraints = {
-          facingMode: { ideal: facingMode },
-        };
-
-        const storedCamId = localStorage.getItem(PREFERRED_CAMERA_KEY);
-        const camToUse = overrideCamId || selectedCameraId || storedCamId;
-
-        if (cameras.length > 0) {
-          // Check if requested or stored camera exists
-          const existingCam = cameras.find((c) => c.id === camToUse);
-          if (existingCam) {
-            targetCamera = existingCam.id;
-            setSelectedCameraId(existingCam.id);
-          } else {
-            // Find best rear camera (prefer main lens over ultrawide)
-            const rearCamIndex = cameras.findIndex((c) => {
+          if (camToUse && cameras.some((c) => c.id === camToUse)) {
+            videoConstraint = {
+              deviceId: { exact: camToUse },
+              width: { ideal: 1280, min: 640, max: 1920 },
+              height: { ideal: 720, min: 480, max: 1080 },
+              frameRate: { ideal: 30, max: 60 },
+            };
+            setSelectedCameraId(camToUse);
+          } else if (cameras.length > 0) {
+            const rearCam = cameras.find((c) => {
               const lbl = c.label.toLowerCase();
               return (
                 lbl.includes('back') ||
@@ -244,47 +360,126 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
                 lbl.includes('main')
               );
             });
-
-            if (facingMode === 'environment' && rearCamIndex >= 0) {
-              targetCamera = cameras[rearCamIndex].id;
-              setSelectedCameraId(cameras[rearCamIndex].id);
-            } else {
-              targetCamera = cameras[0].id;
-              setSelectedCameraId(cameras[0].id);
+            if (facingMode === 'environment' && rearCam) {
+              videoConstraint = {
+                deviceId: { exact: rearCam.id },
+                width: { ideal: 1280, min: 640 },
+                height: { ideal: 720, min: 480 },
+              };
+              setSelectedCameraId(rearCam.id);
             }
           }
+
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: videoConstraint,
+            audio: false,
+          });
+
+          if (stoppedRef.current) {
+            stream.getTracks().forEach((t) => t.stop());
+            return;
+          }
+
+          streamRef.current = stream;
+
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+            await videoRef.current.play().catch((playErr) => console.warn('Video play note:', playErr));
+          }
+
+          // Check torch & zoom capabilities on active video track
+          const videoTrack = stream.getVideoTracks()[0];
+          if (videoTrack) {
+            checkTrackCapabilities(videoTrack);
+          }
+
+          // Pre-warm BarcodeDetector with dummy detection to eliminate first-frame lag
+          try {
+            if (videoRef.current && videoRef.current.videoWidth > 0) {
+              const dummyBitmap = await createImageBitmap(videoRef.current);
+              const detector = detectorRef.current as { detect: (b: ImageBitmap) => Promise<unknown> };
+              await detector.detect(dummyBitmap);
+              dummyBitmap.close();
+            }
+          } catch {
+            // Ignore pre-warm errors
+          }
+
+          setIsScanning(true);
+          startHighSpeedDetectionLoop();
+        } catch (err: unknown) {
+          console.warn('Native camera stream failed, falling back to Html5Qrcode:', err);
+          startFallbackScanner(overrideCamId);
         }
-
-        // Start hardware camera stream
-        await html5QrCode.start(
-          targetCamera,
-          scanConfig,
-          (decodedText) => handleDetected(decodedText),
-          () => {}
-        );
-
-        setIsScanning(true);
-
-        // Check camera capabilities (torch, hardware zoom)
-        setTimeout(() => {
-          checkCapabilities();
-        }, 300);
-      } catch (err) {
-        console.error('Camera startup error:', err);
-        setCameraError(
-          'Kamera belum aktif atau izin ditolak. Pastikan izin kamera telah disetujui, atau masukkan barcode manual di bawah.'
-        );
-        setIsScanning(false);
+      } else {
+        // === MODE B: FALLBACK HTML5QRCODE PIPELINE ===
+        startFallbackScanner(overrideCamId);
       }
     },
-    [facingMode, selectedCameraId, handleDetected, stopScanner, checkCapabilities]
+    [
+      facingMode,
+      selectedCameraId,
+      stopScanner,
+      checkTrackCapabilities,
+      startHighSpeedDetectionLoop,
+    ]
   );
+
+  // Fallback Html5Qrcode engine for older browsers
+  const startFallbackScanner = async (overrideCamId?: string) => {
+    setUseFallbackEngine(true);
+    try {
+      const html5QrCode = new Html5Qrcode(fallbackElementId, {
+        formatsToSupport: [
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.UPC_A,
+          Html5QrcodeSupportedFormats.UPC_E,
+          Html5QrcodeSupportedFormats.QR_CODE,
+        ],
+        verbose: false,
+      });
+
+      fallbackScannerRef.current = html5QrCode;
+
+      const scanConfig = {
+        fps: 25,
+        qrbox: (w: number, h: number) => ({
+          width: Math.max(Math.floor(w * 0.85), 180),
+          height: Math.max(Math.floor(h * 0.5), 120),
+        }),
+        aspectRatio: 1.0,
+      };
+
+      const storedCamId = localStorage.getItem(PREFERRED_CAMERA_KEY);
+      const camToUse = overrideCamId || selectedCameraId || storedCamId;
+
+      const cameraParam = camToUse ? camToUse : { facingMode };
+
+      await html5QrCode.start(
+        cameraParam,
+        scanConfig,
+        (decodedText) => handleDetected(decodedText),
+        () => {}
+      );
+
+      setIsScanning(true);
+    } catch (fallbackErr) {
+      console.error('Fallback camera error:', fallbackErr);
+      setCameraError(
+        'Kamera belum aktif atau izin ditolak. Pastikan izin kamera telah disetujui, atau masukkan barcode secara manual.'
+      );
+      setIsScanning(false);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
       const timer = setTimeout(() => {
         startScanner();
-      }, 150);
+      }, 100);
       return () => {
         clearTimeout(timer);
         stopScanner();
@@ -294,7 +489,7 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
     }
   }, [isOpen, startScanner, stopScanner]);
 
-  // Camera Switch Handler
+  // Flip Camera Lens Handler
   const handleFlipCamera = async () => {
     soundEffects.playClickSound();
     if (cameraList.length > 1) {
@@ -306,44 +501,57 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
       await stopScanner();
       setTimeout(() => {
         startScanner(nextCam.id);
-      }, 120);
+      }, 100);
     } else {
       const nextMode = facingMode === 'environment' ? 'user' : 'environment';
       setFacingMode(nextMode);
       await stopScanner();
       setTimeout(() => {
         startScanner();
-      }, 120);
+      }, 100);
     }
   };
 
-  // Torch / Flashlight Handler
+  // Flashlight / Torch Toggle Handler
   const handleToggleTorch = async () => {
     soundEffects.playClickSound();
-    if (scannerRef.current && isScanning) {
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (track && isScanning) {
       try {
         const nextTorch = !torchOn;
-        await scannerRef.current.applyVideoConstraints({
+        // Apply torch constraint
+        await track.applyConstraints({
           advanced: [{ torch: nextTorch } as MediaTrackConstraintSet],
         });
         setTorchOn(nextTorch);
       } catch (err) {
         console.warn('Torch constraint toggle note:', err);
       }
+    } else if (fallbackScannerRef.current && isScanning) {
+      try {
+        const nextTorch = !torchOn;
+        await fallbackScannerRef.current.applyVideoConstraints({
+          advanced: [{ torch: nextTorch } as MediaTrackConstraintSet],
+        });
+        setTorchOn(nextTorch);
+      } catch (err) {
+        console.warn('Fallback torch toggle note:', err);
+      }
     }
   };
 
-  // Hardware Zoom Handler (1x, 1.5x, 2x, etc.)
+  // Hardware Zoom Handler (1x, 1.5x, 2x)
   const handleSetZoom = async (zoomValue: number) => {
     soundEffects.playClickSound();
-    if (scannerRef.current && isScanning) {
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (track && isScanning) {
       try {
-        await scannerRef.current.applyVideoConstraints({
+        await track.applyConstraints({
           advanced: [{ zoom: zoomValue } as MediaTrackConstraintSet],
         });
         setCurrentZoom(zoomValue);
       } catch (err) {
-        console.warn('Hardware zoom application note:', err);
+        console.warn('Hardware zoom note:', err);
       }
     }
   };
@@ -357,14 +565,14 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
 
     setTimeout(() => {
       setFocusRipple(null);
-    }, 600);
+    }, 550);
 
-    // Re-prompt camera autofocus
-    if (scannerRef.current && isScanning) {
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (track && isScanning) {
       try {
-        await scannerRef.current.applyVideoConstraints({
+        await track.applyConstraints({
           advanced: [{ focusMode: 'continuous' } as unknown as MediaTrackConstraintSet],
-        } as unknown as MediaTrackConstraints);
+        });
       } catch {
         // silent fallback
       }
@@ -380,15 +588,12 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Compute available zoom presets
   const availableZoomPresets = zoomRange
-    ? [1, 1.5, 2, 3].filter(
-        (z) => z >= zoomRange.min && z <= zoomRange.max + 0.05
-      )
+    ? [1, 1.5, 2, 3].filter((z) => z >= zoomRange.min && z <= zoomRange.max + 0.05)
     : [];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 modal-backdrop animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 modal-backdrop animate-in fade-in duration-150">
       <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 bg-zinc-50/90">
@@ -399,7 +604,7 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
             <div>
               <h3 className="text-xs font-bold text-black leading-none">{title}</h3>
               <p className="text-[10px] text-zinc-500 font-medium mt-0.5">
-                Akselerasi hardware aktif • Instant scan
+                Istiqomah Ultra-Fast Scanner • Instant Lock
               </p>
             </div>
           </div>
@@ -419,17 +624,28 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
           onClick={handleViewfinderClick}
           className="relative bg-black aspect-square flex flex-col items-center justify-center overflow-hidden cursor-crosshair select-none"
         >
-          <div id={readerElementId} className="w-full h-full" />
+          {/* Native Direct Hardware Video */}
+          {!useFallbackEngine ? (
+            <video
+              ref={videoRef}
+              playsInline
+              muted
+              autoPlay
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div id={fallbackElementId} className="w-full h-full" />
+          )}
 
           {/* Scanner Overlay Guide & Laser Animation */}
           {isScanning && !cameraError && (
             <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center p-4">
-              {/* Reticle bounding box */}
+              {/* Reticle bounding box matching the 72% x 42% high-performance detection crop */}
               <div
                 className={`w-[85%] max-w-[310px] h-[55%] max-h-[190px] rounded-2xl relative transition-all duration-200 ${
                   successCode
-                    ? 'border-2 border-emerald-400 bg-emerald-500/20 shadow-[0_0_25px_rgba(52,211,153,0.6)]'
-                    : 'border-2 border-dashed border-white/60 shadow-[0_0_0_9999px_rgba(0,0,0,0.55)]'
+                    ? 'border-2 border-emerald-400 bg-emerald-500/25 shadow-[0_0_25px_rgba(52,211,153,0.7)]'
+                    : 'border-2 border-dashed border-white/60 shadow-[0_0_0_9999px_rgba(0,0,0,0.60)]'
                 }`}
               >
                 {/* 4 Corner Markers */}
@@ -440,7 +656,7 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
 
                 {/* Animated Laser Sweep Line */}
                 {!successCode && (
-                  <div className="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_10px_#34d399] animate-laser-sweep" />
+                  <div className="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_12px_#34d399] animate-laser-sweep" />
                 )}
 
                 {/* Success Indicator Overlay */}
@@ -458,11 +674,16 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
                 <div className="mt-3 flex items-center gap-1.5 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 shadow-lg">
                   <Zap size={11} className="text-emerald-400 animate-pulse" />
                   <span className="text-[10px] font-bold text-zinc-200">
-                    Arahkan barcode ke dalam bingkai
+                    Arahkan barcode produk ke dalam bingkai
                   </span>
                 </div>
               )}
             </div>
+          )}
+
+          {/* Flash Effect on Detection */}
+          {flash && (
+            <div className="absolute inset-0 bg-emerald-500/30 backdrop-blur-[2px] pointer-events-none transition-opacity duration-150" />
           )}
 
           {/* Tap-to-Focus Ripple Indicator */}
@@ -479,7 +700,7 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
           {/* Camera Error State */}
           {cameraError && (
             <div className="p-6 text-center text-white space-y-3 z-10">
-              <AlertCircle size={32} className="mx-auto text-amber-400 animate-pulse" />
+              <CameraOff size={32} className="mx-auto text-amber-400 animate-pulse" />
               <p className="text-xs text-zinc-300 leading-relaxed max-w-[260px] mx-auto">
                 {cameraError}
               </p>

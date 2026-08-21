@@ -306,6 +306,8 @@ export class StockStorageEngine {
       reason: reason || (actualDelta > 0 ? 'Penambahan Stok' : 'Pengurangan Stok'),
       timestamp: new Date().toISOString(),
       userName: currentUser ? currentUser.name : 'Staf',
+      floorId,
+      actionType: actualDelta > 0 ? 'STOCK_IN' : actualDelta < 0 ? 'STOCK_OUT' : 'STOCK_ADJUST',
     };
 
     floorData.mutations.unshift(mutation);
@@ -345,9 +347,11 @@ export class StockStorageEngine {
       amount: newItem.quantity,
       prevStock: 0,
       newStock: newItem.quantity,
-      reason: 'Penambahan barang baru',
+      reason: 'Tambah produk baru',
       timestamp: new Date().toISOString(),
       userName: currentUser ? currentUser.name : 'Staf',
+      floorId,
+      actionType: 'ITEM_ADD',
     });
 
     this.saveFloorData(floorId, floorData);
@@ -372,9 +376,11 @@ export class StockStorageEngine {
           amount: Math.abs(delta),
           prevStock,
           newStock: item.quantity,
-          reason: 'Koreksi data barang',
+          reason: prevStock !== item.quantity ? 'Koreksi stok produk' : 'Ubah detail produk',
           timestamp: new Date().toISOString(),
           userName: currentUser ? currentUser.name : 'Staf',
+          floorId,
+          actionType: prevStock !== item.quantity ? 'STOCK_ADJUST' : 'ITEM_UPDATE',
         });
       }
 
@@ -397,13 +403,32 @@ export class StockStorageEngine {
         amount: item.quantity,
         prevStock: item.quantity,
         newStock: 0,
-        reason: 'Hapus barang',
+        reason: 'Hapus barang dari katalog',
         timestamp: new Date().toISOString(),
         userName: currentUser ? currentUser.name : 'Staf',
+        floorId,
+        actionType: 'ITEM_DELETE',
       });
     }
 
     this.saveFloorData(floorId, floorData);
+  }
+
+  static getAllMutations(): (MutationLog & { floorId: FloorId })[] {
+    const floors: FloorId[] = ['1', '2', '3', '4'];
+    const all: (MutationLog & { floorId: FloorId })[] = [];
+    floors.forEach((fId) => {
+      const data = this.getFloorData(fId);
+      if (data.mutations && Array.isArray(data.mutations)) {
+        data.mutations.forEach((m) => {
+          all.push({
+            ...m,
+            floorId: m.floorId || fId,
+          });
+        });
+      }
+    });
+    return all.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }
 
   static addCategory(floorId: FloorId, categoryName: string): boolean {
