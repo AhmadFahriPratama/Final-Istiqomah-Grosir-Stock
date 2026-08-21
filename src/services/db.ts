@@ -9,6 +9,7 @@ import type {
 } from '../types/stock';
 import { FLOOR_DEFINITIONS, DEFAULT_USERS } from '../types/stock';
 import { TelegramService } from './telegram';
+import { NetworkService } from './network';
 
 const STORAGE_PREFIX = 'istiqomah_stock_floor_';
 const ADMIN_CONFIG_KEY = 'istiqomah_stock_admin_config';
@@ -131,7 +132,7 @@ export class StockStorageEngine {
     );
 
     const admin = this.getAdminSettings();
-    if (admin.telegram?.autoBackup && navigator.onLine) {
+    if (admin.telegram?.autoBackup && NetworkService.isOnline()) {
       const backup = this.exportSingleFloor(floorId);
       TelegramService.sendBackup(backup, floorId).catch((err: unknown) => {
         console.warn('Auto backup failed:', err);

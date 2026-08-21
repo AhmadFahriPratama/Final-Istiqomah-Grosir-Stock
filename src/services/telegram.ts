@@ -1,6 +1,7 @@
 import type { BackupExportData, FloorId } from '../types/stock';
 import { FLOOR_DEFINITIONS } from '../types/stock';
 import { StockStorageEngine } from './db';
+import { NetworkService } from './network';
 
 export interface TelegramBackupResult {
   success: boolean;
@@ -10,10 +11,11 @@ export interface TelegramBackupResult {
 export class TelegramService {
   // Test bot credentials
   static async testConnection(botToken: string, chatId: string): Promise<TelegramBackupResult> {
-    if (!navigator.onLine) {
+    const isOnline = await NetworkService.checkOnline();
+    if (!isOnline) {
       return {
         success: false,
-        message: 'Perangkat sedang offline. Sambungkan internet untuk tes Telegram.',
+        message: 'Sambungkan ke internet dahulu untuk menguji bot Telegram.',
       };
     }
 
@@ -48,7 +50,10 @@ export class TelegramService {
         };
       }
     } catch (e) {
-      return { success: false, message: `Kesalahan jaringan: ${String(e)}` };
+      return {
+        success: false,
+        message: `Sambungkan ke internet dahulu atau periksa koneksi bot: ${String(e)}`,
+      };
     }
   }
 
@@ -57,10 +62,11 @@ export class TelegramService {
     backupData: BackupExportData,
     customFloorId?: FloorId
   ): Promise<TelegramBackupResult> {
-    if (!navigator.onLine) {
+    const isOnline = await NetworkService.checkOnline();
+    if (!isOnline) {
       return {
         success: false,
-        message: 'Tidak ada koneksi internet. Backup akan disimpan secara lokal.',
+        message: 'Sambungkan ke internet dahulu untuk mengirim backup ke Telegram.',
       };
     }
 
@@ -155,7 +161,7 @@ export class TelegramService {
     } catch (e) {
       return {
         success: false,
-        message: `Gagal mengirim ke Telegram: ${String(e)}`,
+        message: `Sambungkan ke internet dahulu untuk mengirim backup: ${String(e)}`,
       };
     }
   }

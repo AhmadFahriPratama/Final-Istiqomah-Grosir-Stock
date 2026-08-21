@@ -77,9 +77,13 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
       if (res.success) {
         soundEffects.playBackupSent();
         confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
+      } else {
+        alert(res.message);
       }
     } catch (e) {
-      setTelegramStatus('Gagal kirim: ' + String(e));
+      const errMsg = 'Sambungkan ke internet dahulu untuk mengirim backup: ' + String(e);
+      setTelegramStatus(errMsg);
+      alert(errMsg);
     } finally {
       setIsSendingTelegram(false);
     }

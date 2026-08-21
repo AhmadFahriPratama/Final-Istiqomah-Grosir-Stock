@@ -53,9 +53,13 @@ export const TelegramSettingsModal: React.FC<TelegramSettingsModalProps> = ({
       setTelegramStatus(res.message);
       if (res.success) {
         soundEffects.playUnlockSound();
+      } else {
+        alert(res.message);
       }
     } catch (e) {
-      setTelegramStatus('Error pengujian: ' + String(e));
+      const errMsg = 'Sambungkan ke internet dahulu: ' + String(e);
+      setTelegramStatus(errMsg);
+      alert(errMsg);
     } finally {
       setIsTestingTelegram(false);
     }
@@ -71,9 +75,13 @@ export const TelegramSettingsModal: React.FC<TelegramSettingsModalProps> = ({
       setTelegramStatus(res.message);
       if (res.success) {
         soundEffects.playBackupSent();
+      } else {
+        alert(res.message);
       }
     } catch (e) {
-      setTelegramStatus('Gagal kirim: ' + String(e));
+      const errMsg = 'Sambungkan ke internet dahulu untuk mengirim backup: ' + String(e);
+      setTelegramStatus(errMsg);
+      alert(errMsg);
     } finally {
       setIsSendingBackup(false);
     }
