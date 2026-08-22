@@ -1,9 +1,9 @@
-# Istiqomah Grosir Stock v2.3.0 🏢
+# Istiqomah Grosir Stock v2.4.0 🏢
 
 Sistem Manajemen Stok Multi-Lantai Offline-First & Aplikasi Android Native untuk Toko Grosir Istiqomah.
 
-[![Android APK Release](https://img.shields.io/badge/Download-Android_APK_v2.3.0-000000?style=for-the-badge&logo=android&logoColor=white)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock/releases/download/v1.0.0/Istiqomah-Grosir-Stock.apk)
-[![Theme](https://img.shields.io/badge/Aesthetic-Clean_Monochrome-000000?style=for-the-badge)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock)
+[![Android APK Release](https://img.shields.io/badge/Download-Android_APK_v2.4.0-000000?style=for-the-badge&logo=android&logoColor=white)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock/releases/download/v1.0.0/Istiqomah-Grosir-Stock.apk)
+[![Security](https://img.shields.io/badge/Safeguards-Strict_Protection-000000?style=for-the-badge)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock)
 
 ---
 
@@ -29,25 +29,25 @@ Sistem Manajemen Stok Multi-Lantai Offline-First & Aplikasi Android Native untuk
 
 ---
 
-## ✨ Pembaruan & Fitur Unggulan (v2.3.0):
+## ✨ Pembaruan & Fitur Unggulan (v2.4.0):
 
-1. ⚡ **UX Input Stok Lancar (Bisa Dihapus & Diketik Bebas)**:
-   - Input angka penyesuaian stok dan stok awal kini berbasis string murni, dapat dihapus total (*backspace*) tanpa memantul atau terkunci di angka 1/0.
-   - Auto-select saat kolom disentuh/fokus untuk pengetikan instan.
-   - Tombol cepat hapus/reset dan perbandingan visual `Stok Awal ➔ Perubahan ➔ Stok Akhir`.
+1. 🔒 **Proteksi Aksi Berisiko Tinggi (Strict Safeguards)**:
+   - **Reset Semua Data**: Wajib mengetik kata `"RESET"` di dialog keamanan khusus untuk membuka tombol reset database, mencegah klik tidak disengaja.
+   - **Mode Timpa Semua (REPLACE)**: Dilengkapi banner peringatan dan dialog konfirmasi eksplisit sebelum file backup menimpa data lantai/master.
+   - **Hapus Produk & Akun Petugas**: Dilengkapi konfirmasi rincian nama dan jumlah stok barang.
 
-2. 📦 **Input Stok Awal pada Tambah Produk Baru**:
-   - Kolom **Stok Awal** diletakkan langsung di form utama dengan tombol preset cepat: `0 (Kosong)`, `1`, `5`, `10`, `12 (Lusin)`, `24 (Dus)`, `50`, `100`.
-   - Menghilangkan langkah bertingkat yang berbelit sehingga penambahan barang baru menjadi sangat cepat.
+2. ⚡ **UX Input Stok Lancar**:
+   - Input angka penyesuaian stok dan stok awal bebas dihapus/backspace tanpa terkunci di angka 1.
+   - Auto-select saat kolom disentuh untuk pengetikan cepat.
 
-3. 📲 **Auto-Detect & Share Target File Backup Telegram**:
-   - File JSON cadangan yang dibagikan langsung dari Telegram atau dibuka di HP otomatis dideteksi oleh aplikasi.
-   - Menyediakan dialog 1-klik untuk menerapkan backup ke lantai yang sesuai.
-   - Mendukung Drag & Drop file `.json` dan Clipboard Paste.
+3. 📦 **Input Stok Awal pada Tambah Produk Baru**:
+   - Form penambahan produk ringkas 1 halaman dengan preset stok awal: `0 (Kosong)`, `1`, `5`, `10`, `12 (Lusin)`, `24 (Dus)`, `50`, `100`.
 
-4. 🖤 **Tampilan Bersih & Minimalis (Zero AI Filler)**:
-   - Menghilangkan seluruh teks dan buzzword yang tidak perlu untuk tampilan yang ringkas, modern, dan nyaman dilihat.
-   - Skema warna monokrom hitam-putih kontras tinggi dengan animasi velvet halus.
+4. 📲 **Auto-Detect File Backup Telegram**:
+   - Deteksi otomatis file JSON backup yang dibagikan dari Telegram, dibuka langsung di HP, di-*drop*, atau di-*paste*.
+
+5. 🖤 **Tampilan Bersih & Minimalis**:
+   - Bebas teks AI filler / kalimat panjang yang tidak perlu.
 
 ---
 

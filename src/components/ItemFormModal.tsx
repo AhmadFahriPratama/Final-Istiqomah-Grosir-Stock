@@ -343,7 +343,8 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
               <button
                 type="button"
                 onClick={() => {
-                  if (confirm(`Hapus produk "${itemToEdit.name}"?`)) {
+                  soundEffects.playClickSound();
+                  if (confirm(`⚠️ HAPUS PRODUK:\n\nApakah Anda yakin ingin menghapus "${itemToEdit.name}" dari database?\n\nSisa stok: ${itemToEdit.quantity} ${itemToEdit.unit}.\nTindakan ini tidak dapat dibatalkan.`)) {
                     onDelete(itemToEdit.id);
                     onClose();
                   }

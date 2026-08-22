@@ -99,10 +99,10 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
 
   const handleDeleteUserAccount = (userId: string, userName: string) => {
     if (userName.toLowerCase() === 'fahri') {
-      alert('Akun Fahri tidak dapat dihapus.');
+      alert('Akun Admin Fahri adalah akun utama dan tidak dapat dihapus.');
       return;
     }
-    if (confirm(`Hapus akun staf "${userName}"?`)) {
+    if (confirm(`⚠️ HAPUS AKUN STAF:\n\nApakah Anda yakin ingin menghapus akun petugas "${userName}"?\nPetugas ini tidak akan dapat login lagi ke aplikasi.`)) {
       soundEffects.playClickSound();
       StockStorageEngine.deleteUser(userId);
       onUsersUpdated();

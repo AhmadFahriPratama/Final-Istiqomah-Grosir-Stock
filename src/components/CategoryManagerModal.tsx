@@ -36,7 +36,11 @@ export const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({
       alert('Minimal harus ada 1 jenis barang.');
       return;
     }
-    if (confirm(`Hapus jenis "${cat}" dari ${floorName}?`)) {
+    if (
+      confirm(
+        `⚠️ HAPUS JENIS BARANG:\n\nApakah Anda yakin ingin menghapus kategori "${cat}" dari ${floorName}?\nBarang yang menggunakan kategori ini akan tetap aman di katalog.`
+      )
+    ) {
       soundEffects.playClickSound();
       onRemoveCategory(cat);
     }

@@ -110,6 +110,14 @@ export const AutoBackupReceiverModal: React.FC = () => {
   const handleApplyBackup = () => {
     soundEffects.playClickSound();
 
+    if (importMode === 'REPLACE') {
+      const destination = isFullBackup ? 'Seluruh Lantai (1-4)' : `Lantai ${targetFloor}`;
+      const confirmed = window.confirm(
+        `⚠️ PERINGATAN TIMPA SEMUA:\n\nData stok saat ini di ${destination} akan DIHAPUS dan digantikan dengan isi file backup ini.\n\nLanjutkan?`
+      );
+      if (!confirmed) return;
+    }
+
     const result = StockStorageEngine.importData(
       detectedData,
       isFullBackup ? undefined : targetFloor,
@@ -208,6 +216,12 @@ export const AutoBackupReceiverModal: React.FC = () => {
                   Timpa Semua
                 </button>
               </div>
+
+              {importMode === 'REPLACE' && (
+                <p className="text-[10px] text-zinc-800 font-semibold bg-zinc-100 p-1.5 rounded-lg mt-1 border border-zinc-300">
+                  ⚠️ Timpa Semua akan menghapus stok lama di lantai ini.
+                </p>
+              )}
             </div>
           </div>
 

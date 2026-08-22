@@ -121,6 +121,14 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
   const handleConfirmImport = () => {
     if (!pendingFileContent) return;
 
+    if (importMode === 'REPLACE') {
+      const targetName = FLOOR_DEFINITIONS[targetFloorChoice]?.name || `Lantai ${targetFloorChoice}`;
+      const confirmed = window.confirm(
+        `⚠️ PERINGATAN TIMPA SEMUA:\n\nSeluruh data barang di ${targetName} saat ini akan DIHAPUS dan digantikan sepenuhnya oleh data dari file backup ini.\n\nApakah Anda yakin ingin melanjutkan?`
+      );
+      if (!confirmed) return;
+    }
+
     const result = StockStorageEngine.importData(
       pendingFileContent,
       targetFloorChoice,
@@ -279,6 +287,11 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
                         Timpa Semua
                       </button>
                     </div>
+                    {importMode === 'REPLACE' && (
+                      <p className="text-[10px] text-zinc-800 font-semibold bg-zinc-100 p-1.5 rounded-lg mt-1 border border-zinc-300">
+                        ⚠️ Timpa Semua akan menghapus stok lama di lantai ini.
+                      </p>
+                    )}
                   </div>
                 </div>
 
