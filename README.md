@@ -1,9 +1,9 @@
-# Istiqomah Grosir Stock v2.5.0 🏢
+# Istiqomah Grosir Stock v2.6.0 🏢
 
 Sistem Manajemen Stok Multi-Lantai Offline-First & Aplikasi Android Native untuk Toko Grosir Istiqomah.
 
-[![Android APK Release](https://img.shields.io/badge/Download-Android_APK_v2.5.0-000000?style=for-the-badge&logo=android&logoColor=white)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock/releases/download/v1.0.0/Istiqomah-Grosir-Stock.apk)
-[![Category UX](https://img.shields.io/badge/UX-Compact_Category_Selection-000000?style=for-the-badge)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock)
+[![Android APK Release](https://img.shields.io/badge/Download-Android_APK_v2.6.0-000000?style=for-the-badge&logo=android&logoColor=white)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock/releases/download/v1.0.0/Istiqomah-Grosir-Stock.apk)
+[![Thresholds](https://img.shields.io/badge/Stock-Min_0_&_Max_Unlimited-000000?style=for-the-badge)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock)
 
 ---
 
@@ -29,26 +29,26 @@ Sistem Manajemen Stok Multi-Lantai Offline-First & Aplikasi Android Native untuk
 
 ---
 
-## ✨ Pembaruan & Fitur Unggulan (v2.5.0):
+## ✨ Pembaruan & Fitur Unggulan (v2.6.0):
 
-1. 🏷️ **Pemilihan Jenis Barang Efektif & Tidak Memanjang (Compact Category Selector)**:
-   - **Dropdown Cepat**: Memilih kategori apa pun dalam 1 sentuhan tanpa harus geser ke kanan.
-   - **Wrap Chips Responsif**: Chip kategori teratas otomatis membungkus (*wrap*) rapi ke bawah dan tidak keluar layar.
-   - **Modal Grid Jenis dengan Pencarian**: Tombol `+X Lainnya` atau `Semua Jenis` membuka pop-up grid 2 kolom dengan kolom pencarian nama kategori instan.
-   - **Form Tambah Produk Ringkas**: Pemilihan jenis produk di form baru kini menggunakan dropdown pintar + chip instan.
+1. ⚖️ **Batas Min & Batas Max Opsional di Bawah Stok Awal**:
+   - **Batas Min**: Default = `0` (Tanpa peringatan). Jika diisi angka > 0, aplikasi akan memunculkan peringatan saat stok menipis.
+   - **Batas Max**: Default = `Unlimited` (Kapasitas bebas tanpa batas). Disediakan tombol preset kapasitas (`Unlimited`, `50`, `100`, `250`, `500`).
+   - Sesi batas stok ini bersifat **opsional (tidak wajib)** dan diletakkan tepat di bawah Stok Awal produk.
 
-2. 🔒 **Proteksi Aksi Berisiko Tinggi (Strict Safeguards)**:
-   - Wajib mengetik `"RESET"` untuk konfirmasi pengosongan database.
-   - Konfirmasi eksplisit & banner peringatan saat mode *Timpa Semua*.
+2. 🏷️ **Pemilihan Jenis Barang Efektif & Tidak Memanjang**:
+   - Dropdown instan + chip *wrap* responsif yang tidak keluar layar.
+   - Modal grid 2 kolom lengkap dengan fitur pencarian jenis barang.
 
-3. ⚡ **UX Input Stok Lancar**:
+3. 🔒 **Proteksi Aksi Berisiko Tinggi**:
+   - Wajib mengetik `"RESET"` untuk konfirmasi reset database.
+   - Konfirmasi ganda pada mode *Timpa Semua* dan penghapusan produk.
+
+4. ⚡ **UX Input Stok Lancar**:
    - Nilai angka bebas dihapus (*backspace* hingga kosong) dan auto-select saat disentuh.
 
-4. 📦 **Input Stok Awal Produk Baru**:
-   - Preset stok awal langsung di halaman utama form: `0 (Kosong)`, `1`, `5`, `10`, `12 (Lusin)`, `24 (Dus)`, `50`, `100`.
-
-5. 📲 **Auto-Detect File Backup Telegram**:
-   - Sinkronisasi otomatis file cadangan JSON dari Telegram atau pembukaan file langsung.
+5. 📦 **Input Stok Awal Produk Baru**:
+   - Preset stok awal: `0 (Kosong)`, `1`, `5`, `10`, `12 (Lusin)`, `24 (Dus)`, `50`, `100`.
 
 ---
 

@@ -499,9 +499,13 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
                       <span className="text-[9px] font-bold text-zinc-900 block mt-0.5">
                         [Stok Habis / 0]
                       </span>
-                    ) : isLowStock ? (
+                    ) : isLowStock && item.minStock > 0 ? (
                       <span className="text-[9px] font-medium text-zinc-500 block mt-0.5">
                         [Stok Menipis: Min {item.minStock} {item.unit}]
+                      </span>
+                    ) : item.maxStock && item.quantity >= item.maxStock ? (
+                      <span className="text-[9px] font-medium text-zinc-500 block mt-0.5">
+                        [Kapasitas Maksimal: {item.maxStock} {item.unit}]
                       </span>
                     ) : null}
                   </div>

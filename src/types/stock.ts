@@ -46,6 +46,7 @@ export interface StockItem {
   barcode?: string;
   quantity: number;
   minStock: number;
+  maxStock?: number;
   unit: string;
   locationDetails?: string;
   notes?: string;

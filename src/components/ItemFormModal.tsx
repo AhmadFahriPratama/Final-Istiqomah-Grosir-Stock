@@ -6,6 +6,7 @@ import {
   Check,
   Sparkles,
   ChevronDown,
+  SlidersHorizontal,
 } from 'lucide-react';
 import type { StockItem } from '../types/stock';
 import { BarcodeScannerModal } from './BarcodeScannerModal';
@@ -36,9 +37,10 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
   const [customCategory, setCustomCategory] = useState('');
   const [barcode, setBarcode] = useState('');
   
-  // String-based inputs to allow backspacing, deleting, and free typing
+  // String-based inputs for free typing & backspacing
   const [quantityText, setQuantityText] = useState('0');
-  const [minStockText, setMinStockText] = useState('5');
+  const [minStockText, setMinStockText] = useState('0');
+  const [maxStockText, setMaxStockText] = useState('');
   const [unit, setUnit] = useState('Pcs');
   const [locationDetails, setLocationDetails] = useState('');
   const [notes, setNotes] = useState('');
@@ -52,7 +54,8 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
       setCustomCategory('');
       setBarcode(itemToEdit.barcode || '');
       setQuantityText(String(itemToEdit.quantity ?? 0));
-      setMinStockText(String(itemToEdit.minStock ?? 5));
+      setMinStockText(String(itemToEdit.minStock ?? 0));
+      setMaxStockText(itemToEdit.maxStock ? String(itemToEdit.maxStock) : '');
       setUnit(itemToEdit.unit || 'Pcs');
       setLocationDetails(itemToEdit.locationDetails || '');
       setNotes(itemToEdit.notes || '');
@@ -62,7 +65,8 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
       setCustomCategory('');
       setBarcode('');
       setQuantityText('0');
-      setMinStockText('5');
+      setMinStockText('0');
+      setMaxStockText('');
       setUnit('Pcs');
       setLocationDetails('');
       setNotes('');
@@ -73,6 +77,13 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
 
   const quickUnits = ['Pcs', 'Pack', 'Box', 'Karton', 'Unit', 'Roll', 'Pasang', 'Lusin'];
   const stockPresets = [0, 1, 5, 10, 12, 24, 50, 100];
+  const maxPresets = [
+    { label: 'Unlimited', value: '' },
+    { label: '50', value: '50' },
+    { label: '100', value: '100' },
+    { label: '250', value: '250' },
+    { label: '500', value: '500' },
+  ];
 
   const handleGenerateSKU = () => {
     soundEffects.playClickSound();
@@ -96,6 +107,9 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
     const parsedMin = parseInt(minStockText, 10);
     const validMin = isNaN(parsedMin) ? 0 : Math.max(0, parsedMin);
 
+    const parsedMax = parseInt(maxStockText, 10);
+    const validMax = !isNaN(parsedMax) && parsedMax > 0 ? parsedMax : undefined;
+
     onSave(
       {
         name: name.trim(),
@@ -103,6 +117,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
         barcode: barcode.trim(),
         quantity: validQty,
         minStock: validMin,
+        maxStock: validMax,
         unit: unit.trim() || 'Pcs',
         locationDetails: locationDetails.trim(),
         notes: notes.trim(),
@@ -158,7 +173,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
             />
           </div>
 
-          {/* 2. Stok Awal & Batas Minimal (Highlight Box) */}
+          {/* 2. Stok Awal Produk (Highlight Box) */}
           <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-3 space-y-2.5">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-black uppercase tracking-wider">
@@ -169,44 +184,24 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="text-[10px] font-semibold text-zinc-600 block mb-1">
-                  Jumlah Stok Awal:
-                </label>
-                <div className="flex items-center gap-1">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    placeholder="0"
-                    value={quantityText}
-                    onFocus={(e) => e.target.select()}
-                    onChange={(e) => handleNumberInput(setQuantityText, e.target.value)}
-                    className="w-full px-2 py-1.5 text-center text-sm font-extrabold bg-white border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-mono"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[10px] font-semibold text-zinc-600 block mb-1">
-                  Peringatan Min:
-                </label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  placeholder="5"
-                  value={minStockText}
-                  onFocus={(e) => e.target.select()}
-                  onChange={(e) => handleNumberInput(setMinStockText, e.target.value)}
-                  className="w-full px-2 py-1.5 text-center text-sm font-extrabold bg-white border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-mono"
-                />
-              </div>
+            <div>
+              <label className="text-[10px] font-semibold text-zinc-600 block mb-1">
+                Jumlah Stok Fisik Awal:
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="0"
+                value={quantityText}
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => handleNumberInput(setQuantityText, e.target.value)}
+                className="w-full px-3 py-2 text-center text-base font-extrabold bg-white border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-mono"
+              />
             </div>
 
             {/* Quick Presets for Initial Stock */}
-            <div className="pt-1">
+            <div>
               <span className="text-[9px] text-zinc-400 block mb-1">Pilih cepat stok awal:</span>
               <div className="flex flex-wrap gap-1">
                 {stockPresets.map((val) => (
@@ -230,7 +225,81 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
             </div>
           </div>
 
-          {/* 3. Kategori (Jenis Barang) */}
+          {/* 3. Batas Min & Batas Max (Disediakan di bawah Stok Awal - Opsional) */}
+          <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-zinc-800 flex items-center gap-1">
+                <SlidersHorizontal size={12} className="text-black" /> Batas Stok (Opsional)
+              </span>
+              <span className="text-[9px] font-semibold text-zinc-400">
+                Min: 0 • Max: Unlimited
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[10px] font-semibold text-zinc-600 block mb-1">
+                  Batas Min (Peringatan):
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="0 (Default)"
+                  value={minStockText === '0' ? '' : minStockText}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => handleNumberInput(setMinStockText, e.target.value)}
+                  className="w-full px-2 py-1.5 text-center text-xs font-bold bg-white border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-mono"
+                />
+                <span className="text-[9px] text-zinc-400 block mt-0.5 text-center">
+                  {minStockText && minStockText !== '0' ? `Peringatan ≤ ${minStockText}` : 'Tanpa peringatan (0)'}
+                </span>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-semibold text-zinc-600 block mb-1">
+                  Batas Max (Kapasitas):
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="Unlimited"
+                  value={maxStockText}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => handleNumberInput(setMaxStockText, e.target.value)}
+                  className="w-full px-2 py-1.5 text-center text-xs font-bold bg-white border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-mono"
+                />
+                <span className="text-[9px] text-zinc-400 block mt-0.5 text-center">
+                  {maxStockText ? `Kapasitas: ${maxStockText}` : 'Tidak terbatas (Unlimited)'}
+                </span>
+              </div>
+            </div>
+
+            {/* Quick chips for Max Stock */}
+            <div className="pt-0.5 flex flex-wrap gap-1 items-center">
+              <span className="text-[9px] text-zinc-400 mr-0.5">Preset Max:</span>
+              {maxPresets.map((p) => (
+                <button
+                  key={p.label}
+                  type="button"
+                  onClick={() => {
+                    soundEffects.playClickSound();
+                    setMaxStockText(p.value);
+                  }}
+                  className={`px-2 py-0.5 text-[9px] font-bold rounded-lg border transition-all touch-press ${
+                    maxStockText === p.value
+                      ? 'bg-black text-white border-black'
+                      : 'bg-white text-zinc-600 border-zinc-200 hover:border-black'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 4. Kategori (Jenis Barang) */}
           <div>
             <label className="text-[11px] font-bold text-zinc-800 block mb-1">
               Jenis / Kategori:
@@ -292,7 +361,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
             />
           </div>
 
-          {/* 4. Satuan Produk */}
+          {/* 5. Satuan Produk */}
           <div>
             <label className="text-[11px] font-bold text-zinc-800 block mb-1">
               Satuan:
@@ -318,7 +387,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
             </div>
           </div>
 
-          {/* 5. Barcode / SKU */}
+          {/* 6. Barcode / SKU */}
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="text-[11px] font-bold text-zinc-800">
@@ -352,7 +421,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
             </div>
           </div>
 
-          {/* 6. Lokasi Rak (Opsional) */}
+          {/* 7. Lokasi Rak (Opsional) */}
           <div>
             <label className="text-[10px] font-semibold text-zinc-600 block mb-1">
               Lokasi / Posisi Rak (Opsional):
@@ -373,7 +442,11 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                 type="button"
                 onClick={() => {
                   soundEffects.playClickSound();
-                  if (confirm(`⚠️ HAPUS PRODUK:\n\nApakah Anda yakin ingin menghapus "${itemToEdit.name}" dari database?\n\nSisa stok: ${itemToEdit.quantity} ${itemToEdit.unit}.\nTindakan ini tidak dapat dibatalkan.`)) {
+                  if (
+                    confirm(
+                      `⚠️ HAPUS PRODUK:\n\nApakah Anda yakin ingin menghapus "${itemToEdit.name}" dari database?\n\nSisa stok: ${itemToEdit.quantity} ${itemToEdit.unit}.\nTindakan ini tidak dapat dibatalkan.`
+                    )
+                  ) {
                     onDelete(itemToEdit.id);
                     onClose();
                   }
