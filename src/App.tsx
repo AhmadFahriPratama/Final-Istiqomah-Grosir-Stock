@@ -9,6 +9,8 @@ import { FloorView } from './views/FloorView';
 import { AdminDashboard } from './views/AdminDashboard';
 import { soundEffects } from './utils/audio';
 
+import { AutoBackupReceiverModal } from './components/AutoBackupReceiverModal';
+
 export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(() =>
     StockStorageEngine.getCurrentUser()
@@ -147,6 +149,8 @@ export const App: React.FC = () => {
         currentUser={currentUser}
         onLogout={handleLogout}
       />
+      {/* Auto Backup Receiver Modal (for Telegram Shares, Drops, & Files) */}
+      <AutoBackupReceiverModal />
     </div>
   );
 };

@@ -102,10 +102,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
           </div>
           <div>
             <h1 className="text-sm font-extrabold text-black leading-tight">
-              Pusat Kontrol Fahri
+              Dashboard Admin
             </h1>
             <span className="text-[10px] text-zinc-400 font-medium block">
-              Super Admin Istiqomah Grosir Stock
+              Kelola user, lantai, dan cadangan data
             </span>
           </div>
         </div>

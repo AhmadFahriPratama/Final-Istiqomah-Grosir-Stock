@@ -562,7 +562,7 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
             <div>
               <h3 className="text-xs font-bold text-black leading-none">{title}</h3>
               <p className="text-[10px] text-zinc-500 font-medium mt-0.5">
-                Istiqomah High-Performance Scanner
+                Pindai barcode produk
               </p>
             </div>
           </div>

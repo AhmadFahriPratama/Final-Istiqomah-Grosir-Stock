@@ -1,9 +1,9 @@
-# Istiqomah Grosir Stock v2.2.0 🏢
+# Istiqomah Grosir Stock v2.3.0 🏢
 
 Sistem Manajemen Stok Multi-Lantai Offline-First & Aplikasi Android Native untuk Toko Grosir Istiqomah.
 
-[![Android APK Release](https://img.shields.io/badge/Download-Android_APK_v2.2.0-000000?style=for-the-badge&logo=android&logoColor=white)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock/releases/download/v1.0.0/Istiqomah-Grosir-Stock.apk)
-[![Theme](https://img.shields.io/badge/Aesthetic-Monochrome_Luxury-000000?style=for-the-badge)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock)
+[![Android APK Release](https://img.shields.io/badge/Download-Android_APK_v2.3.0-000000?style=for-the-badge&logo=android&logoColor=white)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock/releases/download/v1.0.0/Istiqomah-Grosir-Stock.apk)
+[![Theme](https://img.shields.io/badge/Aesthetic-Clean_Monochrome-000000?style=for-the-badge)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock)
 
 ---
 
@@ -29,27 +29,25 @@ Sistem Manajemen Stok Multi-Lantai Offline-First & Aplikasi Android Native untuk
 
 ---
 
-## ✨ Pembaruan & Fitur Unggulan (v2.2.0):
+## ✨ Pembaruan & Fitur Unggulan (v2.3.0):
 
-1. 🖤 **Monochrome Luxury & Clean Aesthetics (Bebas Animasi Warna-Warni)**:
-   - Menghapus seluruh animasi konfeti pelangi/warna-warni yang mengganggu tema minimalis.
-   - Mengganti seluruh animasi dengan transisi mikro monokrom yang elegan: laser sweep silver, flash light lembut, badge monokrom kontras tinggi, dan efek suara akustik velvet yang halus.
+1. ⚡ **UX Input Stok Lancar (Bisa Dihapus & Diketik Bebas)**:
+   - Input angka penyesuaian stok dan stok awal kini berbasis string murni, dapat dihapus total (*backspace*) tanpa memantul atau terkunci di angka 1/0.
+   - Auto-select saat kolom disentuh/fokus untuk pengetikan instan.
+   - Tombol cepat hapus/reset dan perbandingan visual `Stok Awal ➔ Perubahan ➔ Stok Akhir`.
 
-2. ⚡ **Ultra-Fast Hardware Camera Scanner (Sesuai Istiqomah-Price)**:
-   - Direct hardware `<video>` stream (60 FPS stabil tanpa lag).
-   - Deteksi instan dengan native `BarcodeDetector` + Center Crop 70% × 40%.
-   - Tombol senter/torch hardware, haptic vibration, dan audio sine beep.
+2. 📦 **Input Stok Awal pada Tambah Produk Baru**:
+   - Kolom **Stok Awal** diletakkan langsung di form utama dengan tombol preset cepat: `0 (Kosong)`, `1`, `5`, `10`, `12 (Lusin)`, `24 (Dus)`, `50`, `100`.
+   - Menghilangkan langkah bertingkat yang berbelit sehingga penambahan barang baru menjadi sangat cepat.
 
-3. 🗂️ **Pusat Kontrol Fahri (Dashboard Super Admin Modular)**:
-   - **👥 User Manage**: Tambah staf, edit password, atur izin lantai.
-   - **📜 History User**: Log audit real-time setiap mutasi stok lengkap dengan ekspor CSV (Excel) & salin teks WhatsApp.
-   - **🏢 Ringkasan 4 Lantai**: Monitoring fisik & jenis barang per lantai kerja.
-   - **💬 Telegram & Auto-Backup**: Konfigurasi bot Telegram & cadangan otomatis.
-   - **💾 Master Database**: Unduh & pulihkan cadangan master seluruh toko.
+3. 📲 **Auto-Detect & Share Target File Backup Telegram**:
+   - File JSON cadangan yang dibagikan langsung dari Telegram atau dibuka di HP otomatis dideteksi oleh aplikasi.
+   - Menyediakan dialog 1-klik untuk menerapkan backup ke lantai yang sesuai.
+   - Mendukung Drag & Drop file `.json` dan Clipboard Paste.
 
-4. 📦 **Toping Grosir Presets**:
-   - Preset penyesuaian stok grosir (+12 Lusin, +24 Dus, +50, +100).
-   - Real-time active probe connectivity (deteksi online/offline instan).
+4. 🖤 **Tampilan Bersih & Minimalis (Zero AI Filler)**:
+   - Menghilangkan seluruh teks dan buzzword yang tidak perlu untuk tampilan yang ringkas, modern, dan nyaman dilihat.
+   - Skema warna monokrom hitam-putih kontras tinggi dengan animasi velvet halus.
 
 ---
 

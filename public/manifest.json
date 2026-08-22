@@ -13,5 +13,26 @@
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "display": "standalone",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "file_handlers": [
+    {
+      "action": "/",
+      "accept": {
+        "application/json": [".json"]
+      }
+    }
+  ],
+  "share_target": {
+    "action": "/?shared=file",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "files": [
+        {
+          "name": "backup_files",
+          "accept": ["application/json", ".json", "text/plain"]
+        }
+      ]
+    }
+  }
 }

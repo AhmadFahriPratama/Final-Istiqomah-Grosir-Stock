@@ -4,9 +4,6 @@ import {
   Camera,
   Trash2,
   Check,
-  ChevronRight,
-  ChevronLeft,
-  Barcode,
   Sparkles,
 } from 'lucide-react';
 import type { StockItem } from '../types/stock';
@@ -33,14 +30,14 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
   onSave,
   onDelete,
 }) => {
-  const [currentStep, setCurrentStep] = useState<number>(1);
-
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
   const [customCategory, setCustomCategory] = useState('');
   const [barcode, setBarcode] = useState('');
-  const [quantity, setQuantity] = useState<number>(0);
-  const [minStock, setMinStock] = useState<number>(5);
+  
+  // String-based inputs to allow backspacing, deleting, and free typing
+  const [quantityText, setQuantityText] = useState('0');
+  const [minStockText, setMinStockText] = useState('5');
   const [unit, setUnit] = useState('Pcs');
   const [locationDetails, setLocationDetails] = useState('');
   const [notes, setNotes] = useState('');
@@ -51,43 +48,30 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
     if (itemToEdit) {
       setName(itemToEdit.name || '');
       setCategory(itemToEdit.category || categories[0] || 'Umum');
+      setCustomCategory('');
       setBarcode(itemToEdit.barcode || '');
-      setQuantity(itemToEdit.quantity ?? 0);
-      setMinStock(itemToEdit.minStock ?? 5);
+      setQuantityText(String(itemToEdit.quantity ?? 0));
+      setMinStockText(String(itemToEdit.minStock ?? 5));
       setUnit(itemToEdit.unit || 'Pcs');
       setLocationDetails(itemToEdit.locationDetails || '');
       setNotes(itemToEdit.notes || '');
-      setCurrentStep(3);
     } else {
       setName('');
       setCategory(categories[0] || 'Umum');
       setCustomCategory('');
       setBarcode('');
-      setQuantity(1);
-      setMinStock(5);
+      setQuantityText('0');
+      setMinStockText('5');
       setUnit('Pcs');
       setLocationDetails('');
       setNotes('');
-      setCurrentStep(1);
     }
   }, [itemToEdit, categories, isOpen]);
 
   if (!isOpen) return null;
 
   const quickUnits = ['Pcs', 'Pack', 'Box', 'Karton', 'Unit', 'Roll', 'Pasang', 'Lusin'];
-
-  const handleNext = () => {
-    soundEffects.playClickSound();
-    if (currentStep === 2 && customCategory.trim()) {
-      setCategory(customCategory.trim());
-    }
-    setCurrentStep((prev) => Math.min(prev + 1, 4));
-  };
-
-  const handlePrev = () => {
-    soundEffects.playClickSound();
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
-  };
+  const stockPresets = [0, 1, 5, 10, 12, 24, 50, 100];
 
   const handleGenerateSKU = () => {
     soundEffects.playClickSound();
@@ -95,22 +79,29 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
     setBarcode(autoSku);
   };
 
+  const handleNumberInput = (setter: (val: string) => void, val: string) => {
+    const cleaned = val.replace(/\D/g, '');
+    setter(cleaned);
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
-      setCurrentStep(3);
-      return;
-    }
+    if (!name.trim()) return;
 
     const finalCategory = customCategory.trim() || category || 'Umum';
+    const parsedQty = parseInt(quantityText, 10);
+    const validQty = isNaN(parsedQty) ? 0 : Math.max(0, parsedQty);
+
+    const parsedMin = parseInt(minStockText, 10);
+    const validMin = isNaN(parsedMin) ? 0 : Math.max(0, parsedMin);
 
     onSave(
       {
         name: name.trim(),
         category: finalCategory,
         barcode: barcode.trim(),
-        quantity: Math.max(0, quantity),
-        minStock: Math.max(0, minStock),
+        quantity: validQty,
+        minStock: validMin,
         unit: unit.trim() || 'Pcs',
         locationDetails: locationDetails.trim(),
         notes: notes.trim(),
@@ -128,318 +119,255 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 modal-backdrop animate-in fade-in duration-150 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 modal-backdrop animate-in fade-in duration-150 overflow-y-auto">
       <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden border border-zinc-200 my-auto flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 bg-zinc-50">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 bg-zinc-50 shrink-0">
           <div>
-            <span className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase">
-              {itemToEdit ? 'Edit Data Barang' : `Langkah ${currentStep} dari 4`}
-            </span>
             <h3 className="text-xs font-bold text-black">
-              {itemToEdit
-                ? itemToEdit.name
-                : currentStep === 1
-                ? 'Scan atau Masukkan Barcode'
-                : currentStep === 2
-                ? 'Pilih Jenis Barang'
-                : currentStep === 3
-                ? 'Nama & Satuan'
-                : 'Stok Fisik Awal & Lokasi'}
+              {itemToEdit ? 'Edit Data Produk' : 'Tambah Produk Baru'}
             </h3>
+            <p className="text-[10px] text-zinc-500 font-medium mt-0.5">
+              Lengkapi informasi barang dan stok awal
+            </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full text-zinc-400 hover:text-black hover:bg-zinc-200 transition-colors"
+            className="p-1.5 rounded-full text-zinc-400 hover:text-black hover:bg-zinc-200 transition-colors touch-press"
           >
             <X size={16} />
           </button>
         </div>
 
-        {/* Minimal Progress Indicator */}
-        {!itemToEdit && (
-          <div className="grid grid-cols-4 gap-1 px-5 pt-2">
-            {[1, 2, 3, 4].map((step) => (
-              <div
-                key={step}
-                className={`h-1 rounded-full transition-all ${
-                  step <= currentStep ? 'bg-black' : 'bg-zinc-200'
-                }`}
-              />
-            ))}
+        {/* Form Body */}
+        <form onSubmit={handleSave} className="p-4 space-y-3.5 overflow-y-auto flex-1">
+          {/* 1. Nama Barang */}
+          <div>
+            <label className="text-[11px] font-bold text-zinc-800 block mb-1">
+              Nama Produk / Barang <span className="text-zinc-400 font-normal">*wajib</span>:
+            </label>
+            <input
+              type="text"
+              required
+              autoFocus
+              placeholder="Contoh: Tisu Paseo 250s"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-3 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-bold"
+            />
           </div>
-        )}
 
-        {/* Wizard Form Body */}
-        <form onSubmit={handleSave} className="p-5 space-y-4 overflow-y-auto flex-1">
-          {/* STEP 1: Barcode / SKU */}
-          {currentStep === 1 && (
-            <div className="space-y-3.5 animate-in fade-in duration-150">
-              <div className="text-center py-2">
-                <div className="w-12 h-12 rounded-2xl bg-zinc-100 text-black flex items-center justify-center mx-auto mb-2">
-                  <Barcode size={24} />
-                </div>
-                <h4 className="text-xs font-bold text-black">Scan Barcode Produk</h4>
-                <p className="text-[11px] text-zinc-400 max-w-xs mx-auto mt-0.5">
-                  Gunakan kamera HP atau ketik nomor SKU produk secara manual.
-                </p>
-              </div>
+          {/* 2. Stok Awal & Batas Minimal (Highlight Box) */}
+          <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-3 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-black uppercase tracking-wider">
+                Stok Awal Produk
+              </span>
+              <span className="text-[10px] text-zinc-500 font-medium font-mono">
+                Satuan: {unit}
+              </span>
+            </div>
 
-              <div className="space-y-2">
-                <button
-                  type="button"
-                  onClick={() => setIsScannerOpen(true)}
-                  className="w-full py-2.5 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 touch-press"
-                >
-                  <Camera size={15} /> Buka Scanner Kamera
-                </button>
-
-                <div className="relative">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[10px] font-semibold text-zinc-600 block mb-1">
+                  Jumlah Stok Awal:
+                </label>
+                <div className="flex items-center gap-1">
                   <input
                     type="text"
-                    placeholder="Atau ketik nomor Barcode / SKU..."
-                    value={barcode}
-                    onChange={(e) => setBarcode(e.target.value)}
-                    className="w-full px-3 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-mono text-center font-bold"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    placeholder="0"
+                    value={quantityText}
+                    onFocus={(e) => e.target.select()}
+                    onChange={(e) => handleNumberInput(setQuantityText, e.target.value)}
+                    className="w-full px-2 py-1.5 text-center text-sm font-extrabold bg-white border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-mono"
                   />
                 </div>
+              </div>
 
-                <button
-                  type="button"
-                  onClick={handleGenerateSKU}
-                  className="w-full py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border border-zinc-200 rounded-xl text-[11px] font-semibold flex items-center justify-center gap-1 touch-press"
-                >
-                  <Sparkles size={12} /> Buat SKU Otomatis
-                </button>
+              <div>
+                <label className="text-[10px] font-semibold text-zinc-600 block mb-1">
+                  Peringatan Min:
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="5"
+                  value={minStockText}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => handleNumberInput(setMinStockText, e.target.value)}
+                  className="w-full px-2 py-1.5 text-center text-sm font-extrabold bg-white border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-mono"
+                />
               </div>
             </div>
-          )}
 
-          {/* STEP 2: Category */}
-          {currentStep === 2 && (
-            <div className="space-y-3 animate-in fade-in duration-150">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-zinc-600 block">
-                  Pilih Jenis (Kategori):
-                </span>
-                <span className="text-[10px] text-zinc-400">Ketuk untuk memilih</span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-1.5 max-h-48 overflow-y-auto pr-0.5">
-                {categories.map((cat) => (
+            {/* Quick Presets for Initial Stock */}
+            <div className="pt-1">
+              <span className="text-[9px] text-zinc-400 block mb-1">Pilih cepat stok awal:</span>
+              <div className="flex flex-wrap gap-1">
+                {stockPresets.map((val) => (
                   <button
-                    key={cat}
+                    key={val}
                     type="button"
                     onClick={() => {
                       soundEffects.playClickSound();
-                      setCategory(cat);
-                      setCustomCategory('');
+                      setQuantityText(String(val));
                     }}
-                    className={`p-2.5 rounded-xl border text-xs font-bold text-left transition-all touch-press ${
-                      category === cat && !customCategory
+                    className={`px-2 py-0.5 text-[10px] font-bold rounded-lg border transition-all touch-press ${
+                      quantityText === String(val)
                         ? 'bg-black text-white border-black'
-                        : 'bg-zinc-50 text-zinc-700 border-zinc-200 hover:border-black'
+                        : 'bg-white text-zinc-700 border-zinc-200 hover:border-black'
                     }`}
                   >
-                    {cat}
+                    {val === 0 ? '0 (Kosong)' : val === 12 ? '12 (Lusin)' : val === 24 ? '24 (Dus)' : val}
                   </button>
                 ))}
               </div>
-
-              <div className="pt-1">
-                <label className="text-[10px] font-semibold text-zinc-500 block mb-1">
-                  Atau Buat Jenis Baru:
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ketik jenis baru..."
-                  value={customCategory}
-                  onChange={(e) => setCustomCategory(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black"
-                />
-              </div>
             </div>
-          )}
+          </div>
 
-          {/* STEP 3: Nama Barang & Satuan */}
-          {currentStep === 3 && (
-            <div className="space-y-3 animate-in fade-in duration-150">
-              <div>
-                <label className="text-[11px] font-bold text-zinc-700 block mb-1">
-                  Nama Barang / Produk:
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Tisu Basah Antiseptic 50s"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-bold"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] font-bold text-zinc-700 block mb-1">
-                  Satuan Barang:
-                </label>
-                <div className="flex flex-wrap gap-1 mb-1.5">
-                  {quickUnits.map((u) => (
-                    <button
-                      key={u}
-                      type="button"
-                      onClick={() => {
-                        soundEffects.playClickSound();
-                        setUnit(u);
-                      }}
-                      className={`px-2 py-1 text-xs font-bold rounded-lg border transition-all ${
-                        unit === u
-                          ? 'bg-black text-white border-black'
-                          : 'bg-white text-zinc-600 border-zinc-200 hover:border-black'
-                      }`}
-                    >
-                      {u}
-                    </button>
-                  ))}
-                </div>
-                <input
-                  type="text"
-                  placeholder="Atau ketik satuan custom..."
-                  value={unit}
-                  onChange={(e) => setUnit(e.target.value)}
-                  className="w-full px-3 py-1.5 text-xs bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black"
-                />
-              </div>
-
-              {itemToEdit && (
-                <div>
-                  <label className="text-[10px] font-semibold text-zinc-500 block mb-1">
-                    Nomor Barcode / SKU:
-                  </label>
-                  <input
-                    type="text"
-                    value={barcode}
-                    onChange={(e) => setBarcode(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs bg-zinc-50 border border-zinc-200 rounded-xl font-mono"
-                  />
-                </div>
-              )}
+          {/* 3. Kategori (Jenis Barang) */}
+          <div>
+            <label className="text-[11px] font-bold text-zinc-800 block mb-1">
+              Jenis / Kategori:
+            </label>
+            <div className="flex flex-wrap gap-1 mb-1.5 max-h-28 overflow-y-auto pr-0.5">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => {
+                    soundEffects.playClickSound();
+                    setCategory(cat);
+                    setCustomCategory('');
+                  }}
+                  className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition-all touch-press ${
+                    category === cat && !customCategory
+                      ? 'bg-black text-white border-black'
+                      : 'bg-zinc-50 text-zinc-700 border-zinc-200 hover:border-black'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
-          )}
+            <input
+              type="text"
+              placeholder="Atau ketik jenis baru..."
+              value={customCategory}
+              onChange={(e) => setCustomCategory(e.target.value)}
+              className="w-full px-3 py-1.5 text-xs bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black"
+            />
+          </div>
 
-          {/* STEP 4: Stok Fisik Awal & Lokasi */}
-          {currentStep === 4 && (
-            <div className="space-y-3 animate-in fade-in duration-150">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-[11px] font-bold text-zinc-700 block mb-1">
-                    Stok Fisik Saat Ini:
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    required
-                    value={quantity}
-                    onChange={(e) => setQuantity(Math.max(0, parseInt(e.target.value) || 0))}
-                    className="w-full px-3 py-2 text-base text-center bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-bold font-mono"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-bold text-zinc-700 block mb-1">
-                    Batas Peringatan Min:
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    required
-                    value={minStock}
-                    onChange={(e) => setMinStock(Math.max(0, parseInt(e.target.value) || 0))}
-                    className="w-full px-3 py-2 text-base text-center bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-bold font-mono"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[10px] font-semibold text-zinc-600 block mb-1">
-                  Lokasi Rak / Posisi Barang (Opsional):
-                </label>
-                <input
-                  type="text"
-                  placeholder="Contoh: Rak A1 Tingkat 2"
-                  value={locationDetails}
-                  onChange={(e) => setLocationDetails(e.target.value)}
-                  className="w-full px-3 py-1.5 text-xs bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black"
-                />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-semibold text-zinc-600 block mb-1">
-                  Catatan Tambahan (Opsional):
-                </label>
-                <input
-                  type="text"
-                  placeholder="Keterangan singkat..."
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="w-full px-3 py-1.5 text-xs bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black"
-                />
-              </div>
+          {/* 4. Satuan Produk */}
+          <div>
+            <label className="text-[11px] font-bold text-zinc-800 block mb-1">
+              Satuan:
+            </label>
+            <div className="flex flex-wrap gap-1 mb-1.5">
+              {quickUnits.map((u) => (
+                <button
+                  key={u}
+                  type="button"
+                  onClick={() => {
+                    soundEffects.playClickSound();
+                    setUnit(u);
+                  }}
+                  className={`px-2 py-0.5 text-xs font-bold rounded-lg border transition-all touch-press ${
+                    unit === u
+                      ? 'bg-black text-white border-black'
+                      : 'bg-white text-zinc-600 border-zinc-200 hover:border-black'
+                  }`}
+                >
+                  {u}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
 
-          {/* Stepper Navigation Buttons */}
-          <div className="pt-2 border-t border-zinc-100 flex items-center justify-between gap-2">
-            {currentStep > 1 ? (
+          {/* 5. Barcode / SKU */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-[11px] font-bold text-zinc-800">
+                Barcode / SKU (Opsional):
+              </label>
               <button
                 type="button"
-                onClick={handlePrev}
-                className="px-3 py-2 bg-zinc-100 hover:bg-zinc-200 text-black rounded-xl text-xs font-bold flex items-center gap-1 touch-press"
+                onClick={handleGenerateSKU}
+                className="text-[10px] text-zinc-500 hover:text-black font-semibold flex items-center gap-0.5"
               >
-                <ChevronLeft size={14} /> Kembali
+                <Sparkles size={11} /> Buat SKU
+              </button>
+            </div>
+
+            <div className="flex gap-1.5">
+              <input
+                type="text"
+                placeholder="Nomor barcode produk..."
+                value={barcode}
+                onChange={(e) => setBarcode(e.target.value)}
+                className="flex-1 px-3 py-1.5 text-xs bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-mono font-bold"
+              />
+              <button
+                type="button"
+                onClick={() => setIsScannerOpen(true)}
+                className="px-2.5 py-1.5 bg-black text-white rounded-xl text-xs font-bold flex items-center gap-1 touch-press shrink-0"
+                title="Scan dengan Kamera"
+              >
+                <Camera size={13} /> Scan
+              </button>
+            </div>
+          </div>
+
+          {/* 6. Lokasi Rak (Opsional) */}
+          <div>
+            <label className="text-[10px] font-semibold text-zinc-600 block mb-1">
+              Lokasi / Posisi Rak (Opsional):
+            </label>
+            <input
+              type="text"
+              placeholder="Contoh: Rak A-2"
+              value={locationDetails}
+              onChange={(e) => setLocationDetails(e.target.value)}
+              className="w-full px-3 py-1.5 text-xs bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black"
+            />
+          </div>
+
+          {/* Submit Action */}
+          <div className="pt-2 border-t border-zinc-100 flex items-center justify-between gap-2">
+            {itemToEdit && onDelete ? (
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm(`Hapus produk "${itemToEdit.name}"?`)) {
+                    onDelete(itemToEdit.id);
+                    onClose();
+                  }
+                }}
+                className="p-2 text-zinc-400 hover:text-black hover:bg-zinc-100 rounded-xl transition-colors touch-press"
+                title="Hapus Produk"
+              >
+                <Trash2 size={16} />
               </button>
             ) : (
               <div />
             )}
 
-            {currentStep < 4 ? (
-              <button
-                type="button"
-                onClick={handleNext}
-                className="px-4 py-2 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold flex items-center gap-1 touch-press"
-              >
-                Lanjut <ChevronRight size={14} />
-              </button>
-            ) : (
-              <button
-                type="submit"
-                className="px-5 py-2 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 touch-press shadow-xs"
-              >
-                <Check size={14} /> {itemToEdit ? 'Simpan Perubahan' : 'Simpan Produk'}
-              </button>
-            )}
+            <button
+              type="submit"
+              className="px-5 py-2.5 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 touch-press shadow-xs ml-auto"
+            >
+              <Check size={14} /> {itemToEdit ? 'Simpan Perubahan' : 'Simpan Produk Baru'}
+            </button>
           </div>
-
-          {/* Delete button when editing */}
-          {itemToEdit && onDelete && (
-            <div className="pt-1 text-center">
-              <button
-                type="button"
-                onClick={() => {
-                  if (confirm(`Hapus ${itemToEdit.name} dari database?`)) {
-                    onDelete(itemToEdit.id);
-                    onClose();
-                  }
-                }}
-                className="text-[11px] text-zinc-400 hover:text-black font-semibold flex items-center justify-center gap-1 mx-auto"
-              >
-                <Trash2 size={12} /> Hapus Barang Ini
-              </button>
-            </div>
-          )}
         </form>
       </div>
 
-      {/* Barcode Scanner Modal for Step 1 */}
+      {/* Barcode Scanner Modal */}
       <BarcodeScannerModal
         isOpen={isScannerOpen}
         onClose={() => setIsScannerOpen(false)}
@@ -447,7 +375,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
           setIsScannerOpen(false);
           setBarcode(scanned);
           soundEffects.playScanBeep();
-          setCurrentStep(2);
         }}
       />
     </div>

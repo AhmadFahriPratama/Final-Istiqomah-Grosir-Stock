@@ -145,7 +145,7 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
                 Riwayat Perubahan User
               </h3>
               <p className="text-[10px] text-zinc-500 font-medium mt-0.5">
-                Audit log aktivitas mutasi & koreksi stok real-time
+                Catatan mutasi dan perubahan stok
               </p>
             </div>
           </div>

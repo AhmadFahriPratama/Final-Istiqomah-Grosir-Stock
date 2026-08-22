@@ -184,17 +184,17 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
           {/* Info Card */}
           <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-2xl space-y-1">
             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1">
-              <FileCheck size={12} /> Format Standar Backup
+              <FileCheck size={12} /> Format Data Backup
             </span>
             <p className="text-[11px] text-zinc-600 leading-relaxed">
-              File backup berformat <code>.json</code> v2.0 berisi seluruh katalog barang, kategori, log mutasi riwayat staf, dan konfigurasi dari Lantai 1 s/d Lantai 4.
+              File cadangan (<code>.json</code>) mencakup seluruh daftar barang, kategori, riwayat mutasi, dan akun dari Lantai 1 sampai 4.
             </p>
           </div>
 
           {/* Danger Zone: Reset all data */}
           <div className="pt-2 border-t border-zinc-200">
             <span className="text-[10px] font-bold text-zinc-800 uppercase tracking-wider block mb-1.5">
-              Area Reset Data (Koreksi Total)
+              Reset Database Toko
             </span>
             <button
               onClick={handleClearAllData}
