@@ -88,15 +88,100 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
     }
   };
 
+  const parseCSVToBackup = (csvText: string, currentFloor: FloorId): BackupExportData => {
+    const lines = csvText.split(/\r?\n/).filter((l) => l.trim().length > 0);
+    if (lines.length < 2) throw new Error('File CSV kosong atau tidak memiliki baris data');
+
+    // Detect separator: comma or semicolon
+    const firstLine = lines[0];
+    const sep = firstLine.includes(';') ? ';' : ',';
+
+    const headers = lines[0].split(sep).map((h) => h.trim().toLowerCase().replace(/['"]+/g, ''));
+    const nameIdx = headers.findIndex((h) => h.includes('nama') || h.includes('name') || h.includes('produk') || h.includes('barang'));
+    const catIdx = headers.findIndex((h) => h.includes('kategori') || h.includes('cat') || h.includes('jenis'));
+    const unitIdx = headers.findIndex((h) => h.includes('satuan') || h.includes('unit'));
+    const qtyIdx = headers.findIndex((h) => h.includes('stok') || h.includes('qty') || h.includes('jumlah'));
+    const minIdx = headers.findIndex((h) => h.includes('min'));
+    const maxIdx = headers.findIndex((h) => h.includes('max'));
+    const locIdx = headers.findIndex((h) => h.includes('lokasi') || h.includes('rak') || h.includes('posisi'));
+    const barcodeIdx = headers.findIndex((h) => h.includes('barcode') || h.includes('sku') || h.includes('kode'));
+
+    if (nameIdx === -1) throw new Error('Kolom "Nama Produk" tidak ditemukan pada baris judul CSV');
+
+    const categoriesSet = new Set<string>();
+    const items = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const row = lines[i].split(sep).map((col) => col.trim().replace(/^["']|["']$/g, ''));
+      const name = row[nameIdx];
+      if (!name) continue;
+
+      const category = (catIdx !== -1 && row[catIdx]) ? row[catIdx] : 'Umum';
+      categoriesSet.add(category);
+
+      const unit = (unitIdx !== -1 && row[unitIdx]) ? row[unitIdx] : 'Pcs';
+      const qty = (qtyIdx !== -1 && !isNaN(Number(row[qtyIdx]))) ? Number(row[qtyIdx]) : 0;
+      const minStock = (minIdx !== -1 && !isNaN(Number(row[minIdx]))) ? Number(row[minIdx]) : 0;
+      const maxStock = (maxIdx !== -1 && !isNaN(Number(row[maxIdx]))) ? Number(row[maxIdx]) : undefined;
+      const locationDetails = (locIdx !== -1 && row[locIdx]) ? row[locIdx] : undefined;
+      const barcode = (barcodeIdx !== -1 && row[barcodeIdx]) ? row[barcodeIdx] : undefined;
+
+      items.push({
+        id: `csv_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 6)}`,
+        name,
+        category,
+        unit,
+        quantity: qty,
+        minStock,
+        maxStock,
+        locationDetails,
+        barcode,
+        notes: 'Impor CSV Masal',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    }
+
+    if (items.length === 0) throw new Error('Tidak ada baris barang valid yang ditemukan di CSV');
+
+    const defaultCats = StockStorageEngine.getFloorData(currentFloor).categories;
+    defaultCats.forEach((c) => categoriesSet.add(c));
+
+    return {
+      version: '3.0.0',
+      appName: 'Istiqomah Grosir Stock',
+      exportedAt: new Date().toISOString(),
+      type: 'SINGLE_FLOOR',
+      floorId: currentFloor,
+      floors: {
+        [currentFloor]: {
+          floorId: currentFloor,
+          items,
+          categories: Array.from(categoriesSet),
+          mutations: [],
+          lastUpdated: new Date().toISOString(),
+        },
+      },
+    };
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const isCSV = file.name.toLowerCase().endsWith('.csv') || file.type.includes('csv');
 
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
         const content = event.target?.result as string;
-        const parsed: BackupExportData = JSON.parse(content);
+        let parsed: BackupExportData;
+
+        if (isCSV) {
+          parsed = parseCSVToBackup(content, floorId);
+        } else {
+          parsed = JSON.parse(content);
+        }
 
         if (!parsed || !parsed.floors) {
           throw new Error('Struktur file tidak valid');
@@ -216,7 +301,7 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
 
             <input
               type="file"
-              accept=".json"
+              accept=".json,.csv,text/csv,application/json"
               ref={fileInputRef}
               onChange={handleFileChange}
               className="hidden"
@@ -227,7 +312,7 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full py-2 bg-zinc-200 hover:bg-zinc-300 text-black rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 touch-press"
               >
-                <Upload size={13} /> Pilih File Backup JSON
+                <Upload size={13} /> Pilih File Backup JSON / CSV Excel
               </button>
             ) : (
               <div className="bg-white p-3 rounded-xl border border-zinc-200 space-y-2">

@@ -1,28 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ShieldCheck,
   Users,
   History,
   Layers,
   Send,
   Database,
   FileText,
-  ChevronRight,
   AlertTriangle,
   Package,
   Activity,
-  CheckCircle2,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import type { FloorId, AdminSettings, UserAccount } from '../types/stock';
 import { StockStorageEngine } from '../services/db';
-import { ReportService } from '../services/reports';
 import { soundEffects } from '../utils/audio';
-import { TextReportModal } from '../components/TextReportModal';
 import { UserManagementModal } from '../components/UserManagementModal';
 import { UserHistoryModal } from '../components/UserHistoryModal';
 import { TelegramSettingsModal } from '../components/TelegramSettingsModal';
 import { MasterDatabaseModal } from '../components/MasterDatabaseModal';
 import { FloorSummaryModal } from '../components/FloorSummaryModal';
+import { ReportGeneratorModal } from '../components/ReportGeneratorModal';
+import { AdminCrestGlyph } from '../components/CustomIcons';
 
 interface AdminDashboardProps {
   onSelectFloor: (floorId: FloorId) => void;
@@ -45,6 +44,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
   const [mutationsCount, setMutationsCount] = useState<number>(() =>
     StockStorageEngine.getAllMutations().length
   );
+  const [isSoundOn, setIsSoundOn] = useState<boolean>(() => soundEffects.isSoundEnabled());
 
   // Modal Control States
   const [isUserManageOpen, setIsUserManageOpen] = useState(false);
@@ -53,7 +53,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
   const [isTelegramOpen, setIsTelegramOpen] = useState(false);
   const [isDatabaseOpen, setIsDatabaseOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [masterReportText, setMasterReportText] = useState('');
 
   const refreshAll = () => {
     const s = StockStorageEngine.getAdminSettings();
@@ -66,14 +65,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
   useEffect(() => {
     refreshAll();
     const handleStorageEvent = () => refreshAll();
+    const handleSoundToggled = (e: Event) => {
+      const custom = e as CustomEvent<{ enabled: boolean }>;
+      setIsSoundOn(custom.detail?.enabled ?? true);
+    };
+
     window.addEventListener('istiqomah_stock_updated', handleStorageEvent);
-    return () => window.removeEventListener('istiqomah_stock_updated', handleStorageEvent);
+    window.addEventListener('istiqomah_sound_toggled', handleSoundToggled);
+    return () => {
+      window.removeEventListener('istiqomah_stock_updated', handleStorageEvent);
+      window.removeEventListener('istiqomah_sound_toggled', handleSoundToggled);
+    };
   }, []);
 
   const handleOpenMasterReport = () => {
     soundEffects.playClickSound();
-    const text = ReportService.generateMasterReport();
-    setMasterReportText(text);
     setIsReportModalOpen(true);
   };
 
@@ -97,25 +103,45 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
       {/* Header Bar */}
       <header className="flex items-center justify-between py-1">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-2xl bg-black text-white flex items-center justify-center font-bold shadow-xs">
-            <ShieldCheck size={18} />
+          <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center shadow-xs">
+            <AdminCrestGlyph size={20} />
           </div>
           <div>
-            <h1 className="text-sm font-extrabold text-black leading-tight">
-              Dashboard Admin
-            </h1>
-            <span className="text-[10px] text-zinc-400 font-medium block">
-              Kelola user, lantai, dan cadangan data
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-sm font-extrabold text-black leading-tight">
+                Dashboard Admin
+              </h1>
+              <span className="text-[9px] font-extrabold bg-zinc-900 text-amber-300 border border-amber-500/40 px-1.5 py-0.2 rounded-md font-mono shadow-2xs">
+                v3.0.0
+              </span>
+            </div>
+            <span className="text-[10px] text-zinc-400 font-medium block mt-0.5">
+              Pengaturan & Master Data
             </span>
           </div>
         </div>
 
-        <button
-          onClick={handleOpenMasterReport}
-          className="px-3 py-1.5 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 touch-press shadow-xs"
-        >
-          <FileText size={13} /> Laporan
-        </button>
+        <div className="flex items-center gap-1.5">
+          {/* Sound Toggle */}
+          <button
+            onClick={() => soundEffects.toggleSound()}
+            className={`p-2 rounded-xl border transition-all touch-press shadow-2xs ${
+              isSoundOn
+                ? 'bg-white border-zinc-200 text-zinc-800'
+                : 'bg-zinc-100 border-zinc-300 text-zinc-400'
+            }`}
+            title={isSoundOn ? 'Suara Aktif (Klik untuk Mematikan)' : 'Suara Mati (Klik untuk Mengaktifkan)'}
+          >
+            {isSoundOn ? <Volume2 size={14} /> : <VolumeX size={14} />}
+          </button>
+
+          <button
+            onClick={handleOpenMasterReport}
+            className="px-3 py-1.5 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 touch-press shadow-xs"
+          >
+            <FileText size={13} /> Laporan
+          </button>
+        </div>
       </header>
 
       {/* Aggregate KPI Grid Cards */}
@@ -154,10 +180,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
           </div>
           <div>
             <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider block">
-              Petugas Toko
+              Petugas Staf
             </span>
             <span className="text-base font-extrabold text-black font-mono leading-none">
-              {usersList.length} <span className="text-[10px] font-normal text-zinc-500 font-sans">staf</span>
+              {usersList.length} <span className="text-[10px] font-normal text-zinc-500 font-sans">akun</span>
             </span>
           </div>
         </div>
@@ -177,157 +203,181 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
         </div>
       </div>
 
-      {/* Main Modular Admin Features Menu */}
+      {/* Main Modular Admin Features: 2-Column Square Grid Cards */}
       <div className="space-y-2 pt-1">
-        <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider px-1 block">
-          Menu Fitur Administrator
+        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider px-1 block">
+          Menu Kontrol
         </span>
 
-        <div className="space-y-2">
-          {/* 1. User Manage Button */}
-          <div
+        <div className="grid grid-cols-2 gap-2.5">
+          {/* 1. Kelola Akun Staf */}
+          <button
+            type="button"
             onClick={() => {
               soundEffects.playClickSound();
               setIsUserManageOpen(true);
             }}
-            className="p-4 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-black cursor-pointer transition-all flex items-center justify-between touch-press shadow-xs"
+            className="p-3.5 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-black text-left cursor-pointer transition-all flex flex-col justify-between min-h-[110px] touch-press shadow-xs group"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center shrink-0">
-                <Users size={18} />
+            <div className="flex items-center justify-between w-full">
+              <div className="w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
+                <Users size={16} />
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xs font-bold text-black">Manajemen User</h3>
-                  <span className="text-[9px] font-bold bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded border border-zinc-200">
-                    {usersList.length} User
-                  </span>
-                </div>
-                <p className="text-[11px] text-zinc-500 mt-0.5">
-                  Tambah staf baru, ganti password & atur akses lantai
-                </p>
-              </div>
+              <span className="text-[9px] font-extrabold bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded-md font-mono">
+                {usersList.length} Akun
+              </span>
             </div>
-            <ChevronRight size={17} className="text-zinc-400 shrink-0" />
-          </div>
+            <div>
+              <h4 className="text-xs font-bold text-black group-hover:text-black">
+                Kelola Staf
+              </h4>
+              <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
+                Akun & hak akses
+              </p>
+            </div>
+          </button>
 
-          {/* 2. History User Button (NEW FEATURE) */}
-          <div
+          {/* 2. Audit Aktivitas */}
+          <button
+            type="button"
             onClick={() => {
               soundEffects.playClickSound();
               setIsUserHistoryOpen(true);
             }}
-            className="p-4 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-black cursor-pointer transition-all flex items-center justify-between touch-press shadow-xs"
+            className="p-3.5 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-black text-left cursor-pointer transition-all flex flex-col justify-between min-h-[110px] touch-press shadow-xs group"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center shrink-0">
-                <History size={18} />
+            <div className="flex items-center justify-between w-full">
+              <div className="w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
+                <History size={16} />
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xs font-bold text-black">Riwayat Perubahan User</h3>
-                  <span className="text-[9px] font-bold bg-black text-white px-1.5 py-0.5 rounded border border-black">
-                    Live Audit
-                  </span>
-                </div>
-                <p className="text-[11px] text-zinc-500 mt-0.5">
-                  Lihat log mutasi & aktivitas koreksi stok oleh setiap user
-                </p>
-              </div>
+              <span className="text-[9px] font-extrabold bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded-md font-mono">
+                {mutationsCount} Log
+              </span>
             </div>
-            <ChevronRight size={17} className="text-zinc-400 shrink-0" />
-          </div>
+            <div>
+              <h4 className="text-xs font-bold text-black group-hover:text-black">
+                Aktivitas Staf
+              </h4>
+              <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
+                Audit mutasi & aksi
+              </p>
+            </div>
+          </button>
 
-          {/* 3. Ringkasan Lantai Button */}
-          <div
+          {/* 3. Ringkasan Lantai */}
+          <button
+            type="button"
             onClick={() => {
               soundEffects.playClickSound();
               setIsFloorSummaryOpen(true);
             }}
-            className="p-4 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-black cursor-pointer transition-all flex items-center justify-between touch-press shadow-xs"
+            className="p-3.5 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-black text-left cursor-pointer transition-all flex flex-col justify-between min-h-[110px] touch-press shadow-xs group"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center shrink-0">
-                <Layers size={18} />
+            <div className="flex items-center justify-between w-full">
+              <div className="w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
+                <Layers size={16} />
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xs font-bold text-black">Ringkasan 4 Lantai</h3>
-                  <span className="text-[9px] font-bold bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded border border-zinc-200">
-                    Lt 1 - 4
-                  </span>
-                </div>
-                <p className="text-[11px] text-zinc-500 mt-0.5">
-                  Rincian fisik & macam barang di setiap lantai kerja
-                </p>
-              </div>
+              <span className="text-[9px] font-extrabold bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded-md">
+                Lt 1-4
+              </span>
             </div>
-            <ChevronRight size={17} className="text-zinc-400 shrink-0" />
-          </div>
+            <div>
+              <h4 className="text-xs font-bold text-black group-hover:text-black">
+                Ringkasan Lantai
+              </h4>
+              <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
+                Rekap stok per lantai
+              </p>
+            </div>
+          </button>
 
-          {/* 4. Telegram & Auto-Backup Button */}
-          <div
+          {/* 4. Cadangan Telegram */}
+          <button
+            type="button"
             onClick={() => {
               soundEffects.playClickSound();
               setIsTelegramOpen(true);
             }}
-            className="p-4 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-black cursor-pointer transition-all flex items-center justify-between touch-press shadow-xs"
+            className="p-3.5 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-black text-left cursor-pointer transition-all flex flex-col justify-between min-h-[110px] touch-press shadow-xs group"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center shrink-0">
-                <Send size={17} />
+            <div className="flex items-center justify-between w-full">
+              <div className="w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
+                <Send size={15} />
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xs font-bold text-black">Telegram & Auto-Backup</h3>
-                  {settings.telegram.autoBackup ? (
-                    <span className="text-[9px] font-bold bg-black text-white px-1.5 py-0.5 rounded border border-black flex items-center gap-0.5">
-                      <CheckCircle2 size={9} /> Aktif
-                    </span>
-                  ) : (
-                    <span className="text-[9px] font-bold bg-zinc-100 text-zinc-600 px-1.5 py-0.5 rounded border border-zinc-200">
-                      Nonaktif
-                    </span>
-                  )}
-                </div>
-                <p className="text-[11px] text-zinc-500 mt-0.5">
-                  Konfigurasi bot token, chat ID & kirim backup instan
-                </p>
-              </div>
+              <span
+                className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-md ${
+                  settings.telegram.autoBackup
+                    ? 'bg-emerald-100 text-emerald-800'
+                    : 'bg-zinc-100 text-zinc-500'
+                }`}
+              >
+                {settings.telegram.autoBackup ? 'Auto Aktif' : 'Manual'}
+              </span>
             </div>
-            <ChevronRight size={17} className="text-zinc-400 shrink-0" />
-          </div>
+            <div>
+              <h4 className="text-xs font-bold text-black group-hover:text-black">
+                Backup Telegram
+              </h4>
+              <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
+                Cloud bot cadangan
+              </p>
+            </div>
+          </button>
 
-          {/* 5. Master Database (JSON) Button */}
-          <div
+          {/* 5. Master Database */}
+          <button
+            type="button"
             onClick={() => {
               soundEffects.playClickSound();
               setIsDatabaseOpen(true);
             }}
-            className="p-4 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-black cursor-pointer transition-all flex items-center justify-between touch-press shadow-xs"
+            className="p-3.5 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-black text-left cursor-pointer transition-all flex flex-col justify-between min-h-[110px] touch-press shadow-xs group"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center shrink-0">
-                <Database size={18} />
+            <div className="flex items-center justify-between w-full">
+              <div className="w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
+                <Database size={16} />
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xs font-bold text-black">Master Database (JSON)</h3>
-                  <span className="text-[9px] font-bold bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded border border-zinc-200">
-                    JSON v2.0
-                  </span>
-                </div>
-                <p className="text-[11px] text-zinc-500 mt-0.5">
-                  Unduh cadangan data lengkap, pulihkan JSON, atau reset
-                </p>
-              </div>
+              <span className="text-[9px] font-extrabold bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded-md">
+                JSON
+              </span>
             </div>
-            <ChevronRight size={17} className="text-zinc-400 shrink-0" />
-          </div>
+            <div>
+              <h4 className="text-xs font-bold text-black group-hover:text-black">
+                Master Database
+              </h4>
+              <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
+                Ekspor, impor & reset
+              </p>
+            </div>
+          </button>
+
+          {/* 6. Laporan Lengkap */}
+          <button
+            type="button"
+            onClick={handleOpenMasterReport}
+            className="p-3.5 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-black text-left cursor-pointer transition-all flex flex-col justify-between min-h-[110px] touch-press shadow-xs group"
+          >
+            <div className="flex items-center justify-between w-full">
+              <div className="w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
+                <FileText size={16} />
+              </div>
+              <span className="text-[9px] font-extrabold bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded-md">
+                Teks / WA
+              </span>
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-black group-hover:text-black">
+                Laporan Global
+              </h4>
+              <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
+                Rekap teks 4 lantai
+              </p>
+            </div>
+          </button>
         </div>
       </div>
 
-      {/* Sub-Modals for each feature */}
+      {/* Admin Modals */}
       <UserManagementModal
         isOpen={isUserManageOpen}
         onClose={() => setIsUserManageOpen(false)}
@@ -351,10 +401,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
         isOpen={isTelegramOpen}
         onClose={() => setIsTelegramOpen(false)}
         settings={settings}
-        onSettingsUpdated={(up) => {
-          setSettings(up);
-          refreshAll();
-        }}
+        onSettingsUpdated={() => refreshAll()}
       />
 
       <MasterDatabaseModal
@@ -363,10 +410,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
         onDataResetOrImported={refreshAll}
       />
 
-      <TextReportModal
+      <ReportGeneratorModal
         isOpen={isReportModalOpen}
-        title="Laporan Master Seluruh Lantai"
-        reportText={masterReportText}
         onClose={() => setIsReportModalOpen(false)}
       />
     </div>

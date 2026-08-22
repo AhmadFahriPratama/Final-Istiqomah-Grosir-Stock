@@ -39,7 +39,6 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
       return;
     }
 
-    // Verify old password against current stored user
     const currentStored = StockStorageEngine.authenticateUser(
       currentUser.username,
       oldPassword.trim()
@@ -63,7 +62,6 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
       return;
     }
 
-    // Update password
     const updatedUser: UserAccount = {
       ...currentStored,
       password: newPassword.trim(),
@@ -89,33 +87,33 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 modal-backdrop animate-in fade-in duration-150">
-      <div className="bg-white rounded-2xl max-w-xs w-full shadow-xl overflow-hidden border border-zinc-200 flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 modal-backdrop animate-in fade-in duration-150">
+      <div className="bg-white rounded-3xl max-w-xs w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col">
         {/* Header */}
-        <div className="p-4 bg-zinc-50 border-b border-zinc-100 flex items-center justify-between relative">
+        <div className="px-4 py-3.5 bg-zinc-50 border-b border-zinc-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-black text-white flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
               <KeyRound size={15} />
             </div>
             <div>
-              <h3 className="text-xs font-bold text-black">Ubah Password</h3>
-              <p className="text-[10px] text-zinc-400">Akun: {currentUser.name}</p>
+              <h3 className="text-xs font-bold text-black leading-tight">Ganti Password</h3>
+              <p className="text-[10px] text-zinc-400 font-medium">{currentUser.name} (@{currentUser.username})</p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-zinc-400 hover:text-black hover:bg-zinc-200 transition-colors"
+            className="p-1.5 rounded-full text-zinc-400 hover:text-black hover:bg-zinc-200 transition-colors touch-press"
           >
-            <X size={15} />
+            <X size={16} />
           </button>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-4 space-y-3">
           <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-zinc-700 block">
-              Password Lama:
+            <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider block">
+              Password Lama
             </label>
             <div className="relative">
               <input
@@ -127,8 +125,8 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                   setOldPassword(e.target.value);
                   setErrorMsg('');
                 }}
-                placeholder="Masukkan password saat ini"
-                className="w-full pl-3 pr-8 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-xl font-mono focus:outline-none focus:border-black"
+                placeholder="Password saat ini"
+                className="w-full pl-3 pr-8 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-xl font-mono focus:outline-none focus:border-black font-semibold text-black"
               />
               <button
                 type="button"
@@ -142,8 +140,8 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
           </div>
 
           <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-zinc-700 block">
-              Password Baru:
+            <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider block">
+              Password Baru
             </label>
             <div className="relative">
               <input
@@ -154,8 +152,8 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                   setNewPassword(e.target.value);
                   setErrorMsg('');
                 }}
-                placeholder="Masukkan password baru"
-                className="w-full pl-3 pr-8 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-xl font-mono focus:outline-none focus:border-black"
+                placeholder="Password baru"
+                className="w-full pl-3 pr-8 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-xl font-mono focus:outline-none focus:border-black font-semibold text-black"
               />
               <button
                 type="button"
@@ -169,8 +167,8 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
           </div>
 
           <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-zinc-700 block">
-              Ulangi Password Baru:
+            <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider block">
+              Konfirmasi Password Baru
             </label>
             <input
               type={showNew ? 'text' : 'password'}
@@ -180,40 +178,31 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 setConfirmPassword(e.target.value);
                 setErrorMsg('');
               }}
-              placeholder="Ketik ulang password baru"
-              className="w-full px-3 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-xl font-mono focus:outline-none focus:border-black"
+              placeholder="Ulangi password baru"
+              className="w-full px-3 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-xl font-mono focus:outline-none focus:border-black font-semibold text-black"
             />
           </div>
 
           {errorMsg && (
-            <div className="p-2 rounded-lg bg-zinc-100 text-[10px] font-semibold text-black flex items-center gap-1.5">
-              <AlertCircle size={12} className="shrink-0" />
+            <div className="p-2.5 rounded-xl bg-zinc-100 border border-zinc-200 text-xs font-semibold text-black flex items-center gap-1.5 animate-in fade-in">
+              <AlertCircle size={13} className="shrink-0 text-red-500" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="p-2 rounded-lg bg-zinc-100 text-[10px] font-semibold text-black flex items-center gap-1.5">
-              <CheckCircle size={12} className="shrink-0" />
+            <div className="p-2.5 rounded-xl bg-zinc-900 text-white text-xs font-semibold flex items-center gap-1.5 animate-in fade-in">
+              <CheckCircle size={13} className="shrink-0 text-emerald-400" />
               <span>{successMsg}</span>
             </div>
           )}
 
-          <div className="pt-1 flex gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-2 bg-zinc-100 hover:bg-zinc-200 text-black text-xs font-semibold rounded-xl"
-            >
-              Batal
-            </button>
-            <button
-              type="submit"
-              className="flex-1 py-2 bg-black hover:bg-zinc-800 text-white text-xs font-bold rounded-xl touch-press shadow-xs"
-            >
-              Simpan
-            </button>
-          </div>
+          <button
+            type="submit"
+            className="w-full py-2.5 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold touch-press shadow-xs mt-1"
+          >
+            Simpan Password Baru
+          </button>
         </form>
       </div>
     </div>

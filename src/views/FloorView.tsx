@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   Plus,
   Search,
-  Camera,
   Layers,
   Eye,
   EyeOff,
@@ -14,13 +13,10 @@ import {
   User,
   MapPin,
   KeyRound,
-  ShoppingBag,
-  Shirt,
-  Armchair,
-  Package,
   ChevronDown,
-  Check,
-  X,
+  AlertTriangle,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import type { FloorId, StockItem, UserAccount } from '../types/stock';
 import { FLOOR_DEFINITIONS } from '../types/stock';
@@ -36,28 +32,22 @@ import { CategoryManagerModal } from '../components/CategoryManagerModal';
 import { FloorExportImportModal } from '../components/FloorExportImportModal';
 import { TextReportModal } from '../components/TextReportModal';
 import { ChangePasswordModal } from '../components/ChangePasswordModal';
+import { FloorGlyph, ScannerGlyph } from '../components/CustomIcons';
 
 interface FloorViewProps {
   floorId: FloorId;
   onOpenAdmin: () => void;
 }
 
-const FLOOR_ICONS: Record<FloorId, typeof ShoppingBag> = {
-  '1': ShoppingBag,
-  '2': Shirt,
-  '3': Armchair,
-  '4': Package,
-};
-
 export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
   const floorInfo = FLOOR_DEFINITIONS[floorId];
-  const FloorIconComponent = FLOOR_ICONS[floorId] || Package;
 
   // User & Auth State
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(() =>
     StockStorageEngine.getCurrentUser()
   );
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isSoundOn, setIsSoundOn] = useState<boolean>(() => soundEffects.isSoundEnabled());
 
   // Data State
   const [floorData, setFloorData] = useState(() => StockStorageEngine.getFloorData(floorId));
@@ -67,7 +57,9 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [hideOutOfStock, setHideOutOfStock] = useState<boolean>(true);
+  const [filterOnlyLowStock, setFilterOnlyLowStock] = useState<boolean>(false);
   const [showRecentMutations, setShowRecentMutations] = useState<boolean>(false);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   // Modals
   const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false);
@@ -92,7 +84,7 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
     const timer = setTimeout(() => {
       refreshData();
       setIsLoading(false);
-    }, 80);
+    }, 60);
 
     const handleStorageEvent = (e: Event) => {
       const customEvent = e as CustomEvent<{ floorId: FloorId }>;
@@ -106,21 +98,61 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
       setCurrentUser(custom.detail?.user || null);
     };
 
+    const handleSoundToggled = (e: Event) => {
+      const custom = e as CustomEvent<{ enabled: boolean }>;
+      setIsSoundOn(custom.detail?.enabled ?? true);
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT'
+      ) {
+        return;
+      }
+      if (e.key === '/' || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k')) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      } else if (e.altKey && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        setIsScannerOpen(true);
+      } else if (e.altKey && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        setEditingItem(null);
+        setIsItemFormOpen(true);
+      }
+    };
+
     window.addEventListener('istiqomah_stock_updated', handleStorageEvent);
     window.addEventListener('istiqomah_user_changed', handleUserChanged);
+    window.addEventListener('istiqomah_sound_toggled', handleSoundToggled);
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
       clearTimeout(timer);
       window.removeEventListener('istiqomah_stock_updated', handleStorageEvent);
       window.removeEventListener('istiqomah_user_changed', handleUserChanged);
+      window.removeEventListener('istiqomah_sound_toggled', handleSoundToggled);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [floorId, refreshData]);
+
+  const lowStockCount = useMemo(() => {
+    return floorData.items.filter(
+      (it) => it.quantity > 0 && it.quantity <= it.minStock && it.minStock > 0
+    ).length;
+  }, [floorData.items]);
 
   const filteredItems = useMemo(() => {
     return floorData.items.filter((item) => {
       if (selectedCategory !== 'ALL' && item.category !== selectedCategory) {
         return false;
       }
-      if (hideOutOfStock && item.quantity <= 0) {
+      if (filterOnlyLowStock && (item.quantity <= 0 || item.quantity > item.minStock || item.minStock === 0)) {
+        return false;
+      }
+      if (hideOutOfStock && item.quantity <= 0 && !filterOnlyLowStock) {
         return false;
       }
       if (searchQuery.trim()) {
@@ -133,7 +165,7 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
       }
       return true;
     });
-  }, [floorData.items, selectedCategory, hideOutOfStock, searchQuery]);
+  }, [floorData.items, selectedCategory, hideOutOfStock, filterOnlyLowStock, searchQuery]);
 
   const outOfStockCount = useMemo(() => {
     return floorData.items.filter((item) => {
@@ -205,12 +237,12 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
 
   return (
     <div className="min-h-screen pb-28 pt-3 px-3 max-w-md mx-auto space-y-3">
-      {/* Header Bar */}
+      {/* Top Header Bar */}
       <header className="flex items-center justify-between py-1 px-0.5">
         <div className="flex items-center gap-2.5">
-          {/* Remade Sleek Vector Floor Badge */}
+          {/* Custom Floor Badge */}
           <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center shadow-xs">
-            <FloorIconComponent size={18} className="stroke-[2.2]" />
+            <FloorGlyph floorId={floorId} size={20} />
           </div>
 
           <div>
@@ -218,21 +250,21 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
               <h1 className="text-sm font-extrabold text-black leading-tight">
                 {floorInfo.name}
               </h1>
-              <span className="text-[10px] font-medium text-zinc-500">
-                ({floorInfo.subtitle})
+              <span className="text-[10px] font-medium text-zinc-400">
+                • {floorInfo.subtitle}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 font-medium">
-              <span>{floorData.items.length} item</span>
+            <div className="flex items-center gap-2 text-[10px] text-zinc-500 mt-0.5">
+              <span className="font-semibold">{floorData.items.length} macam</span>
               {currentUser && (
                 <>
-                  <span>-</span>
+                  <span className="text-zinc-300">•</span>
                   <button
                     onClick={() => setIsPasswordModalOpen(true)}
-                    className="text-black font-semibold hover:underline flex items-center gap-0.5"
-                    title="Ubah Password"
+                    className="text-zinc-700 hover:text-black font-semibold flex items-center gap-0.5 transition-colors"
+                    title="Ganti Password"
                   >
-                    <User size={10} />
+                    <User size={10} className="text-zinc-400" />
                     <span>{currentUser.name}</span>
                     <KeyRound size={9} className="text-zinc-400 ml-0.5" />
                   </button>
@@ -245,37 +277,76 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
         <div className="flex items-center gap-1.5">
           <OfflineBadge />
 
+          {/* Sound Toggle */}
+          <button
+            onClick={() => soundEffects.toggleSound()}
+            className={`p-2 rounded-xl border transition-all touch-press shadow-2xs ${
+              isSoundOn
+                ? 'bg-white border-zinc-200 text-zinc-800'
+                : 'bg-zinc-100 border-zinc-300 text-zinc-400'
+            }`}
+            title={isSoundOn ? 'Suara Aktif (Klik untuk Mematikan)' : 'Suara Mati (Klik untuk Mengaktifkan)'}
+          >
+            {isSoundOn ? <Volume2 size={14} /> : <VolumeX size={14} />}
+          </button>
+
           <button
             onClick={() => {
               soundEffects.playClickSound();
               setIsExportModalOpen(true);
             }}
-            className="p-2 rounded-xl bg-white border border-zinc-200 text-zinc-700 hover:border-black touch-press"
-            title="Sinkronisasi & Multi-HP"
+            className="p-2 rounded-xl bg-white border border-zinc-200 text-zinc-700 hover:border-black touch-press shadow-2xs"
+            title="Sinkronisasi Data"
           >
             <Share2 size={14} />
           </button>
 
           <button
             onClick={handleOpenReport}
-            className="p-2 rounded-xl bg-white border border-zinc-200 text-zinc-700 hover:border-black touch-press"
-            title="Laporan Teks"
+            className="p-2 rounded-xl bg-white border border-zinc-200 text-zinc-700 hover:border-black touch-press shadow-2xs"
+            title="Salin Laporan Teks"
           >
             <FileText size={14} />
           </button>
         </div>
       </header>
 
-      {/* Search & Camera Bar */}
+      {/* Low Stock Alert Ticker (Smart Topping) */}
+      {lowStockCount > 0 && (
+        <div className="flex items-center justify-between p-2.5 px-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-900 text-xs font-semibold shadow-2xs animate-in fade-in">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <AlertTriangle size={14} className="text-amber-700 shrink-0" />
+            <span className="truncate">
+              <strong>{lowStockCount} barang</strong> stoknya menipis
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              soundEffects.playClickSound();
+              setFilterOnlyLowStock(!filterOnlyLowStock);
+            }}
+            className={`px-2.5 py-1 rounded-lg text-[10px] font-bold shrink-0 transition-all ${
+              filterOnlyLowStock
+                ? 'bg-amber-800 text-white shadow-xs'
+                : 'bg-white text-amber-900 border border-amber-300 hover:bg-amber-100'
+            }`}
+          >
+            {filterOnlyLowStock ? 'Lihat Semua' : 'Filter Menipis'}
+          </button>
+        </div>
+      )}
+
+      {/* Search & Scanner Bar */}
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <Search size={14} className="absolute left-3 top-2.5 text-zinc-400" />
           <input
+            ref={searchInputRef}
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={`Cari barang di ${floorInfo.name}...`}
-            className="w-full pl-9 pr-8 py-2 text-xs bg-white border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-medium placeholder:text-zinc-400"
+            placeholder="Cari barang... (tekan '/' atau Ctrl+K)"
+            className="w-full pl-9 pr-8 py-2 text-xs bg-white border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-medium placeholder:text-zinc-400 shadow-2xs transition-all"
           />
           {searchQuery && (
             <button
@@ -292,18 +363,18 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
             soundEffects.playClickSound();
             setIsScannerOpen(true);
           }}
-          className="p-2 bg-black hover:bg-zinc-800 text-white rounded-xl touch-press flex items-center gap-1"
-          title="Scan Kamera"
+          className="p-2 bg-black hover:bg-zinc-800 text-white rounded-xl touch-press shadow-xs flex items-center justify-center"
+          title="Scan Barcode (Alt+S)"
         >
-          <Camera size={16} />
+          <ScannerGlyph size={16} />
         </button>
       </div>
 
-      {/* Category Selection Bar (Compact Dropdown + Wrap Chips) */}
+      {/* Categories Bar */}
       <div className="space-y-2 bg-white p-3 rounded-2xl border border-zinc-200 shadow-xs">
         <div className="flex items-center justify-between px-0.5">
-          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-            Jenis / Kategori Barang
+          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+            Kategori
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -314,9 +385,9 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
               }}
               className="text-[10px] font-bold text-black hover:underline flex items-center gap-1"
             >
-              <Layers size={11} /> Semua Jenis
+              <Layers size={11} /> Semua Kategori
             </button>
-            <span className="text-zinc-300">•</span>
+            <span className="text-zinc-200">•</span>
             <button
               onClick={() => {
                 soundEffects.playClickSound();
@@ -329,7 +400,7 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
           </div>
         </div>
 
-        {/* 1. Native Dropdown Selector (Fits full screen perfectly) */}
+        {/* Dropdown Selector */}
         <div className="relative">
           <select
             value={selectedCategory}
@@ -339,12 +410,12 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
             }}
             className="w-full pl-3 pr-8 py-2 text-xs font-bold bg-zinc-50 border border-zinc-200 rounded-xl text-black focus:outline-none focus:border-black appearance-none"
           >
-            <option value="ALL">Semua Jenis ({floorData.items.length} macam barang)</option>
+            <option value="ALL">Semua Kategori ({floorData.items.length})</option>
             {floorData.categories.map((cat) => {
               const count = floorData.items.filter((it) => it.category === cat).length;
               return (
                 <option key={cat} value={cat}>
-                  {cat} ({count} barang)
+                  {cat} ({count})
                 </option>
               );
             })}
@@ -352,7 +423,7 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
           <ChevronDown size={14} className="absolute right-3 top-2.5 text-zinc-400 pointer-events-none" />
         </div>
 
-        {/* 2. Responsive Wrap Quick-Chips (Max 4 pills + view all) */}
+        {/* Quick-Chips */}
         <div className="flex flex-wrap gap-1 pt-0.5">
           <button
             onClick={() => {
@@ -405,20 +476,20 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
               }}
               className="px-2.5 py-1 rounded-lg text-xs font-bold bg-zinc-100 text-zinc-700 hover:text-black border border-zinc-200 touch-press flex items-center gap-1"
             >
-              <Layers size={11} /> +{floorData.categories.length - 4} Lainnya
+              +{floorData.categories.length - 4} Lainnya
             </button>
           )}
         </div>
       </div>
 
-      {/* Out of Stock Toggle & Add Button */}
-      <div className="flex items-center justify-between bg-white border border-zinc-200 rounded-xl p-2 px-3">
+      {/* Action Row (Out of stock switch + Add item) */}
+      <div className="flex items-center justify-between bg-white border border-zinc-200 rounded-xl p-2 px-3 shadow-2xs">
         <button
           onClick={() => {
             soundEffects.playClickSound();
             setHideOutOfStock(!hideOutOfStock);
           }}
-          className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-600 hover:text-black"
+          className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-600 hover:text-black transition-colors"
         >
           {hideOutOfStock ? <EyeOff size={13} /> : <Eye size={13} />}
           <span>{hideOutOfStock ? 'Sembunyikan Habis' : 'Tampilkan Habis'}</span>
@@ -435,9 +506,9 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
             setEditingItem(null);
             setIsItemFormOpen(true);
           }}
-          className="px-2.5 py-1.5 bg-black hover:bg-zinc-800 text-white rounded-lg text-[11px] font-bold flex items-center gap-1 touch-press"
+          className="px-3 py-1.5 bg-black hover:bg-zinc-800 text-white rounded-lg text-[11px] font-bold flex items-center gap-1 touch-press shadow-xs"
         >
-          <Plus size={13} /> Tambah Barang
+          <Plus size={13} /> Tambah Produk
         </button>
       </div>
 
@@ -446,7 +517,7 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
         {isLoading ? (
           <SkeletonLoader count={4} />
         ) : filteredItems.length === 0 ? (
-          <div className="bg-white border border-dashed border-zinc-300 rounded-2xl p-7 text-center space-y-2">
+          <div className="bg-white border border-dashed border-zinc-300 rounded-2xl p-7 text-center space-y-1.5 shadow-2xs">
             <h4 className="text-xs font-bold text-zinc-700">Tidak ada barang ditemukan</h4>
             <p className="text-[11px] text-zinc-400 max-w-xs mx-auto">
               {searchQuery
@@ -469,9 +540,9 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
                     soundEffects.playClickSound();
                     setAdjustingItem(item);
                   }}
-                  className="bg-white rounded-xl p-3.5 border border-zinc-200 hover:border-black cursor-pointer transition-all flex items-center justify-between shadow-xs touch-press group"
+                  className="bg-white rounded-2xl p-3.5 border border-zinc-200 hover:border-black cursor-pointer transition-all flex items-center justify-between shadow-xs touch-press group"
                 >
-                  {/* Item Details */}
+                  {/* Item Info */}
                   <div className="min-w-0 flex-1 pr-3">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-zinc-100 text-zinc-700">
@@ -490,33 +561,33 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
                       )}
                     </div>
 
-                    <h3 className="text-xs font-bold text-black mt-1 truncate group-hover:text-black">
+                    <h3 className="text-xs font-bold text-black mt-1 truncate group-hover:text-black leading-snug">
                       {item.name}
                     </h3>
 
-                    {/* Stock Alert Label */}
+                    {/* Clean Status Badges */}
                     {isOutOfStock ? (
-                      <span className="text-[9px] font-bold text-zinc-900 block mt-0.5">
-                        [Stok Habis / 0]
+                      <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.2 rounded bg-zinc-900 text-white text-[9px] font-bold">
+                        Habis (0)
                       </span>
                     ) : isLowStock && item.minStock > 0 ? (
-                      <span className="text-[9px] font-medium text-zinc-500 block mt-0.5">
-                        [Stok Menipis: Min {item.minStock} {item.unit}]
+                      <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 text-[9px] font-bold">
+                        <AlertTriangle size={9} /> Min {item.minStock} {item.unit}
                       </span>
                     ) : item.maxStock && item.quantity >= item.maxStock ? (
-                      <span className="text-[9px] font-medium text-zinc-500 block mt-0.5">
-                        [Kapasitas Maksimal: {item.maxStock} {item.unit}]
+                      <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.2 rounded bg-zinc-100 text-zinc-600 text-[9px] font-medium">
+                        Max {item.maxStock} {item.unit}
                       </span>
                     ) : null}
                   </div>
 
-                  {/* Stock Quantity Badge & Edit Action */}
-                  <div className="flex items-center gap-2 shrink-0">
+                  {/* Stock Quantity Numeral & Edit */}
+                  <div className="flex items-center gap-2.5 shrink-0">
                     <div className="text-right">
-                      <span className="text-sm font-extrabold text-black font-mono block">
+                      <span className="text-base font-black text-black font-mono block leading-none">
                         {item.quantity}
                       </span>
-                      <span className="text-[9px] text-zinc-400 block -mt-0.5 font-medium">
+                      <span className="text-[9px] text-zinc-400 block mt-0.5 font-medium">
                         {item.unit}
                       </span>
                     </div>
@@ -528,10 +599,10 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
                         setEditingItem(item);
                         setIsItemFormOpen(true);
                       }}
-                      className="p-1.5 text-zinc-300 hover:text-black hover:bg-zinc-100 rounded-lg transition-colors"
-                      title="Edit Data Barang"
+                      className="p-1.5 text-zinc-300 hover:text-black hover:bg-zinc-100 rounded-xl transition-colors"
+                      title="Edit Produk"
                     >
-                      <Edit2 size={13} />
+                      <Edit2 size={14} />
                     </button>
                   </div>
                 </div>
@@ -541,20 +612,20 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
         )}
       </div>
 
-      {/* Recent Mutations Toggle */}
-      <div className="pt-2">
+      {/* Mutations Drawer */}
+      <div className="pt-1">
         <button
           onClick={() => {
             soundEffects.playClickSound();
             setShowRecentMutations(!showRecentMutations);
           }}
-          className="w-full flex items-center justify-between text-xs font-bold text-zinc-600 p-2 rounded-xl bg-white border border-zinc-200"
+          className="w-full flex items-center justify-between text-xs font-bold text-zinc-700 p-2.5 rounded-xl bg-white border border-zinc-200 shadow-2xs transition-colors hover:border-black"
         >
           <span className="flex items-center gap-1.5">
-            <Clock size={13} className="text-zinc-500" />
-            Riwayat Mutasi {floorInfo.name} ({floorData.mutations.length})
+            <Clock size={13} className="text-zinc-400" />
+            Riwayat Mutasi ({floorData.mutations.length})
           </span>
-          <span className="text-[10px] text-black">
+          <span className="text-[10px] text-zinc-500 font-semibold">
             {showRecentMutations ? 'Tutup' : 'Lihat'}
           </span>
         </button>
@@ -569,22 +640,22 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
               floorData.mutations.slice(0, 15).map((m) => (
                 <div
                   key={m.id}
-                  className="bg-white border border-zinc-200 p-2 rounded-lg text-xs flex items-center justify-between"
+                  className="bg-white border border-zinc-200 p-2.5 rounded-xl text-xs flex items-center justify-between shadow-2xs"
                 >
                   <div className="min-w-0 pr-2">
                     <span className="font-bold text-black block truncate">
                       {m.itemName}
                     </span>
                     <span className="text-[10px] text-zinc-400 block">
-                      {m.reason} {m.userName ? `- ${m.userName}` : ''}
+                      {m.reason} {m.userName ? `• ${m.userName}` : ''}
                     </span>
                   </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-xs text-black">
+                  <div className="text-right shrink-0">
+                    <span className="font-mono font-bold text-xs text-black block">
                       {m.type === 'IN' ? `+${m.amount}` : `-${m.amount}`}
                     </span>
-                    <span className="text-[9px] text-zinc-400 block">
-                      {m.prevStock} -&gt; {m.newStock}
+                    <span className="text-[9px] text-zinc-400 block font-mono">
+                      {m.prevStock} → {m.newStock}
                     </span>
                   </div>
                 </div>
@@ -629,145 +700,96 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
         onRemoveCategory={handleRemoveCategory}
       />
 
-      {/* Searchable Category Picker Grid Modal */}
+      {/* Category Picker Modal */}
       {isCategoryPickerOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 modal-backdrop animate-in fade-in duration-150">
           <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col max-h-[85vh]">
-            {/* Header */}
             <div className="flex items-center justify-between px-4 py-3.5 border-b border-zinc-100 bg-zinc-50 shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
                   <Layers size={16} />
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-black leading-none">Pilih Jenis Barang</h3>
-                  <p className="text-[10px] text-zinc-500 font-medium mt-0.5">
+                  <h3 className="text-xs font-bold text-black leading-none">Pilih Kategori</h3>
+                  <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
                     {floorInfo.name} ({floorData.categories.length} kategori)
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsCategoryPickerOpen(false)}
-                className="w-7 h-7 flex items-center justify-center rounded-full text-zinc-400 hover:text-black hover:bg-zinc-200 transition-colors touch-press"
+                className="p-1.5 rounded-full text-zinc-400 hover:text-black hover:bg-zinc-200 transition-colors touch-press"
               >
-                <X size={16} />
+                ✕
               </button>
             </div>
 
-            {/* Search Input */}
-            <div className="p-3 bg-zinc-50/60 border-b border-zinc-200 shrink-0">
+            <div className="p-3 border-b border-zinc-100 bg-white shrink-0">
               <div className="relative">
+                <Search size={14} className="absolute left-3 top-2.5 text-zinc-400" />
                 <input
                   type="text"
+                  placeholder="Cari kategori..."
                   value={categoryPickerSearch}
                   onChange={(e) => setCategoryPickerSearch(e.target.value)}
-                  placeholder="Cari jenis barang..."
-                  className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-medium"
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-medium"
                 />
-                <Search size={13} className="absolute left-2.5 top-2 text-zinc-400" />
-                {categoryPickerSearch && (
-                  <button
-                    onClick={() => setCategoryPickerSearch('')}
-                    className="absolute right-2.5 top-2 text-zinc-400 hover:text-black text-xs"
-                  >
-                    ✕
-                  </button>
-                )}
               </div>
             </div>
 
-            {/* Grid List */}
-            <div className="p-3 overflow-y-auto space-y-1.5 flex-1">
-              {/* Option: Semua */}
-              {(!categoryPickerSearch.trim() || 'semua'.includes(categoryPickerSearch.toLowerCase())) && (
-                <button
-                  onClick={() => {
-                    soundEffects.playClickSound();
-                    setSelectedCategory('ALL');
-                    setIsCategoryPickerOpen(false);
-                  }}
-                  className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all touch-press ${
-                    selectedCategory === 'ALL'
-                      ? 'bg-black text-white border-black font-bold shadow-xs'
-                      : 'bg-zinc-50 text-zinc-800 border-zinc-200 hover:border-black'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs">Semua Jenis Barang</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md ${
-                      selectedCategory === 'ALL' ? 'bg-zinc-800 text-white' : 'bg-zinc-200 text-zinc-700'
-                    }`}>
-                      {floorData.items.length} item
-                    </span>
-                    {selectedCategory === 'ALL' && <Check size={14} className="text-white" />}
-                  </div>
-                </button>
-              )}
-
-              {/* Grid of Categories */}
-              <div className="grid grid-cols-2 gap-1.5 pt-1">
-                {floorData.categories
-                  .filter((cat) =>
-                    cat.toLowerCase().includes(categoryPickerSearch.toLowerCase().trim())
-                  )
-                  .map((cat) => {
-                    const count = floorData.items.filter((it) => it.category === cat).length;
-                    const isSelected = selectedCategory === cat;
-                    return (
-                      <button
-                        key={cat}
-                        onClick={() => {
-                          soundEffects.playClickSound();
-                          setSelectedCategory(cat);
-                          setIsCategoryPickerOpen(false);
-                        }}
-                        className={`p-2.5 rounded-xl border text-left transition-all touch-press flex flex-col justify-between min-h-[58px] ${
-                          isSelected
-                            ? 'bg-black text-white border-black shadow-xs font-bold'
-                            : 'bg-zinc-50 text-zinc-800 border-zinc-200 hover:border-black'
-                        }`}
-                      >
-                        <span className="text-xs truncate block w-full">{cat}</span>
-                        <div className="flex items-center justify-between mt-1">
-                          <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded-md ${
-                            isSelected ? 'bg-zinc-800 text-white' : 'bg-zinc-200 text-zinc-600'
-                          }`}>
-                            {count} barang
-                          </span>
-                          {isSelected && <Check size={12} className="text-white" />}
-                        </div>
-                      </button>
-                    );
-                  })}
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="p-3 bg-zinc-50 border-t border-zinc-100 flex items-center justify-between shrink-0">
+            <div className="p-3 overflow-y-auto grid grid-cols-2 gap-1.5 flex-1">
               <button
                 onClick={() => {
                   soundEffects.playClickSound();
+                  setSelectedCategory('ALL');
                   setIsCategoryPickerOpen(false);
-                  setIsCategoryModalOpen(true);
                 }}
-                className="text-[10px] font-bold text-zinc-600 hover:text-black flex items-center gap-1 underline"
+                className={`p-2.5 rounded-xl border text-left text-xs font-bold transition-all touch-press ${
+                  selectedCategory === 'ALL'
+                    ? 'bg-black text-white border-black shadow-xs'
+                    : 'bg-zinc-50 text-zinc-800 border-zinc-200 hover:border-black'
+                }`}
               >
-                <Layers size={12} /> Kelola / Tambah Jenis
+                <span className="block truncate">Semua Kategori</span>
+                <span className="text-[10px] font-normal opacity-70 block mt-0.5">
+                  {floorData.items.length} produk
+                </span>
               </button>
 
-              <button
-                onClick={() => setIsCategoryPickerOpen(false)}
-                className="px-3.5 py-1.5 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold touch-press shadow-xs"
-              >
-                Selesai
-              </button>
+              {floorData.categories
+                .filter((c) =>
+                  c.toLowerCase().includes(categoryPickerSearch.toLowerCase().trim())
+                )
+                .map((cat) => {
+                  const count = floorData.items.filter((it) => it.category === cat).length;
+                  const isSelected = selectedCategory === cat;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => {
+                        soundEffects.playClickSound();
+                        setSelectedCategory(cat);
+                        setIsCategoryPickerOpen(false);
+                      }}
+                      className={`p-2.5 rounded-xl border text-left text-xs font-bold transition-all touch-press ${
+                        isSelected
+                          ? 'bg-black text-white border-black shadow-xs'
+                          : 'bg-zinc-50 text-zinc-800 border-zinc-200 hover:border-black'
+                      }`}
+                    >
+                      <span className="block truncate">{cat}</span>
+                      <span className="text-[10px] font-normal opacity-70 block mt-0.5">
+                        {count} produk
+                      </span>
+                    </button>
+                  );
+                })}
             </div>
           </div>
         </div>
       )}
 
+      {/* Export / Sync Modal */}
       <FloorExportImportModal
         isOpen={isExportModalOpen}
         floorId={floorId}
@@ -775,19 +797,23 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
         onDataChanged={refreshData}
       />
 
+      {/* Text Report Modal */}
       <TextReportModal
         isOpen={isReportModalOpen}
-        title={`Laporan Stok ${floorInfo.name}`}
+        title={`Laporan ${floorInfo.name}`}
         reportText={reportText}
         onClose={() => setIsReportModalOpen(false)}
       />
 
+      {/* Change Password Modal */}
       {currentUser && (
         <ChangePasswordModal
           isOpen={isPasswordModalOpen}
           currentUser={currentUser}
           onClose={() => setIsPasswordModalOpen(false)}
-          onSuccess={(updated) => setCurrentUser(updated)}
+          onSuccess={() => {
+            refreshData();
+          }}
         />
       )}
     </div>

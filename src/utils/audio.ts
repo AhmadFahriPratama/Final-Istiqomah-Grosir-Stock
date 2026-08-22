@@ -1,7 +1,48 @@
 // Smooth, Velvet & Luxurious Acoustic Web Audio Synthesizer for Istiqomah Grosir Stock
+import confetti from 'canvas-confetti';
 
 class SoundEffects {
   private ctx: AudioContext | null = null;
+  private soundActive: boolean = true;
+
+  constructor() {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('istiqomah_sound_enabled');
+      this.soundActive = stored !== 'false';
+    }
+  }
+
+  isSoundEnabled(): boolean {
+    return this.soundActive;
+  }
+
+  setSoundEnabled(enabled: boolean) {
+    this.soundActive = enabled;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('istiqomah_sound_enabled', enabled ? 'true' : 'false');
+      window.dispatchEvent(new CustomEvent('istiqomah_sound_toggled', { detail: { enabled } }));
+    }
+  }
+
+  toggleSound(): boolean {
+    const next = !this.soundActive;
+    this.setSoundEnabled(next);
+    if (next) this.playClickSound();
+    return next;
+  }
+
+  triggerConfetti() {
+    try {
+      confetti({
+        particleCount: 35,
+        spread: 55,
+        origin: { y: 0.65 },
+        colors: ['#09090b', '#27272a', '#71717a', '#10b981', '#f59e0b'],
+      });
+    } catch {
+      // fallback
+    }
+  }
 
   private initCtx() {
     if (!this.ctx && typeof window !== 'undefined') {
@@ -15,6 +56,7 @@ class SoundEffects {
   }
 
   private ensureRunning() {
+    if (!this.soundActive) return;
     this.initCtx();
     if (this.ctx && this.ctx.state === 'suspended') {
       this.ctx.resume();
@@ -23,6 +65,7 @@ class SoundEffects {
 
   // 1. Ultra-smooth velvet blip for barcode scanner (Warm Sine Marimba)
   playScanBeep() {
+    if (!this.soundActive) return;
     try {
       this.ensureRunning();
       if (!this.ctx) return;
@@ -60,6 +103,7 @@ class SoundEffects {
 
   // 2. Soft velvet micro-tap for UI buttons
   playClickSound() {
+    if (!this.soundActive) return;
     try {
       this.ensureRunning();
       if (!this.ctx) return;
@@ -97,6 +141,7 @@ class SoundEffects {
 
   // 3. Smooth warm ascending chord when stock is added (+)
   playStockAdd() {
+    if (!this.soundActive) return;
     try {
       this.ensureRunning();
       if (!this.ctx) return;
@@ -137,6 +182,7 @@ class SoundEffects {
 
   // 4. Smooth warm descending tone when stock is reduced (-)
   playStockSubtract() {
+    if (!this.soundActive) return;
     try {
       this.ensureRunning();
       if (!this.ctx) return;
@@ -175,8 +221,10 @@ class SoundEffects {
     }
   }
 
-  // 5. Harmonious smooth velvet chord when a new item is created
+  // 5. Harmonious smooth velvet chord when a new item is created + Confetti celebration
   playItemCreated() {
+    this.triggerConfetti();
+    if (!this.soundActive) return;
     try {
       this.ensureRunning();
       if (!this.ctx) return;
@@ -215,8 +263,10 @@ class SoundEffects {
     }
   }
 
-  // 6. Velvet crystal chime for database backup
+  // 6. Velvet crystal chime for database backup + Confetti
   playBackupSent() {
+    this.triggerConfetti();
+    if (!this.soundActive) return;
     try {
       this.ensureRunning();
       if (!this.ctx) return;
@@ -257,6 +307,7 @@ class SoundEffects {
 
   // 7. Subtle wood latch click when locking/logging out
   playLockSound() {
+    if (!this.soundActive) return;
     try {
       this.ensureRunning();
       if (!this.ctx) return;
@@ -294,6 +345,7 @@ class SoundEffects {
 
   // 8. Soft two-note pleasant chime when unlocking/logging in
   playUnlockSound() {
+    if (!this.soundActive) return;
     try {
       this.ensureRunning();
       if (!this.ctx) return;

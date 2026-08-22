@@ -11,8 +11,8 @@ import { soundEffects } from './utils/audio';
 import { App as CapApp } from '@capacitor/app';
 import { backButtonManager } from './utils/modalManager';
 import { ExitConfirmModal } from './components/ExitConfirmModal';
-
 import { AutoBackupReceiverModal } from './components/AutoBackupReceiverModal';
+import { SplashScreen } from './components/SplashScreen';
 
 export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(() =>
@@ -150,11 +150,19 @@ export const App: React.FC = () => {
 
   // If not logged in, render the clean professional LoginPage
   if (!currentUser) {
-    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+    return (
+      <>
+        <SplashScreen />
+        <LoginPage onLoginSuccess={handleLoginSuccess} />
+      </>
+    );
   }
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-slate-800 font-sans selection:bg-zinc-200">
+      {/* Smooth Intro Splash Screen */}
+      <SplashScreen />
+
       {/* Top Mobile Border Accent */}
       <div className="h-0.5 bg-black w-full" />
 

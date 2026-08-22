@@ -18,7 +18,6 @@ export const StockAdjustModal: React.FC<StockAdjustModalProps> = ({
   onConfirm,
 }) => {
   useRegisterModal('StockAdjustModal', isOpen, onClose);
-  // Input as string to allow seamless backspacing, deleting, and typing
   const [inputText, setInputText] = useState<string>('1');
   const [mode, setMode] = useState<'ADD' | 'SUBTRACT'>('ADD');
   const [reason, setReason] = useState<string>('Restock Supplier');
@@ -44,11 +43,10 @@ export const StockAdjustModal: React.FC<StockAdjustModalProps> = ({
   const quickPresets = [1, 5, 10, 12, 24, 50, 100];
   const commonReasons =
     mode === 'ADD'
-      ? ['Restock Supplier', 'Barang Masuk', 'Retur Pelanggan', 'Koreksi Stok Opname']
-      : ['Penjualan Kasir', 'Barang Rusak / Cacat', 'Hilang / Selisih', 'Koreksi Stok Opname'];
+      ? ['Restock Supplier', 'Barang Masuk', 'Retur Pelanggan', 'Koreksi Stok']
+      : ['Penjualan Kasir', 'Barang Rusak / Cacat', 'Hilang / Selisih', 'Koreksi Stok'];
 
   const handleInputChange = (val: string) => {
-    // Only allow numeric digits
     const cleaned = val.replace(/\D/g, '');
     setInputText(cleaned);
   };
@@ -87,12 +85,12 @@ export const StockAdjustModal: React.FC<StockAdjustModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 modal-backdrop animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 modal-backdrop animate-in fade-in duration-150">
       <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden border border-zinc-200">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 bg-zinc-50">
           <div className="min-w-0 pr-2">
-            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+            <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider block">
               {item.category}
             </span>
             <h3 className="text-xs font-bold text-black truncate">{item.name}</h3>
@@ -106,7 +104,7 @@ export const StockAdjustModal: React.FC<StockAdjustModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 space-y-3.5">
-          {/* Mode Tabs */}
+          {/* Mode Switcher */}
           <div className="grid grid-cols-2 gap-1 p-1 bg-zinc-100 rounded-xl">
             <button
               type="button"
@@ -117,7 +115,7 @@ export const StockAdjustModal: React.FC<StockAdjustModalProps> = ({
                   : 'text-zinc-600 hover:text-black'
               }`}
             >
-              <Plus size={14} /> Tambah Stok
+              <Plus size={14} /> Stok Masuk (+)
             </button>
             <button
               type="button"
@@ -128,40 +126,44 @@ export const StockAdjustModal: React.FC<StockAdjustModalProps> = ({
                   : 'text-zinc-600 hover:text-black'
               }`}
             >
-              <Minus size={14} /> Kurang Stok
+              <Minus size={14} /> Stok Keluar (-)
             </button>
           </div>
 
-          {/* Stock Projection Comparison */}
-          <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-3 flex items-center justify-between">
+          {/* Arithmetic Card: Stock Before -> Delta -> Stock After */}
+          <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-3 flex items-center justify-between shadow-2xs">
             <div>
-              <span className="text-[10px] font-medium text-zinc-400 block">Stok Awal</span>
+              <span className="text-[9px] font-bold text-zinc-400 uppercase block">Stok Awal</span>
               <span className="text-sm font-bold text-zinc-700 font-mono">
-                {currentStock} <span className="text-xs font-normal font-sans text-zinc-500">{item.unit}</span>
+                {currentStock} <span className="text-[10px] font-normal text-zinc-400">{item.unit}</span>
               </span>
             </div>
 
             <div className="text-center px-2">
-              <span className={`text-[11px] font-bold font-mono px-2 py-0.5 rounded-md ${
-                mode === 'ADD' ? 'bg-black text-white' : 'bg-zinc-200 text-zinc-900'
-              }`}>
+              <span
+                className={`text-[11px] font-black font-mono px-2 py-0.5 rounded-md ${
+                  mode === 'ADD' ? 'bg-black text-white' : 'bg-zinc-200 text-zinc-900'
+                }`}
+              >
                 {mode === 'ADD' ? `+${validAmount}` : `-${validAmount}`}
               </span>
             </div>
 
             <div className="text-right">
-              <span className="text-[10px] font-medium text-zinc-400 block">Stok Akhir</span>
-              <span className="text-base font-extrabold text-black font-mono">
-                {projectedStock} <span className="text-xs font-normal font-sans text-zinc-500">{item.unit}</span>
+              <span className="text-[9px] font-bold text-zinc-400 uppercase block">Stok Akhir</span>
+              <span className="text-base font-black text-black font-mono">
+                {projectedStock} <span className="text-[10px] font-normal text-zinc-400">{item.unit}</span>
               </span>
             </div>
           </div>
 
-          {/* Numeric Input & Stepper Controls */}
+          {/* Number Stepper & Input */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
-              Jumlah ({item.unit}):
-            </label>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                Jumlah Mutasi ({item.unit})
+              </span>
+            </div>
 
             <div className="flex items-center gap-1.5">
               <button
@@ -180,7 +182,7 @@ export const StockAdjustModal: React.FC<StockAdjustModalProps> = ({
                 value={inputText}
                 onFocus={(e) => e.target.select()}
                 onChange={(e) => handleInputChange(e.target.value)}
-                className="flex-1 text-center font-bold text-lg py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-mono"
+                className="flex-1 text-center font-black text-xl py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-mono shadow-inner"
               />
 
               <button
@@ -193,13 +195,13 @@ export const StockAdjustModal: React.FC<StockAdjustModalProps> = ({
             </div>
 
             {/* Quick Chips Presets */}
-            <div className="flex flex-wrap gap-1 pt-1">
+            <div className="flex flex-wrap gap-1 pt-0.5">
               {quickPresets.map((val) => (
                 <button
                   key={val}
                   type="button"
                   onClick={() => handleApplyPreset(val)}
-                  className={`px-2 py-1 text-[11px] font-bold rounded-lg border transition-all touch-press ${
+                  className={`px-2 py-0.5 text-[10px] font-bold rounded-lg border transition-all touch-press ${
                     validAmount === val
                       ? 'bg-black text-white border-black'
                       : 'bg-white text-zinc-700 border-zinc-200 hover:border-black'
@@ -216,18 +218,18 @@ export const StockAdjustModal: React.FC<StockAdjustModalProps> = ({
                   soundEffects.playClickSound();
                   setInputText('');
                 }}
-                className="px-2 py-1 text-[11px] font-bold rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-500 hover:text-black touch-press"
+                className="px-2 py-0.5 text-[10px] font-bold rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-500 hover:text-black touch-press ml-auto"
               >
-                Hapus
+                Reset
               </button>
             </div>
           </div>
 
           {/* Reason Section */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
-              Keterangan:
-            </label>
+            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+              Alasan Mutasi
+            </span>
             <div className="grid grid-cols-2 gap-1">
               {commonReasons.map((r) => (
                 <button
@@ -238,9 +240,9 @@ export const StockAdjustModal: React.FC<StockAdjustModalProps> = ({
                     setReason(r);
                     setCustomReason('');
                   }}
-                  className={`px-2 py-1.5 text-[11px] font-medium rounded-lg border text-left truncate transition-all touch-press ${
+                  className={`px-2.5 py-1.5 text-[11px] font-medium rounded-lg border text-left truncate transition-all touch-press ${
                     reason === r && !customReason
-                      ? 'bg-black text-white border-black font-bold'
+                      ? 'bg-black text-white border-black font-bold shadow-xs'
                       : 'bg-zinc-50 text-zinc-700 border-zinc-200 hover:border-black'
                   }`}
                 >
@@ -248,22 +250,23 @@ export const StockAdjustModal: React.FC<StockAdjustModalProps> = ({
                 </button>
               ))}
             </div>
+
             <input
               type="text"
-              placeholder="Atau ketik alasan lain..."
+              placeholder="Alasan kustom..."
               value={customReason}
               onChange={(e) => setCustomReason(e.target.value)}
-              className="w-full px-3 py-1.5 text-xs bg-zinc-50 border border-zinc-200 rounded-lg focus:outline-none focus:border-black"
+              className="w-full px-3 py-1.5 text-xs bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-medium"
             />
           </div>
 
-          {/* Confirm Button */}
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={validAmount <= 0}
-            className="w-full py-2.5 rounded-xl text-xs font-bold text-white bg-black hover:bg-zinc-800 disabled:opacity-40 flex items-center justify-center gap-1.5 shadow-xs transition-all touch-press"
+            className="w-full py-2.5 bg-black hover:bg-zinc-800 disabled:opacity-40 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 touch-press shadow-xs mt-1"
           >
-            <Check size={14} /> Simpan ({mode === 'ADD' ? `+${validAmount}` : `-${validAmount}`} {item.unit})
+            <Check size={14} /> Konfirmasi {mode === 'ADD' ? 'Tambah' : 'Kurang'} ({validAmount} {item.unit})
           </button>
         </form>
       </div>
