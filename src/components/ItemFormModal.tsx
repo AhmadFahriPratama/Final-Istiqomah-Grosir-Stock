@@ -5,6 +5,7 @@ import {
   Trash2,
   Check,
   Sparkles,
+  ChevronDown,
 } from 'lucide-react';
 import type { StockItem } from '../types/stock';
 import { BarcodeScannerModal } from './BarcodeScannerModal';
@@ -234,8 +235,35 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
             <label className="text-[11px] font-bold text-zinc-800 block mb-1">
               Jenis / Kategori:
             </label>
-            <div className="flex flex-wrap gap-1 mb-1.5 max-h-28 overflow-y-auto pr-0.5">
-              {categories.map((cat) => (
+
+            {/* Dropdown for All Categories */}
+            <div className="relative mb-1.5">
+              <select
+                value={customCategory ? '__NEW__' : category}
+                onChange={(e) => {
+                  soundEffects.playClickSound();
+                  if (e.target.value === '__NEW__') {
+                    setCustomCategory('');
+                  } else {
+                    setCategory(e.target.value);
+                    setCustomCategory('');
+                  }
+                }}
+                className="w-full pl-3 pr-8 py-2 text-xs font-bold bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black appearance-none"
+              >
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+                <option value="__NEW__">+ Tambah Jenis Baru...</option>
+              </select>
+              <ChevronDown size={14} className="absolute right-3 top-2.5 text-zinc-400 pointer-events-none" />
+            </div>
+
+            {/* Quick Chips for Top Categories */}
+            <div className="flex flex-wrap gap-1 mb-1.5">
+              {categories.slice(0, 5).map((cat) => (
                 <button
                   key={cat}
                   type="button"
@@ -246,7 +274,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                   }}
                   className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition-all touch-press ${
                     category === cat && !customCategory
-                      ? 'bg-black text-white border-black'
+                      ? 'bg-black text-white border-black shadow-xs'
                       : 'bg-zinc-50 text-zinc-700 border-zinc-200 hover:border-black'
                   }`}
                 >
@@ -254,12 +282,13 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                 </button>
               ))}
             </div>
+
             <input
               type="text"
-              placeholder="Atau ketik jenis baru..."
+              placeholder="Atau ketik jenis baru di sini..."
               value={customCategory}
               onChange={(e) => setCustomCategory(e.target.value)}
-              className="w-full px-3 py-1.5 text-xs bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black"
+              className="w-full px-3 py-1.5 text-xs bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-medium"
             />
           </div>
 

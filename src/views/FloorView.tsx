@@ -18,6 +18,9 @@ import {
   Shirt,
   Armchair,
   Package,
+  ChevronDown,
+  Check,
+  X,
 } from 'lucide-react';
 import type { FloorId, StockItem, UserAccount } from '../types/stock';
 import { FLOOR_DEFINITIONS } from '../types/stock';
@@ -72,6 +75,8 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
   const [editingItem, setEditingItem] = useState<StockItem | null>(null);
   const [isItemFormOpen, setIsItemFormOpen] = useState<boolean>(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState<boolean>(false);
+  const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState<boolean>(false);
+  const [categoryPickerSearch, setCategoryPickerSearch] = useState<string>('');
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
   const [reportText, setReportText] = useState<string>('');
@@ -294,39 +299,76 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
         </button>
       </div>
 
-      {/* Category Pills Switcher */}
-      <div className="space-y-1.5">
+      {/* Category Selection Bar (Compact Dropdown + Wrap Chips) */}
+      <div className="space-y-2 bg-white p-3 rounded-2xl border border-zinc-200 shadow-xs">
         <div className="flex items-center justify-between px-0.5">
-          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
-            Jenis Barang
+          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
+            Jenis / Kategori Barang
           </span>
-          <button
-            onClick={() => {
-              soundEffects.playClickSound();
-              setIsCategoryModalOpen(true);
-            }}
-            className="text-[10px] font-semibold text-zinc-600 hover:text-black flex items-center gap-1"
-          >
-            <Layers size={11} /> Kelola Jenis
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                soundEffects.playClickSound();
+                setIsCategoryPickerOpen(true);
+                setCategoryPickerSearch('');
+              }}
+              className="text-[10px] font-bold text-black hover:underline flex items-center gap-1"
+            >
+              <Layers size={11} /> Semua Jenis
+            </button>
+            <span className="text-zinc-300">•</span>
+            <button
+              onClick={() => {
+                soundEffects.playClickSound();
+                setIsCategoryModalOpen(true);
+              }}
+              className="text-[10px] font-semibold text-zinc-500 hover:text-black flex items-center gap-1"
+            >
+              Kelola
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5 no-scrollbar">
+        {/* 1. Native Dropdown Selector (Fits full screen perfectly) */}
+        <div className="relative">
+          <select
+            value={selectedCategory}
+            onChange={(e) => {
+              soundEffects.playClickSound();
+              setSelectedCategory(e.target.value);
+            }}
+            className="w-full pl-3 pr-8 py-2 text-xs font-bold bg-zinc-50 border border-zinc-200 rounded-xl text-black focus:outline-none focus:border-black appearance-none"
+          >
+            <option value="ALL">Semua Jenis ({floorData.items.length} macam barang)</option>
+            {floorData.categories.map((cat) => {
+              const count = floorData.items.filter((it) => it.category === cat).length;
+              return (
+                <option key={cat} value={cat}>
+                  {cat} ({count} barang)
+                </option>
+              );
+            })}
+          </select>
+          <ChevronDown size={14} className="absolute right-3 top-2.5 text-zinc-400 pointer-events-none" />
+        </div>
+
+        {/* 2. Responsive Wrap Quick-Chips (Max 4 pills + view all) */}
+        <div className="flex flex-wrap gap-1 pt-0.5">
           <button
             onClick={() => {
               soundEffects.playClickSound();
               setSelectedCategory('ALL');
             }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all touch-press ${
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all touch-press ${
               selectedCategory === 'ALL'
-                ? 'bg-black text-white'
-                : 'bg-white text-zinc-600 border border-zinc-200 hover:border-black'
+                ? 'bg-black text-white shadow-xs'
+                : 'bg-zinc-50 text-zinc-600 border border-zinc-200 hover:border-black'
             }`}
           >
             Semua ({floorData.items.length})
           </button>
 
-          {floorData.categories.map((cat) => {
+          {floorData.categories.slice(0, 4).map((cat) => {
             const count = floorData.items.filter((it) => it.category === cat).length;
             const isSelected = selectedCategory === cat;
             return (
@@ -336,16 +378,16 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
                   soundEffects.playClickSound();
                   setSelectedCategory(cat);
                 }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all touch-press flex items-center gap-1.5 ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all touch-press flex items-center gap-1 ${
                   isSelected
-                    ? 'bg-black text-white'
-                    : 'bg-white text-zinc-600 border border-zinc-200 hover:border-black'
+                    ? 'bg-black text-white shadow-xs'
+                    : 'bg-zinc-50 text-zinc-700 border border-zinc-200 hover:border-black'
                 }`}
               >
                 <span>{cat}</span>
                 <span
-                  className={`text-[9px] px-1.5 py-0.2 rounded-md ${
-                    isSelected ? 'bg-zinc-800 text-white' : 'bg-zinc-100 text-zinc-500'
+                  className={`text-[9px] px-1 py-0.2 rounded-md ${
+                    isSelected ? 'bg-zinc-800 text-white' : 'bg-zinc-200 text-zinc-600'
                   }`}
                 >
                   {count}
@@ -353,6 +395,19 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
               </button>
             );
           })}
+
+          {floorData.categories.length > 4 && (
+            <button
+              onClick={() => {
+                soundEffects.playClickSound();
+                setIsCategoryPickerOpen(true);
+                setCategoryPickerSearch('');
+              }}
+              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-zinc-100 text-zinc-700 hover:text-black border border-zinc-200 touch-press flex items-center gap-1"
+            >
+              <Layers size={11} /> +{floorData.categories.length - 4} Lainnya
+            </button>
+          )}
         </div>
       </div>
 
@@ -569,6 +624,145 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
         onAddCategory={handleAddCategory}
         onRemoveCategory={handleRemoveCategory}
       />
+
+      {/* Searchable Category Picker Grid Modal */}
+      {isCategoryPickerOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 modal-backdrop animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col max-h-[85vh]">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3.5 border-b border-zinc-100 bg-zinc-50 shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
+                  <Layers size={16} />
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-black leading-none">Pilih Jenis Barang</h3>
+                  <p className="text-[10px] text-zinc-500 font-medium mt-0.5">
+                    {floorInfo.name} ({floorData.categories.length} kategori)
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsCategoryPickerOpen(false)}
+                className="w-7 h-7 flex items-center justify-center rounded-full text-zinc-400 hover:text-black hover:bg-zinc-200 transition-colors touch-press"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Search Input */}
+            <div className="p-3 bg-zinc-50/60 border-b border-zinc-200 shrink-0">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={categoryPickerSearch}
+                  onChange={(e) => setCategoryPickerSearch(e.target.value)}
+                  placeholder="Cari jenis barang..."
+                  className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-medium"
+                />
+                <Search size={13} className="absolute left-2.5 top-2 text-zinc-400" />
+                {categoryPickerSearch && (
+                  <button
+                    onClick={() => setCategoryPickerSearch('')}
+                    className="absolute right-2.5 top-2 text-zinc-400 hover:text-black text-xs"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Grid List */}
+            <div className="p-3 overflow-y-auto space-y-1.5 flex-1">
+              {/* Option: Semua */}
+              {(!categoryPickerSearch.trim() || 'semua'.includes(categoryPickerSearch.toLowerCase())) && (
+                <button
+                  onClick={() => {
+                    soundEffects.playClickSound();
+                    setSelectedCategory('ALL');
+                    setIsCategoryPickerOpen(false);
+                  }}
+                  className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all touch-press ${
+                    selectedCategory === 'ALL'
+                      ? 'bg-black text-white border-black font-bold shadow-xs'
+                      : 'bg-zinc-50 text-zinc-800 border-zinc-200 hover:border-black'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs">Semua Jenis Barang</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md ${
+                      selectedCategory === 'ALL' ? 'bg-zinc-800 text-white' : 'bg-zinc-200 text-zinc-700'
+                    }`}>
+                      {floorData.items.length} item
+                    </span>
+                    {selectedCategory === 'ALL' && <Check size={14} className="text-white" />}
+                  </div>
+                </button>
+              )}
+
+              {/* Grid of Categories */}
+              <div className="grid grid-cols-2 gap-1.5 pt-1">
+                {floorData.categories
+                  .filter((cat) =>
+                    cat.toLowerCase().includes(categoryPickerSearch.toLowerCase().trim())
+                  )
+                  .map((cat) => {
+                    const count = floorData.items.filter((it) => it.category === cat).length;
+                    const isSelected = selectedCategory === cat;
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => {
+                          soundEffects.playClickSound();
+                          setSelectedCategory(cat);
+                          setIsCategoryPickerOpen(false);
+                        }}
+                        className={`p-2.5 rounded-xl border text-left transition-all touch-press flex flex-col justify-between min-h-[58px] ${
+                          isSelected
+                            ? 'bg-black text-white border-black shadow-xs font-bold'
+                            : 'bg-zinc-50 text-zinc-800 border-zinc-200 hover:border-black'
+                        }`}
+                      >
+                        <span className="text-xs truncate block w-full">{cat}</span>
+                        <div className="flex items-center justify-between mt-1">
+                          <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded-md ${
+                            isSelected ? 'bg-zinc-800 text-white' : 'bg-zinc-200 text-zinc-600'
+                          }`}>
+                            {count} barang
+                          </span>
+                          {isSelected && <Check size={12} className="text-white" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-3 bg-zinc-50 border-t border-zinc-100 flex items-center justify-between shrink-0">
+              <button
+                onClick={() => {
+                  soundEffects.playClickSound();
+                  setIsCategoryPickerOpen(false);
+                  setIsCategoryModalOpen(true);
+                }}
+                className="text-[10px] font-bold text-zinc-600 hover:text-black flex items-center gap-1 underline"
+              >
+                <Layers size={12} /> Kelola / Tambah Jenis
+              </button>
+
+              <button
+                onClick={() => setIsCategoryPickerOpen(false)}
+                className="px-3.5 py-1.5 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold touch-press shadow-xs"
+              >
+                Selesai
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <FloorExportImportModal
         isOpen={isExportModalOpen}
