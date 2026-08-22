@@ -1,4 +1,4 @@
-// Smooth, Aesthetic & Velvet Web Audio Synthesizer for Istiqomah Grosir Stock
+// Smooth, Velvet & Luxurious Acoustic Web Audio Synthesizer for Istiqomah Grosir Stock
 
 class SoundEffects {
   private ctx: AudioContext | null = null;
@@ -21,67 +21,71 @@ class SoundEffects {
     }
   }
 
-  // 1. Smooth, pleasant marimba blip for barcode scanner
+  // 1. Ultra-smooth velvet blip for barcode scanner (Warm Sine Marimba)
   playScanBeep() {
     try {
       this.ensureRunning();
       if (!this.ctx) return;
 
+      const now = this.ctx.currentTime;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       const filter = this.ctx.createBiquadFilter();
 
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(2400, this.ctx.currentTime);
+      filter.frequency.setValueAtTime(1800, now);
 
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, this.ctx.currentTime); // A5
-      osc.frequency.exponentialRampToValueAtTime(1174.66, this.ctx.currentTime + 0.05); // D6
+      osc.frequency.setValueAtTime(880, now); // A5
+      osc.frequency.exponentialRampToValueAtTime(1318.51, now + 0.05); // E6
 
-      gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.09);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.07, now + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11);
 
       osc.connect(filter);
       filter.connect(gain);
       gain.connect(this.ctx.destination);
 
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.09);
+      osc.start(now);
+      osc.stop(now + 0.11);
 
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate(20);
+        navigator.vibrate(15);
       }
     } catch {
-      // Audio autoplay policy fallback
+      // audio fallback
     }
   }
 
-  // 2. Soft acoustic micro-tap for UI buttons
+  // 2. Soft velvet micro-tap for UI buttons
   playClickSound() {
     try {
       this.ensureRunning();
       if (!this.ctx) return;
 
+      const now = this.ctx.currentTime;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       const filter = this.ctx.createBiquadFilter();
 
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(1200, this.ctx.currentTime);
+      filter.frequency.setValueAtTime(1000, now);
 
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(320, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(120, this.ctx.currentTime + 0.025);
+      osc.frequency.setValueAtTime(360, now);
+      osc.frequency.exponentialRampToValueAtTime(140, now + 0.03);
 
-      gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.025);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.035, now + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.035);
 
       osc.connect(filter);
       filter.connect(gain);
       gain.connect(this.ctx.destination);
 
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.025);
+      osc.start(now);
+      osc.stop(now + 0.035);
 
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate(8);
@@ -91,38 +95,40 @@ class SoundEffects {
     }
   }
 
-  // 3. Smooth ascending warm acoustic chime when stock is added (+)
+  // 3. Smooth warm ascending chord when stock is added (+)
   playStockAdd() {
     try {
       this.ensureRunning();
       if (!this.ctx) return;
 
-      const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+      const now = this.ctx.currentTime;
+      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
       notes.forEach((freq, idx) => {
         const osc = this.ctx!.createOscillator();
         const gain = this.ctx!.createGain();
         const filter = this.ctx!.createBiquadFilter();
-        const start = this.ctx!.currentTime + idx * 0.045;
+        const start = now + idx * 0.035;
 
         filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(2000, start);
+        filter.frequency.setValueAtTime(1600, start);
 
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, start);
 
-        gain.gain.setValueAtTime(0.06, start);
-        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.16);
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(0.05, start + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.18);
 
         osc.connect(filter);
         filter.connect(gain);
         gain.connect(this.ctx!.destination);
 
         osc.start(start);
-        osc.stop(start + 0.16);
+        osc.stop(start + 0.18);
       });
 
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate(15);
+        navigator.vibrate(12);
       }
     } catch {
       // fallback
@@ -135,12 +141,53 @@ class SoundEffects {
       this.ensureRunning();
       if (!this.ctx) return;
 
+      const now = this.ctx.currentTime;
       const notes = [783.99, 587.33]; // G5 -> D5
       notes.forEach((freq, idx) => {
         const osc = this.ctx!.createOscillator();
         const gain = this.ctx!.createGain();
         const filter = this.ctx!.createBiquadFilter();
-        const start = this.ctx!.currentTime + idx * 0.045;
+        const start = now + idx * 0.04;
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(1400, start);
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, start);
+
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(0.045, start + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.15);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx!.destination);
+
+        osc.start(start);
+        osc.stop(start + 0.15);
+      });
+
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(12);
+      }
+    } catch {
+      // fallback
+    }
+  }
+
+  // 5. Harmonious smooth velvet chord when a new item is created
+  playItemCreated() {
+    try {
+      this.ensureRunning();
+      if (!this.ctx) return;
+
+      const now = this.ctx.currentTime;
+      const chord = [440, 554.37, 659.25, 880]; // A Major Chord
+      chord.forEach((freq, idx) => {
+        const osc = this.ctx!.createOscillator();
+        const gain = this.ctx!.createGain();
+        const filter = this.ctx!.createBiquadFilter();
+        const start = now + idx * 0.03;
 
         filter.type = 'lowpass';
         filter.frequency.setValueAtTime(1800, start);
@@ -148,45 +195,8 @@ class SoundEffects {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, start);
 
-        gain.gain.setValueAtTime(0.05, start);
-        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.14);
-
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(this.ctx!.destination);
-
-        osc.start(start);
-        osc.stop(start + 0.14);
-      });
-
-      if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate(15);
-      }
-    } catch {
-      // fallback
-    }
-  }
-
-  // 5. Harmonious smooth chord when a new item is created
-  playItemCreated() {
-    try {
-      this.ensureRunning();
-      if (!this.ctx) return;
-
-      const chord = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
-      chord.forEach((freq, idx) => {
-        const osc = this.ctx!.createOscillator();
-        const gain = this.ctx!.createGain();
-        const filter = this.ctx!.createBiquadFilter();
-        const start = this.ctx!.currentTime + idx * 0.035;
-
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(2200, start);
-
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, start);
-
-        gain.gain.setValueAtTime(0.05, start);
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(0.04, start + 0.02);
         gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.22);
 
         osc.connect(filter);
@@ -198,7 +208,7 @@ class SoundEffects {
       });
 
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate([15, 15]);
+        navigator.vibrate([12, 12]);
       }
     } catch {
       // fallback
@@ -211,32 +221,34 @@ class SoundEffects {
       this.ensureRunning();
       if (!this.ctx) return;
 
+      const now = this.ctx.currentTime;
       const notes = [659.25, 880, 1174.66]; // E5, A5, D6
       notes.forEach((freq, idx) => {
         const osc = this.ctx!.createOscillator();
         const gain = this.ctx!.createGain();
         const filter = this.ctx!.createBiquadFilter();
-        const start = this.ctx!.currentTime + idx * 0.05;
+        const start = now + idx * 0.045;
 
         filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(2400, start);
+        filter.frequency.setValueAtTime(2000, start);
 
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, start);
 
-        gain.gain.setValueAtTime(0.06, start);
-        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.25);
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(0.05, start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.24);
 
         osc.connect(filter);
         filter.connect(gain);
         gain.connect(this.ctx!.destination);
 
         osc.start(start);
-        osc.stop(start + 0.25);
+        osc.stop(start + 0.24);
       });
 
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate([15, 15]);
+        navigator.vibrate([10, 10]);
       }
     } catch {
       // fallback
@@ -249,26 +261,28 @@ class SoundEffects {
       this.ensureRunning();
       if (!this.ctx) return;
 
+      const now = this.ctx.currentTime;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       const filter = this.ctx.createBiquadFilter();
 
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(800, this.ctx.currentTime);
+      filter.frequency.setValueAtTime(700, now);
 
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(240, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.04);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(260, now);
+      osc.frequency.exponentialRampToValueAtTime(90, now + 0.04);
 
-      gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.04);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.05, now + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
 
       osc.connect(filter);
       filter.connect(gain);
       gain.connect(this.ctx.destination);
 
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.04);
+      osc.start(now);
+      osc.stop(now + 0.04);
 
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate(10);
@@ -284,28 +298,30 @@ class SoundEffects {
       this.ensureRunning();
       if (!this.ctx) return;
 
+      const now = this.ctx.currentTime;
       const notes = [587.33, 880]; // D5 -> A5
       notes.forEach((freq, idx) => {
         const osc = this.ctx!.createOscillator();
         const gain = this.ctx!.createGain();
         const filter = this.ctx!.createBiquadFilter();
-        const start = this.ctx!.currentTime + idx * 0.05;
+        const start = now + idx * 0.045;
 
         filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(2000, start);
+        filter.frequency.setValueAtTime(1800, start);
 
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, start);
 
-        gain.gain.setValueAtTime(0.06, start);
-        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.15);
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(0.05, start + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.16);
 
         osc.connect(filter);
         filter.connect(gain);
         gain.connect(this.ctx!.destination);
 
         osc.start(start);
-        osc.stop(start + 0.15);
+        osc.stop(start + 0.16);
       });
 
       if (typeof navigator !== 'undefined' && navigator.vibrate) {

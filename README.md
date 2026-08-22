@@ -1,9 +1,9 @@
-# Istiqomah Grosir Stock v2.6.0 🏢
+# Istiqomah Grosir Stock v2.7.0 🏢
 
 Sistem Manajemen Stok Multi-Lantai Offline-First & Aplikasi Android Native untuk Toko Grosir Istiqomah.
 
-[![Android APK Release](https://img.shields.io/badge/Download-Android_APK_v2.6.0-000000?style=for-the-badge&logo=android&logoColor=white)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock/releases/download/v1.0.0/Istiqomah-Grosir-Stock.apk)
-[![Thresholds](https://img.shields.io/badge/Stock-Min_0_&_Max_Unlimited-000000?style=for-the-badge)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock)
+[![Android APK Release](https://img.shields.io/badge/Download-Android_APK_v2.7.0-000000?style=for-the-badge&logo=android&logoColor=white)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock/releases/download/v1.0.0/Istiqomah-Grosir-Stock.apk)
+[![Audio & Navigation](https://img.shields.io/badge/UX-Velvet_Audio_&_Hardware_Back-000000?style=for-the-badge)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock)
 
 ---
 
@@ -29,26 +29,24 @@ Sistem Manajemen Stok Multi-Lantai Offline-First & Aplikasi Android Native untuk
 
 ---
 
-## ✨ Pembaruan & Fitur Unggulan (v2.6.0):
+## ✨ Pembaruan & Fitur Unggulan (v2.7.0):
 
-1. ⚖️ **Batas Min & Batas Max Opsional di Bawah Stok Awal**:
-   - **Batas Min**: Default = `0` (Tanpa peringatan). Jika diisi angka > 0, aplikasi akan memunculkan peringatan saat stok menipis.
-   - **Batas Max**: Default = `Unlimited` (Kapasitas bebas tanpa batas). Disediakan tombol preset kapasitas (`Unlimited`, `50`, `100`, `250`, `500`).
-   - Sesi batas stok ini bersifat **opsional (tidak wajib)** dan diletakkan tepat di bawah Stok Awal produk.
+1. 🔙 **Fungsi Tombol Kembali HP & Callback Bertingkat (Hardware Back Button)**:
+   - **Tutup Pop-up/Modal Terlebih Dahulu**: Jika sedang membuka Scanner, Form Edit, Mutasi Stok, Kelola Jenis, atau Backup, menekan tombol kembali HP otomatis menutup pop-up tersebut tanpa keluar aplikasi.
+   - **Kembali ke Halaman Utama**: Jika berada di dalam lantai kerja/admin, tombol kembali akan mengarahkan kembali ke Dashboard Utama (*Home*).
+   - **Konfirmasi Keluar Aplikasi**: Jika sudah mentok di halaman utama, aplikasi menampilkan notifikasi dialog konfirmasi *"Apakah Anda Ingin Keluar dari Aplikasi?"* sehingga tidak keluar secara tidak sengaja.
 
-2. 🏷️ **Pemilihan Jenis Barang Efektif & Tidak Memanjang**:
-   - Dropdown instan + chip *wrap* responsif yang tidak keluar layar.
-   - Modal grid 2 kolom lengkap dengan fitur pencarian jenis barang.
+2. 🎵 **Audio Synthesizer Ultra-Smooth & Velvet**:
+   - Efek suara dirancang ulang dengan gelombang sinus murni (*pure sine*), filter *lowpass* akustik lembut, dan kurva *attack/decay* velvet yang sangat halus, elegan, dan menenangkan saat digunakan sehari-hari.
 
-3. 🔒 **Proteksi Aksi Berisiko Tinggi**:
-   - Wajib mengetik `"RESET"` untuk konfirmasi reset database.
-   - Konfirmasi ganda pada mode *Timpa Semua* dan penghapusan produk.
+3. ⚖️ **Batas Min (0) & Batas Max (Unlimited) Opsional**:
+   - Input batas stok minimal dan kapasitas maksimal diletakkan tepat di bawah Stok Awal produk.
 
-4. ⚡ **UX Input Stok Lancar**:
-   - Nilai angka bebas dihapus (*backspace* hingga kosong) dan auto-select saat disentuh.
+4. 🏷️ **Pemilihan Jenis Barang Compact & Rapi**:
+   - Filter jenis berbasis dropdown instan dan chip wrap yang responsif di segala ukuran layar.
 
-5. 📦 **Input Stok Awal Produk Baru**:
-   - Preset stok awal: `0 (Kosong)`, `1`, `5`, `10`, `12 (Lusin)`, `24 (Dus)`, `50`, `100`.
+5. 🔒 **Proteksi Aksi Berisiko Tinggi**:
+   - Konfirmasi ketik `"RESET"` untuk reset database dan dialog konfirmasi mode Timpa Semua.
 
 ---
 

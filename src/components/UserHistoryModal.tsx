@@ -13,6 +13,7 @@ import type { FloorId, MutationLog, UserAccount } from '../types/stock';
 import { FLOOR_DEFINITIONS } from '../types/stock';
 import { StockStorageEngine } from '../services/db';
 import { soundEffects } from '../utils/audio';
+import { useRegisterModal } from '../utils/modalManager';
 
 interface UserHistoryModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
   onClose,
   users,
 }) => {
+  useRegisterModal('UserHistoryModal', isOpen, onClose);
   const [selectedUser, setSelectedUser] = useState<string>('ALL');
   const [selectedFloor, setSelectedFloor] = useState<string>('ALL');
   const [selectedType, setSelectedType] = useState<string>('ALL');

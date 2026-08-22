@@ -12,6 +12,7 @@ import {
 import type { FloorId } from '../types/stock';
 import { StockStorageEngine } from '../services/db';
 import { soundEffects } from '../utils/audio';
+import { useRegisterModal } from '../utils/modalManager';
 
 interface FloorSummaryModalProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ export const FloorSummaryModal: React.FC<FloorSummaryModalProps> = ({
   onClose,
   onSelectFloor,
 }) => {
+  useRegisterModal('FloorSummaryModal', isOpen, onClose);
   const stats = StockStorageEngine.getAggregateStats();
 
   if (!isOpen) return null;

@@ -14,6 +14,7 @@ import { FLOOR_DEFINITIONS } from '../types/stock';
 import { StockStorageEngine } from '../services/db';
 import { TelegramService } from '../services/telegram';
 import { soundEffects } from '../utils/audio';
+import { useRegisterModal } from '../utils/modalManager';
 
 interface FloorExportImportModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
   onClose,
   onDataChanged,
 }) => {
+  useRegisterModal('FloorExportImportModal', isOpen, onClose);
   const [isSendingTelegram, setIsSendingTelegram] = useState(false);
   const [telegramStatus, setTelegramStatus] = useState<string | null>(null);
 

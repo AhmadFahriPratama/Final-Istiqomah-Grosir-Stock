@@ -11,6 +11,7 @@ import {
   Camera,
 } from 'lucide-react';
 import { soundEffects } from '../utils/audio';
+import { useRegisterModal } from '../utils/modalManager';
 
 interface BarcodeScannerModalProps {
   isOpen: boolean;
@@ -529,6 +530,7 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
   title = 'Scan Barcode / QR',
   continuous = false,
 }) => {
+  useRegisterModal('BarcodeScannerModal', isOpen, onClose);
   const [manualCode, setManualCode] = useState('');
 
   if (!isOpen) return null;

@@ -3,6 +3,7 @@ import { KeyRound, Eye, EyeOff, X, CheckCircle, AlertCircle } from 'lucide-react
 import type { UserAccount } from '../types/stock';
 import { StockStorageEngine } from '../services/db';
 import { soundEffects } from '../utils/audio';
+import { useRegisterModal } from '../utils/modalManager';
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  useRegisterModal('ChangePasswordModal', isOpen, onClose);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');

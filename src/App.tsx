@@ -8,6 +8,9 @@ import { LandingPage } from './views/LandingPage';
 import { FloorView } from './views/FloorView';
 import { AdminDashboard } from './views/AdminDashboard';
 import { soundEffects } from './utils/audio';
+import { App as CapApp } from '@capacitor/app';
+import { backButtonManager } from './utils/modalManager';
+import { ExitConfirmModal } from './components/ExitConfirmModal';
 
 import { AutoBackupReceiverModal } from './components/AutoBackupReceiverModal';
 
@@ -15,6 +18,7 @@ export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(() =>
     StockStorageEngine.getCurrentUser()
   );
+  const [isExitModalOpen, setIsExitModalOpen] = useState(false);
 
   const getInitialTab = (user: UserAccount | null): NavTab => {
     if (!user) return 'home';
@@ -93,6 +97,37 @@ export const App: React.FC = () => {
     };
   }, [computeBadges]);
 
+  // Configure Android Hardware Back Button & Web PopState Navigation
+  useEffect(() => {
+    backButtonManager.setNavigationHandlers(
+      () => activeTab === 'home',
+      () => {
+        soundEffects.playClickSound();
+        setActiveTab('home');
+      },
+      () => setIsExitModalOpen(true)
+    );
+  }, [activeTab]);
+
+  useEffect(() => {
+    let capListener: { remove: () => void } | null = null;
+    CapApp.addListener('backButton', () => {
+      backButtonManager.handleBack();
+    }).then((listener) => {
+      capListener = listener;
+    });
+
+    const handlePopState = () => {
+      backButtonManager.handleBack();
+    };
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      if (capListener) capListener.remove();
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
   const handleLoginSuccess = (user: UserAccount) => {
     setCurrentUser(user);
     const targetTab = getInitialTab(user);
@@ -151,6 +186,12 @@ export const App: React.FC = () => {
       />
       {/* Auto Backup Receiver Modal (for Telegram Shares, Drops, & Files) */}
       <AutoBackupReceiverModal />
+
+      {/* Android Hardware Back Button Exit Prompt */}
+      <ExitConfirmModal
+        isOpen={isExitModalOpen}
+        onClose={() => setIsExitModalOpen(false)}
+      />
     </div>
   );
 };

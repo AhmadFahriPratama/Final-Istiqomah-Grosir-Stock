@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Plus, Minus, Check } from 'lucide-react';
 import type { StockItem } from '../types/stock';
 import { soundEffects } from '../utils/audio';
+import { useRegisterModal } from '../utils/modalManager';
 
 interface StockAdjustModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ export const StockAdjustModal: React.FC<StockAdjustModalProps> = ({
   onClose,
   onConfirm,
 }) => {
+  useRegisterModal('StockAdjustModal', isOpen, onClose);
   // Input as string to allow seamless backspacing, deleting, and typing
   const [inputText, setInputText] = useState<string>('1');
   const [mode, setMode] = useState<'ADD' | 'SUBTRACT'>('ADD');

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Copy, Check, Share2, FileText } from 'lucide-react';
 import { soundEffects } from '../utils/audio';
+import { useRegisterModal } from '../utils/modalManager';
 
 interface TextReportModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export const TextReportModal: React.FC<TextReportModalProps> = ({
   reportText,
   onClose,
 }) => {
+  useRegisterModal('TextReportModal', isOpen, onClose);
   const [copied, setCopied] = useState(false);
 
   if (!isOpen) return null;

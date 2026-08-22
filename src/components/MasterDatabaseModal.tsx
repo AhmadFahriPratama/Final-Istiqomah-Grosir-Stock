@@ -13,6 +13,7 @@ import {
 import type { BackupExportData } from '../types/stock';
 import { StockStorageEngine } from '../services/db';
 import { soundEffects } from '../utils/audio';
+import { useRegisterModal } from '../utils/modalManager';
 
 interface MasterDatabaseModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
   onClose,
   onDataResetOrImported,
 }) => {
+  useRegisterModal('MasterDatabaseModal', isOpen, onClose);
   const fullImportRef = useRef<HTMLInputElement | null>(null);
   const [importStatus, setImportStatus] = useState<{ success: boolean; message: string } | null>(
     null

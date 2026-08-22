@@ -14,6 +14,7 @@ import type { FloorId, UserAccount } from '../types/stock';
 import { FLOOR_DEFINITIONS } from '../types/stock';
 import { StockStorageEngine } from '../services/db';
 import { soundEffects } from '../utils/audio';
+import { useRegisterModal } from '../utils/modalManager';
 
 interface UserManagementModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
   users,
   onUsersUpdated,
 }) => {
+  useRegisterModal('UserManagementModal', isOpen, onClose);
   const [isAddingUser, setIsAddingUser] = useState(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [formName, setFormName] = useState('');

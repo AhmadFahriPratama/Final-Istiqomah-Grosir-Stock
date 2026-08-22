@@ -11,6 +11,7 @@ import {
 import type { StockItem } from '../types/stock';
 import { BarcodeScannerModal } from './BarcodeScannerModal';
 import { soundEffects } from '../utils/audio';
+import { useRegisterModal } from '../utils/modalManager';
 
 interface ItemFormModalProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
   onSave,
   onDelete,
 }) => {
+  useRegisterModal('ItemFormModal', isOpen, onClose);
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
   const [customCategory, setCustomCategory] = useState('');

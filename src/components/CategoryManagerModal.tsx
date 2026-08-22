@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Plus, Trash2, Layers } from 'lucide-react';
 import { soundEffects } from '../utils/audio';
+import { useRegisterModal } from '../utils/modalManager';
 
 interface CategoryManagerModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({
   onAddCategory,
   onRemoveCategory,
 }) => {
+  useRegisterModal('CategoryManagerModal', isOpen, onClose);
   const [newCat, setNewCat] = useState('');
 
   if (!isOpen) return null;
