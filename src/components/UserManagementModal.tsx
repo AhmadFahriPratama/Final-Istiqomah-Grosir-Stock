@@ -118,19 +118,19 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 modal-backdrop animate-in fade-in duration-150">
-      <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 modal-backdrop anim-fade-in">
+      <div className="bg-white rounded-2xl max-w-md w-full shadow-xl overflow-hidden border border-stone-200 flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3.5 border-b border-zinc-100 bg-zinc-50/90 shrink-0">
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-stone-100 bg-stone-50/90 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
+            <div className="w-8 h-8 rounded-xl bg-stone-900 text-white flex items-center justify-center shadow-xs">
               <Users size={16} />
             </div>
             <div>
-              <h3 className="text-xs font-bold text-black leading-none">
+              <h3 className="text-xs font-bold text-stone-900 leading-none">
                 Manajemen User & Staf
               </h3>
-              <p className="text-[10px] text-zinc-500 font-medium mt-0.5">
+              <p className="text-[10px] text-stone-500 font-medium mt-0.5">
                 Kelola akun petugas, password & hak akses lantai
               </p>
             </div>
@@ -140,28 +140,28 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
               soundEffects.playClickSound();
               onClose();
             }}
-            className="w-7 h-7 flex items-center justify-center rounded-full text-zinc-400 hover:text-black hover:bg-zinc-200 transition-colors touch-press"
+            className="w-7 h-7 flex items-center justify-center rounded-full text-stone-400 hover:text-stone-900 hover:bg-stone-200 transition-colors touch-press"
           >
             <X size={16} />
           </button>
         </div>
 
         {/* Action / Search Bar */}
-        <div className="p-3 bg-zinc-50/60 border-b border-zinc-200 flex items-center gap-2 shrink-0">
+        <div className="p-3 bg-stone-50/60 border-b border-stone-200 flex items-center gap-2 shrink-0">
           <div className="relative flex-1">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari staf..."
-              className="w-full pl-7 pr-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-xl focus:outline-none focus:border-black"
+              className="w-full pl-7 pr-3 py-1.5 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-black"
             />
-            <Search size={12} className="absolute left-2.5 top-2.5 text-zinc-400" />
+            <Search size={12} className="absolute left-2.5 top-2.5 text-stone-400" />
           </div>
 
           <button
             onClick={handleStartAddUser}
-            className="px-3 py-1.5 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold flex items-center gap-1 touch-press shrink-0 shadow-xs"
+            className="px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold flex items-center gap-1 touch-press shrink-0 shadow-xs"
           >
             <Plus size={13} /> Tambah Staf
           </button>
@@ -169,7 +169,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
 
         {/* Toast Alert */}
         {userToast && (
-          <div className="mx-3 mt-2 p-2 rounded-xl bg-black text-white border border-zinc-800 text-xs font-semibold flex items-center gap-1.5 shrink-0 shadow-lg">
+          <div className="mx-3 mt-2 p-2 rounded-xl bg-stone-900 text-white border border-stone-800 text-xs font-semibold flex items-center gap-1.5 shrink-0 shadow-lg">
             <CheckCircle size={14} className="text-white" />
             <span>{userToast}</span>
           </div>
@@ -181,17 +181,17 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
           {isAddingUser && (
             <form
               onSubmit={handleSaveUserForm}
-              className="bg-zinc-50 border border-zinc-300 rounded-2xl p-3.5 space-y-2.5 animate-in zoom-in-95 duration-150 shadow-sm"
+              className="bg-stone-50 border border-stone-300 rounded-2xl p-3.5 space-y-2.5 animate-in zoom-in-95 duration-150 shadow-sm"
             >
-              <div className="flex items-center justify-between border-b border-zinc-200 pb-1.5">
-                <span className="text-xs font-bold text-black flex items-center gap-1.5">
+              <div className="flex items-center justify-between border-b border-stone-200 pb-1.5">
+                <span className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
                   <Shield size={13} />
                   {editingUserId ? 'Edit Akun Staf' : 'Tambah Penjaga Baru'}
                 </span>
                 <button
                   type="button"
                   onClick={() => setIsAddingUser(false)}
-                  className="text-[10px] text-zinc-400 hover:text-black font-semibold"
+                  className="text-[10px] text-stone-400 hover:text-stone-900 font-semibold"
                 >
                   Batal
                 </button>
@@ -199,7 +199,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[10px] font-semibold text-zinc-600 block mb-0.5">
+                  <label className="text-[10px] font-semibold text-stone-500 block mb-0.5">
                     Nama Petugas:
                   </label>
                   <input
@@ -208,12 +208,12 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
                     placeholder="Contoh: Eza"
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
-                    className="w-full px-2.5 py-1.5 text-xs bg-white border border-zinc-200 rounded-xl font-bold focus:outline-none focus:border-black"
+                    className="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-200 rounded-xl font-bold focus:outline-none focus:border-black"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-semibold text-zinc-600 block mb-0.5">
+                  <label className="text-[10px] font-semibold text-stone-500 block mb-0.5">
                     Username Login:
                   </label>
                   <input
@@ -222,14 +222,14 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
                     placeholder="eza"
                     value={formUsername}
                     onChange={(e) => setFormUsername(e.target.value)}
-                    className="w-full px-2.5 py-1.5 text-xs bg-white border border-zinc-200 rounded-xl font-mono font-bold focus:outline-none focus:border-black"
+                    className="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-200 rounded-xl font-mono font-bold focus:outline-none focus:border-black"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[10px] font-semibold text-zinc-600 block mb-0.5">
+                  <label className="text-[10px] font-semibold text-stone-500 block mb-0.5">
                     Password Akun:
                   </label>
                   <input
@@ -238,18 +238,18 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
                     placeholder="password"
                     value={formPassword}
                     onChange={(e) => setFormPassword(e.target.value)}
-                    className="w-full px-2.5 py-1.5 text-xs bg-white border border-zinc-200 rounded-xl font-mono font-bold focus:outline-none focus:border-black"
+                    className="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-200 rounded-xl font-mono font-bold focus:outline-none focus:border-black"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-semibold text-zinc-600 block mb-0.5">
+                  <label className="text-[10px] font-semibold text-stone-500 block mb-0.5">
                     Peran / Hak Akses:
                   </label>
                   <select
                     value={formRole}
                     onChange={(e) => setFormRole(e.target.value as 'ADMIN' | 'STAFF')}
-                    className="w-full px-2.5 py-1.5 text-xs bg-white border border-zinc-200 rounded-xl font-bold focus:outline-none focus:border-black"
+                    className="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-200 rounded-xl font-bold focus:outline-none focus:border-black"
                   >
                     <option value="STAFF">Penjaga Lantai (Staf)</option>
                     <option value="ADMIN">Super Admin (Fahri)</option>
@@ -259,7 +259,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
 
               {formRole === 'STAFF' && (
                 <div>
-                  <label className="text-[10px] font-semibold text-zinc-600 block mb-1">
+                  <label className="text-[10px] font-semibold text-stone-500 block mb-1">
                     Pilih Akses Lantai Kerja:
                   </label>
                   <div className="grid grid-cols-4 gap-1">
@@ -272,8 +272,8 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
                           onClick={() => handleToggleFloorAssignment(f)}
                           className={`py-1 text-[10px] font-bold rounded-lg border transition-all ${
                             isChecked
-                              ? 'bg-black text-white border-black shadow-xs'
-                              : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-100'
+                              ? 'bg-stone-900 text-white border-black shadow-xs'
+                              : 'bg-white text-stone-500 border-stone-200 hover:bg-stone-100'
                           }`}
                         >
                           Lt {f}
@@ -286,7 +286,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
 
               <button
                 type="submit"
-                className="w-full py-2 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold touch-press shadow-xs mt-1"
+                className="w-full py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold touch-press shadow-xs mt-1"
               >
                 Simpan Data Akun
               </button>
@@ -298,35 +298,35 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
             {filteredUsers.map((u) => (
               <div
                 key={u.id}
-                className="p-3 rounded-2xl bg-zinc-50 border border-zinc-200 flex items-center justify-between hover:border-zinc-300 transition-colors"
+                className="p-3 rounded-2xl bg-stone-50 border border-stone-200 flex items-center justify-between hover:border-stone-300 transition-colors"
               >
                 <div className="min-w-0 pr-2 space-y-1">
                   <div className="flex items-center gap-1.5">
-                    <div className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-[10px] font-bold">
+                    <div className="w-6 h-6 rounded-full bg-stone-900 text-white flex items-center justify-center text-[10px] font-bold">
                       {u.name.charAt(0).toUpperCase()}
                     </div>
-                    <span className="text-xs font-bold text-black">{u.name}</span>
-                    <span className="text-[10px] text-zinc-400 font-mono">@{u.username}</span>
+                    <span className="text-xs font-bold text-stone-900">{u.name}</span>
+                    <span className="text-[10px] text-stone-400 font-mono">@{u.username}</span>
                     {u.role === 'ADMIN' && (
-                      <span className="text-[8px] font-bold bg-black text-white px-1.5 py-0.5 rounded">
+                      <span className="text-[8px] font-bold bg-stone-900 text-white px-1.5 py-0.5 rounded">
                         ADMIN
                       </span>
                     )}
                   </div>
 
-                  <div className="text-[10px] text-zinc-500 flex flex-wrap items-center gap-1 pl-7">
+                  <div className="text-[10px] text-stone-500 flex flex-wrap items-center gap-1 pl-7">
                     <span>Akses:</span>
                     {u.role === 'ADMIN' ? (
-                      <span className="font-semibold text-black">Admin (Semua Lantai)</span>
+                      <span className="font-semibold text-stone-900">Admin (Semua Lantai)</span>
                     ) : (
-                      <span className="font-semibold text-black">
+                      <span className="font-semibold text-stone-900">
                         {u.assignedFloors.map((f) => FLOOR_DEFINITIONS[f].name).join(', ')}
                       </span>
                     )}
                     <span>•</span>
                     <span className="flex items-center gap-0.5">
-                      <KeyRound size={10} className="text-zinc-400" />
-                      <code className="font-mono font-bold text-zinc-700">{u.password}</code>
+                      <KeyRound size={10} className="text-stone-400" />
+                      <code className="font-mono font-bold text-stone-600">{u.password}</code>
                     </span>
                   </div>
                 </div>
@@ -334,7 +334,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
                 <div className="flex items-center gap-1 shrink-0">
                   <button
                     onClick={() => handleStartEditUser(u)}
-                    className="p-1.5 text-zinc-400 hover:text-black hover:bg-zinc-200 rounded-lg transition-colors"
+                    className="p-1.5 text-stone-400 hover:text-stone-900 hover:bg-stone-200 rounded-lg transition-colors"
                     title="Edit Akun"
                   >
                     <Edit2 size={14} />
@@ -342,7 +342,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
                   {u.name.toLowerCase() !== 'fahri' && (
                     <button
                       onClick={() => handleDeleteUserAccount(u.id, u.name)}
-                      className="p-1.5 text-zinc-400 hover:text-black hover:bg-zinc-200 rounded-lg transition-colors"
+                      className="p-1.5 text-stone-400 hover:text-stone-900 hover:bg-stone-200 rounded-lg transition-colors"
                       title="Hapus Akun"
                     >
                       <Trash2 size={14} />
@@ -355,13 +355,13 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-3 bg-zinc-50 border-t border-zinc-100 flex justify-end shrink-0">
+        <div className="p-3 bg-stone-50 border-t border-stone-100 flex justify-end shrink-0">
           <button
             onClick={() => {
               soundEffects.playClickSound();
               onClose();
             }}
-            className="px-4 py-2 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold touch-press shadow-xs"
+            className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold touch-press shadow-xs"
           >
             Selesai
           </button>

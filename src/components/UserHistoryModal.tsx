@@ -100,53 +100,53 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
   const getActionBadge = (m: MutationLog) => {
     if (m.actionType === 'ITEM_ADD' || (m.type === 'IN' && m.prevStock === 0)) {
       return {
-        bg: 'bg-black text-white border-black shadow-xs',
+        bg: 'bg-stone-900 text-white border-black shadow-xs',
         icon: PlusCircle,
         label: `+${m.amount} (Item Baru)`,
       };
     }
     if (m.actionType === 'ITEM_DELETE') {
       return {
-        bg: 'bg-zinc-100 text-zinc-900 border-zinc-300',
+        bg: 'bg-stone-100 text-stone-800 border-stone-300',
         icon: Trash2,
         label: `Hapus Item`,
       };
     }
     if (m.actionType === 'ITEM_UPDATE' || m.type === 'ADJUST') {
       return {
-        bg: 'bg-white text-zinc-800 border-zinc-300',
+        bg: 'bg-white text-stone-700 border-stone-300',
         icon: Edit3,
         label: `Koreksi Data`,
       };
     }
     if (m.type === 'IN') {
       return {
-        bg: 'bg-zinc-900 text-white border-zinc-900 shadow-xs',
+        bg: 'bg-stone-800 text-white border-zinc-900 shadow-xs',
         icon: ArrowDownLeft,
         label: `+${m.amount} Unit`,
       };
     }
     return {
-      bg: 'bg-zinc-100 text-zinc-900 border-zinc-300',
+      bg: 'bg-stone-100 text-stone-800 border-stone-300',
       icon: ArrowUpRight,
       label: `-${m.amount} Unit`,
     };
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 modal-backdrop animate-in fade-in duration-150">
-      <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 modal-backdrop anim-fade-in">
+      <div className="bg-white rounded-2xl max-w-md w-full shadow-xl overflow-hidden border border-stone-200 flex flex-col max-h-[90vh]">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-4 py-3.5 border-b border-zinc-100 bg-zinc-50/90 shrink-0">
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-stone-100 bg-stone-50/90 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
+            <div className="w-8 h-8 rounded-xl bg-stone-900 text-white flex items-center justify-center shadow-xs">
               <History size={16} />
             </div>
             <div>
-              <h3 className="text-xs font-bold text-black leading-none">
+              <h3 className="text-xs font-bold text-stone-900 leading-none">
                 Riwayat Perubahan User
               </h3>
-              <p className="text-[10px] text-zinc-500 font-medium mt-0.5">
+              <p className="text-[10px] text-stone-500 font-medium mt-0.5">
                 Catatan mutasi dan perubahan stok
               </p>
             </div>
@@ -156,14 +156,14 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
               soundEffects.playClickSound();
               onClose();
             }}
-            className="w-7 h-7 flex items-center justify-center rounded-full text-zinc-400 hover:text-black hover:bg-zinc-200 transition-colors touch-press"
+            className="w-7 h-7 flex items-center justify-center rounded-full text-stone-400 hover:text-stone-900 hover:bg-stone-200 transition-colors touch-press"
           >
             <X size={16} />
           </button>
         </div>
 
         {/* Filters Section */}
-        <div className="p-3 bg-zinc-50/60 border-b border-zinc-200 space-y-2 shrink-0">
+        <div className="p-3 bg-stone-50/60 border-b border-stone-200 space-y-2 shrink-0">
           {/* Search bar */}
           <div className="relative">
             <input
@@ -171,13 +171,13 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari nama barang, nama staf, atau alasan..."
-              className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-xl focus:outline-none focus:border-black transition-colors"
+              className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-black transition-colors"
             />
-            <Search size={13} className="absolute left-2.5 top-2.5 text-zinc-400" />
+            <Search size={13} className="absolute left-2.5 top-2.5 text-stone-400" />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-2 text-zinc-400 hover:text-black text-xs"
+                className="absolute right-2.5 top-2 text-stone-400 hover:text-stone-900 text-xs"
               >
                 ✕
               </button>
@@ -188,7 +188,7 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
           <div className="grid grid-cols-3 gap-1.5">
             {/* User Filter */}
             <div>
-              <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider block mb-0.5">
+              <label className="text-[9px] font-bold text-stone-500 uppercase tracking-wider block mb-0.5">
                 Filter Petugas
               </label>
               <select
@@ -197,7 +197,7 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
                   soundEffects.playClickSound();
                   setSelectedUser(e.target.value);
                 }}
-                className="w-full px-2 py-1 text-[11px] font-bold bg-white border border-zinc-200 rounded-lg text-black focus:outline-none focus:border-black"
+                className="w-full px-2 py-1 text-[11px] font-bold bg-white border border-stone-200 rounded-lg text-stone-900 focus:outline-none focus:border-black"
               >
                 <option value="ALL">Semua Petugas ({users.length})</option>
                 {users.map((u) => (
@@ -210,7 +210,7 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
 
             {/* Floor Filter */}
             <div>
-              <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider block mb-0.5">
+              <label className="text-[9px] font-bold text-stone-500 uppercase tracking-wider block mb-0.5">
                 Filter Lantai
               </label>
               <select
@@ -219,7 +219,7 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
                   soundEffects.playClickSound();
                   setSelectedFloor(e.target.value);
                 }}
-                className="w-full px-2 py-1 text-[11px] font-bold bg-white border border-zinc-200 rounded-lg text-black focus:outline-none focus:border-black"
+                className="w-full px-2 py-1 text-[11px] font-bold bg-white border border-stone-200 rounded-lg text-stone-900 focus:outline-none focus:border-black"
               >
                 <option value="ALL">Semua Lantai</option>
                 {(['1', '2', '3', '4'] as FloorId[]).map((f) => (
@@ -232,7 +232,7 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
 
             {/* Type Filter */}
             <div>
-              <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider block mb-0.5">
+              <label className="text-[9px] font-bold text-stone-500 uppercase tracking-wider block mb-0.5">
                 Jenis Aksi
               </label>
               <select
@@ -241,7 +241,7 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
                   soundEffects.playClickSound();
                   setSelectedType(e.target.value);
                 }}
-                className="w-full px-2 py-1 text-[11px] font-bold bg-white border border-zinc-200 rounded-lg text-black focus:outline-none focus:border-black"
+                className="w-full px-2 py-1 text-[11px] font-bold bg-white border border-stone-200 rounded-lg text-stone-900 focus:outline-none focus:border-black"
               >
                 <option value="ALL">Semua Aksi</option>
                 <option value="IN">Masuk (+)</option>
@@ -252,14 +252,14 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="flex items-center justify-between pt-1 px-1 text-[10px] text-zinc-500 font-medium">
+          <div className="flex items-center justify-between pt-1 px-1 text-[10px] text-stone-500 font-medium">
             <span>
-              Total: <strong className="text-black font-mono">{filteredMutations.length}</strong> aktivitas
+              Total: <strong className="text-stone-900 font-mono">{filteredMutations.length}</strong> aktivitas
             </span>
             <div className="flex items-center gap-2">
-              <span className="text-zinc-900 font-bold font-mono">+{totalInQty} in</span>
+              <span className="text-stone-800 font-bold font-mono">+{totalInQty} in</span>
               <span>•</span>
-              <span className="text-zinc-600 font-bold font-mono">-{totalOutQty} out</span>
+              <span className="text-stone-500 font-bold font-mono">-{totalOutQty} out</span>
             </div>
           </div>
         </div>
@@ -267,12 +267,12 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
         {/* Scrollable Mutation Feed */}
         <div className="p-3 overflow-y-auto space-y-2 flex-1 divide-y divide-zinc-100">
           {filteredMutations.length === 0 ? (
-            <div className="py-12 text-center text-zinc-400 space-y-2">
+            <div className="py-12 text-center text-stone-400 space-y-2">
               <History size={32} className="mx-auto text-zinc-300 stroke-[1.5]" />
-              <p className="text-xs font-semibold text-zinc-500">
+              <p className="text-xs font-semibold text-stone-500">
                 Belum ada aktivitas mutasi yang sesuai filter
               </p>
-              <p className="text-[10px] text-zinc-400">
+              <p className="text-[10px] text-stone-400">
                 Aktivitas staf saat menambah/mengurangi/mengubah stok akan tercatat otomatis di sini.
               </p>
             </div>
@@ -290,20 +290,20 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
                   {/* Top line: User avatar + name + floor + timestamp */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
-                      <div className="w-5 h-5 rounded-full bg-zinc-800 text-white flex items-center justify-center text-[9px] font-bold">
+                      <div className="w-5 h-5 rounded-full bg-stone-800 text-white flex items-center justify-center text-[9px] font-bold">
                         {(m.userName || 'S').charAt(0).toUpperCase()}
                       </div>
-                      <span className="text-xs font-bold text-black">
+                      <span className="text-xs font-bold text-stone-900">
                         {m.userName || 'Staf Gudang'}
                       </span>
                       {floorDef && (
-                        <span className="text-[9px] font-semibold bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded border border-zinc-200">
+                        <span className="text-[9px] font-semibold bg-stone-100 text-stone-600 px-1.5 py-0.5 rounded border border-stone-200">
                           {floorDef.name}
                         </span>
                       )}
                     </div>
 
-                    <span className="text-[10px] text-zinc-400 font-mono">
+                    <span className="text-[10px] text-stone-400 font-mono">
                       {formatTime(m.timestamp)}
                     </span>
                   </div>
@@ -311,10 +311,10 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
                   {/* Middle line: Item Name & Action Badge */}
                   <div className="flex items-center justify-between gap-2 pl-6">
                     <div className="min-w-0">
-                      <span className="text-xs font-bold text-zinc-900 block truncate">
+                      <span className="text-xs font-bold text-stone-800 block truncate">
                         {m.itemName}
                       </span>
-                      <p className="text-[10px] text-zinc-500 italic mt-0.5">
+                      <p className="text-[10px] text-stone-500 italic mt-0.5">
                         {m.reason || 'Perubahan stok'}
                       </p>
                     </div>
@@ -328,15 +328,15 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
                   </div>
 
                   {/* Bottom stock transition comparison */}
-                  <div className="flex items-center justify-between text-[10px] text-zinc-400 pl-6 pt-0.5 font-mono">
+                  <div className="flex items-center justify-between text-[10px] text-stone-400 pl-6 pt-0.5 font-mono">
                     <span>
                       Stok Sebelumnya:{' '}
-                      <strong className="text-zinc-600 font-bold">{m.prevStock}</strong>
+                      <strong className="text-stone-500 font-bold">{m.prevStock}</strong>
                     </span>
                     <span>→</span>
                     <span>
                       Stok Akhir:{' '}
-                      <strong className="text-black font-bold">{m.newStock} unit</strong>
+                      <strong className="text-stone-900 font-bold">{m.newStock} unit</strong>
                     </span>
                   </div>
                 </div>
@@ -346,7 +346,7 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
         </div>
 
         {/* Footer with Actions */}
-        <div className="p-3 bg-zinc-50 border-t border-zinc-100 flex items-center justify-between gap-2 shrink-0">
+        <div className="p-3 bg-stone-50 border-t border-stone-100 flex items-center justify-between gap-2 shrink-0">
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => {
@@ -377,7 +377,7 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
                 soundEffects.playBackupSent();
               }}
               disabled={filteredMutations.length === 0}
-              className="px-3 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border border-zinc-200 rounded-xl text-xs font-bold touch-press disabled:opacity-50"
+              className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-200 rounded-xl text-xs font-bold touch-press disabled:opacity-50"
               title="Unduh file Excel / CSV"
             >
               Unduh CSV
@@ -405,7 +405,7 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
                 }
               }}
               disabled={filteredMutations.length === 0}
-              className="px-3 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border border-zinc-200 rounded-xl text-xs font-bold touch-press disabled:opacity-50"
+              className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-200 rounded-xl text-xs font-bold touch-press disabled:opacity-50"
               title="Salin Teks Ringkasan untuk WhatsApp"
             >
               Salin Teks
@@ -417,7 +417,7 @@ export const UserHistoryModal: React.FC<UserHistoryModalProps> = ({
               soundEffects.playClickSound();
               onClose();
             }}
-            className="px-4 py-2 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold touch-press shadow-xs"
+            className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold touch-press shadow-xs"
           >
             Tutup
           </button>

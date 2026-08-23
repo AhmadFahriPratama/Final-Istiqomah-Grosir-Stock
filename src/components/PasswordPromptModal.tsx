@@ -49,25 +49,25 @@ export const PasswordPromptModal: React.FC<PasswordPromptModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 modal-backdrop animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 modal-backdrop anim-fade-in">
       <div
-        className={`bg-white rounded-3xl max-w-xs w-full shadow-2xl overflow-hidden border border-zinc-200 ${
+        className={`bg-white rounded-2xl max-w-xs w-full shadow-xl overflow-hidden border border-stone-200 ${
           shake ? 'animate-bounce' : ''
         }`}
       >
         {/* Header */}
-        <div className="p-4 text-center bg-zinc-50 border-b border-zinc-100 relative">
+        <div className="p-4 text-center bg-stone-50 border-b border-stone-100 relative">
           <button
             onClick={onCancel}
-            className="absolute top-3 right-3 p-1 rounded-full text-zinc-400 hover:text-black transition-colors"
+            className="absolute top-3 right-3 p-1 rounded-full text-stone-400 hover:text-stone-900 transition-colors"
           >
             <X size={16} />
           </button>
-          <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center mx-auto mb-2">
+          <div className="w-10 h-10 rounded-xl bg-stone-900 text-white flex items-center justify-center mx-auto mb-2">
             <Lock size={18} />
           </div>
-          <h3 className="text-xs font-bold text-black">{title}</h3>
-          <p className="text-[10px] text-zinc-400 mt-0.5">{subtitle}</p>
+          <h3 className="text-xs font-bold text-stone-900">{title}</h3>
+          <p className="text-[10px] text-stone-400 mt-0.5">{subtitle}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 space-y-3">
@@ -83,19 +83,19 @@ export const PasswordPromptModal: React.FC<PasswordPromptModalProps> = ({
                   setErrorMsg('');
                 }}
                 placeholder="Ketik PIN..."
-                className="w-full px-3 py-2 text-center text-sm font-bold bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black tracking-widest font-mono"
+                className="w-full px-3 py-2 text-center text-sm font-bold bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:border-black tracking-widest font-mono"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 text-zinc-400 hover:text-black"
+                className="absolute right-3 top-2.5 text-stone-400 hover:text-stone-900"
               >
                 {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
 
             {errorMsg && (
-              <p className="text-[10px] font-semibold text-black flex items-center justify-center gap-1 mt-1">
+              <p className="text-[10px] font-semibold text-stone-900 flex items-center justify-center gap-1 mt-1">
                 <AlertCircle size={11} /> {errorMsg}
               </p>
             )}
@@ -114,7 +114,7 @@ export const PasswordPromptModal: React.FC<PasswordPromptModalProps> = ({
                   else setInputVal((prev) => prev + k);
                   setErrorMsg('');
                 }}
-                className="py-2 text-xs font-bold rounded-lg bg-zinc-50 hover:bg-zinc-100 text-black border border-zinc-200 touch-press"
+                className="py-2 text-xs font-bold rounded-lg bg-stone-50 hover:bg-stone-100 text-stone-900 border border-stone-200 touch-press"
               >
                 {k}
               </button>
@@ -126,22 +126,22 @@ export const PasswordPromptModal: React.FC<PasswordPromptModalProps> = ({
               type="checkbox"
               checked={rememberSession}
               onChange={(e) => setRememberSession(e.target.checked)}
-              className="rounded text-black focus:ring-0 w-3.5 h-3.5"
+              className="rounded text-stone-900 focus:ring-0 w-3.5 h-3.5"
             />
-            <span className="text-[10px] text-zinc-500">Ingat sesi di perangkat ini</span>
+            <span className="text-[10px] text-stone-500">Ingat sesi di perangkat ini</span>
           </label>
 
           <div className="pt-1 flex gap-2">
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 py-2 bg-zinc-100 hover:bg-zinc-200 text-black text-xs font-bold rounded-xl"
+              className="flex-1 py-2 bg-stone-100 hover:bg-stone-200 text-stone-900 text-xs font-bold rounded-xl"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="flex-1 py-2 bg-black hover:bg-zinc-800 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 touch-press"
+              className="flex-1 py-2 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 touch-press"
             >
               Buka <ArrowRight size={13} />
             </button>

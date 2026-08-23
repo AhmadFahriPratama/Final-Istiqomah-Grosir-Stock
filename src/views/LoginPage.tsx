@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import type { UserAccount } from '../types/stock';
 import { StockStorageEngine } from '../services/db';
 import { soundEffects } from '../utils/audio';
@@ -46,63 +46,46 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       soundEffects.playClickSound();
       setErrorMsg('Nama atau password tidak sesuai.');
       setShake(true);
-      setTimeout(() => setShake(false), 450);
+      setTimeout(() => setShake(false), 400);
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] flex flex-col justify-center px-4 py-8 max-w-sm mx-auto selection:bg-zinc-200">
-      {/* Brand Header */}
-      <div className="text-center space-y-2 mb-8">
-        <div className="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center mx-auto shadow-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" className="w-7 h-7">
-            <path d="M28 34L50 22L72 34L50 46L28 34Z" stroke="#FFFFFF" strokeWidth="6" strokeLinejoin="round" />
-            <path d="M28 50L50 62L72 50" stroke="#A1A1AA" strokeWidth="6" strokeLinejoin="round" />
-            <path d="M28 66L50 78L72 66" stroke="#71717A" strokeWidth="6" strokeLinejoin="round" />
-          </svg>
-        </div>
-
-        <div>
-          <h1 className="text-lg font-extrabold text-black tracking-tight leading-tight">
-            Istiqomah Grosir Stock
-          </h1>
-          <p className="text-xs text-zinc-500 font-medium mt-0.5">
-            Sistem Manajemen Stok
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#f5eedc] flex flex-col justify-center px-5 py-8 max-w-sm mx-auto">
+      {/* Brand */}
+      <div className="mb-10">
+        <h1 className="text-2xl font-extrabold text-[#2a1a10] tracking-tight">
+          Istiqomah Grosir
+        </h1>
+        <p className="text-sm text-[#78604d] mt-0.5 font-medium">
+          Sistem Manajemen Stok
+        </p>
       </div>
 
-      {/* Login Card */}
-      <div
-        className={`bg-white rounded-2xl p-6 border border-zinc-200 shadow-xs ${
-          shake ? 'animate-bounce' : ''
-        }`}
-      >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-zinc-800 block">
+      {/* Form */}
+      <div className={shake ? 'anim-shake' : ''}>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="text-xs font-semibold text-stone-600 block mb-1.5">
               Nama
             </label>
-            <div className="relative">
-              <input
-                type="text"
-                required
-                autoFocus
-                value={username}
-                onChange={(e) => {
-                  setUsername(e.target.value);
-                  setErrorMsg('');
-                }}
-                placeholder="Masukkan nama"
-                className="w-full pl-9 pr-3 py-2.5 text-xs font-semibold bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black focus:bg-white transition-all text-black placeholder:text-zinc-400"
-              />
-              <User size={15} className="absolute left-3 top-3 text-zinc-400" />
-            </div>
+            <input
+              type="text"
+              required
+              autoFocus
+              value={username}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                setErrorMsg('');
+              }}
+              placeholder="Masukkan nama"
+              className="w-full px-3.5 py-3 text-sm bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900/10 transition-all text-stone-900 placeholder:text-stone-300 font-medium"
+            />
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-zinc-800 block">
+          <div>
+            <label className="text-xs font-semibold text-stone-600 block mb-1.5">
               Password
             </label>
             <div className="relative">
@@ -115,34 +98,32 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   setErrorMsg('');
                 }}
                 placeholder="Masukkan password"
-                className="w-full pl-9 pr-10 py-2.5 text-xs font-semibold bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black focus:bg-white transition-all font-mono tracking-wider text-black placeholder:text-zinc-400"
+                className="w-full px-3.5 py-3 pr-11 text-sm bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900/10 transition-all font-mono tracking-wider text-stone-900 placeholder:text-stone-300 placeholder:font-sans placeholder:tracking-normal"
               />
-              <Lock size={15} className="absolute left-3 top-3 text-zinc-400" />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-zinc-400 hover:text-black transition-colors"
+                className="absolute right-3 top-3.5 text-stone-400 hover:text-stone-700 transition-colors"
                 tabIndex={-1}
               >
-                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </div>
 
           {errorMsg && (
-            <div className="p-2.5 rounded-xl bg-zinc-100 border border-zinc-200 text-xs font-semibold text-black flex items-center gap-2">
-              <AlertCircle size={14} className="shrink-0" />
-              <span>{errorMsg}</span>
-            </div>
+            <p className="text-xs text-red-600 font-medium px-1">
+              {errorMsg}
+            </p>
           )}
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-3 bg-black hover:bg-zinc-800 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs touch-press transition-all mt-2"
+            className="w-full py-3 bg-stone-900 hover:bg-stone-800 disabled:opacity-40 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 touch-press transition-colors mt-2"
           >
             <span>Masuk</span>
-            <ArrowRight size={14} />
+            <ArrowRight size={15} />
           </button>
         </form>
       </div>

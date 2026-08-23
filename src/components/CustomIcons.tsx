@@ -163,7 +163,7 @@ export const ScannerGlyph: React.FC<IconProps> = ({ className = '', size = 18 })
   </svg>
 );
 
-// Clean Admin Crest Icon
+// Premium Executive Admin Crest Icon
 export const AdminCrestGlyph: React.FC<IconProps> = ({ className = '', size = 18 }) => (
   <svg
     width={size}
@@ -173,19 +173,22 @@ export const AdminCrestGlyph: React.FC<IconProps> = ({ className = '', size = 18
     xmlns="http://www.w3.org/2000/svg"
     className={className}
   >
+    {/* Refined Shield Contour */}
     <path
-      d="M12 2.5L19.5 5.5V11.5C19.5 16.5 16 20.5 12 22C8 20.5 4.5 16.5 4.5 11.5V5.5L12 2.5Z"
+      d="M12 2.5L4.5 5.8V11.5C4.5 16.5 7.7 20.8 12 22C16.3 20.8 19.5 16.5 19.5 11.5V5.8L12 2.5Z"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
+    {/* Executive Crown & Star Accent */}
     <path
-      d="M9 11.5L11 13.5L15 9.5"
+      d="M8.5 14L10 9.5L12 11.5L14 9.5L15.5 14H8.5Z"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
+    <circle cx="12" cy="7.2" r="1.1" fill="currentColor" />
   </svg>
 );

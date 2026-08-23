@@ -159,12 +159,9 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] text-slate-800 font-sans selection:bg-zinc-200">
-      {/* Smooth Intro Splash Screen */}
+    <div className="min-h-screen bg-[#f5eedc] text-[#2a1a10] font-sans selection:bg-amber-300/60">
+      {/* Splash Screen */}
       <SplashScreen />
-
-      {/* Top Mobile Border Accent */}
-      <div className="h-0.5 bg-black w-full" />
 
       {/* Main View Container */}
       <main className="w-full">

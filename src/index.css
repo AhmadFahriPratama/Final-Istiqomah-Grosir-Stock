@@ -1,60 +1,108 @@
 @import "tailwindcss";
 
+@theme {
+  --color-white: #faf5e8;
+  --color-black: #2a1a10;
+
+  --color-stone-50: #fbf8f0;
+  --color-stone-100: #f3ebd7;
+  --color-stone-150: #ebe0c8;
+  --color-stone-200: #ded2b8;
+  --color-stone-300: #c8b99c;
+  --color-stone-400: #9e8b74;
+  --color-stone-500: #78604d;
+  --color-stone-600: #5f4a38;
+  --color-stone-700: #483526;
+  --color-stone-800: #38261a;
+  --color-stone-900: #2a1a10;
+  --color-stone-950: #1c1008;
+
+  --color-amber-50: #fdf7ec;
+  --color-amber-100: #faecd2;
+  --color-amber-200: #f5d6a0;
+  --color-amber-500: #c56f1f;
+  --color-amber-600: #ac5a15;
+  --color-amber-700: #8c450c;
+  --color-amber-800: #70360c;
+  --color-amber-900: #592b0c;
+}
+
 @layer base {
   :root {
-    --bg-main: #f8f9fa;
-    --card-bg: #ffffff;
-    --text-primary: #09090b;
-    --text-secondary: #71717a;
-    --text-muted: #a1a1aa;
-    --border-subtle: #e4e4e7;
-    --border-hairline: #f4f4f5;
+    --bg: #f5eedc;
+    --surface: #faf5e8;
+    --surface-raised: #f0e7d2;
+    --text: #2a1a10;
+    --text-secondary: #78604d;
+    --text-muted: #9e8b74;
+    --border: #ded2b8;
+    --border-light: #f3ebd7;
+    --border-dark: #2a1a10;
+    --accent: #8a4f25;
+    --accent-dark: #633312;
+    --accent-light: #faecd2;
+    --accent-text: #633312;
+    --autumn-amber: #c56f1f;
+    --autumn-amber-light: #fdf7ec;
+    --danger: #a83535;
+    --danger-light: #fdf1f1;
+    --success: #3a6941;
+    --success-light: #eef7f0;
   }
 
   body {
-    background-color: var(--bg-main);
-    color: var(--text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     user-select: none;
     -webkit-user-select: none;
     overflow-x: hidden;
+    font-size: 14px;
+    line-height: 1.5;
   }
 
-  /* Ultra minimal scrollbar */
+  /* Minimal rich vintage ivory scrollbar */
   ::-webkit-scrollbar {
-    width: 3px;
-    height: 3px;
+    width: 4px;
+    height: 4px;
   }
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background: #f5eedc;
   }
   ::-webkit-scrollbar-thumb {
-    background: #d4d4d8;
+    background: #c8b99c;
     border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #9e8b74;
+  }
+
+  /* Better focus outlines */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 }
 
-.card-minimal {
-  background-color: #ffffff;
-  border: 1px solid #e4e4e7;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-}
+/* ── Reusable utility classes ── */
 
 .touch-press {
-  transition: transform 0.1s ease, opacity 0.1s ease;
+  transition: transform 80ms ease, opacity 80ms ease;
 }
 .touch-press:active {
   transform: scale(0.97);
-  opacity: 0.9;
+  opacity: 0.85;
 }
 
 .modal-backdrop {
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(42, 26, 16, 0.65);
 }
+
+/* ── Barcode scanner overrides ── */
 
 #reader video,
 #istiqomah-barcode-reader video {
@@ -73,6 +121,8 @@
 #istiqomah-barcode-reader img[alt="Info icon"] {
   display: none !important;
 }
+
+/* ── Scanner animations ── */
 
 @keyframes scanner-laser-sweep {
   0% {
@@ -106,4 +156,24 @@
 
 .animate-focus-ripple {
   animation: focus-ripple 0.6s ease-out forwards;
+}
+
+/* ── Simple fade-in for modals ── */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.anim-fade-in {
+  animation: fadeIn 150ms ease-out;
+}
+
+.anim-slide-up {
+  animation: slideUp 200ms ease-out;
 }

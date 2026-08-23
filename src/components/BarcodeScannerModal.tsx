@@ -8,7 +8,6 @@ import {
   ZapOff,
   Search,
   CheckCircle2,
-  Camera,
 } from 'lucide-react';
 import { soundEffects } from '../utils/audio';
 import { useRegisterModal } from '../utils/modalManager';
@@ -527,7 +526,7 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
   isOpen,
   onClose,
   onScan,
-  title = 'Scan Barcode / QR',
+  title = 'Scan Barcode',
   continuous = false,
 }) => {
   useRegisterModal('BarcodeScannerModal', isOpen, onClose);
@@ -537,7 +536,6 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
 
   const handleDetectedCode = (code: string) => {
     const cleaned = code.trim();
-    // Smooth delay for visual confirmation
     setTimeout(() => {
       onScan(cleaned);
       onClose();
@@ -553,27 +551,22 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 modal-backdrop animate-in fade-in duration-150">
-      <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop anim-fade-in">
+      <div className="bg-white rounded-2xl max-w-sm w-full shadow-xl overflow-hidden border border-stone-200 flex flex-col anim-slide-up">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 bg-zinc-50/90">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
-              <Camera size={14} />
-            </div>
-            <div>
-              <h3 className="text-xs font-bold text-black leading-none">{title}</h3>
-              <p className="text-[10px] text-zinc-500 font-medium mt-0.5">
-                Pindai barcode produk
-              </p>
-            </div>
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-stone-100">
+          <div>
+            <h3 className="text-sm font-semibold text-stone-900">{title}</h3>
+            <p className="text-xs text-stone-400 mt-0.5">
+              Pindai barcode produk
+            </p>
           </div>
           <button
             onClick={() => {
               soundEffects.playClickSound();
               onClose();
             }}
-            className="w-7 h-7 flex items-center justify-center rounded-full text-zinc-400 hover:text-black hover:bg-zinc-200 transition-colors touch-press"
+            className="w-7 h-7 flex items-center justify-center rounded-full text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors"
           >
             <X size={16} />
           </button>
@@ -585,22 +578,22 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
           continuous={continuous}
         />
 
-        {/* Manual Barcode Input Section */}
-        <div className="p-3 bg-white border-t border-zinc-100">
+        {/* Manual Barcode Input */}
+        <div className="p-3 bg-white border-t border-stone-100">
           <form onSubmit={handleManualSubmit} className="flex gap-1.5">
             <div className="relative flex-1">
               <input
                 type="text"
                 value={manualCode}
                 onChange={(e) => setManualCode(e.target.value)}
-                placeholder="Ketik kode barcode manual..."
-                className="w-full pl-8 pr-3 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-mono font-bold transition-colors"
+                placeholder="Ketik kode barcode..."
+                className="w-full pl-8 pr-3 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:border-stone-400 font-mono transition-colors"
               />
-              <Search size={13} className="absolute left-2.5 top-2.5 text-zinc-400" />
+              <Search size={13} className="absolute left-2.5 top-3 text-stone-300" />
             </div>
             <button
               type="submit"
-              className="px-3.5 py-2 bg-black hover:bg-zinc-800 text-white text-xs font-bold rounded-xl touch-press shadow-xs"
+              className="px-3.5 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-xl touch-press"
             >
               Cari
             </button>
@@ -610,3 +603,4 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
     </div>
   );
 };
+

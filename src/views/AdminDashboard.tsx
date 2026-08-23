@@ -7,8 +7,6 @@ import {
   Database,
   FileText,
   AlertTriangle,
-  Package,
-  Activity,
   Volume2,
   VolumeX,
 } from 'lucide-react';
@@ -83,297 +81,153 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
     setIsReportModalOpen(true);
   };
 
-  // If not Fahri / Admin, show Access Denied guard
+  // Access Denied guard
   if (!isFahri) {
     return (
-      <div className="min-h-screen bg-[#f8f9fa] flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-black text-white flex items-center justify-center mb-4 shadow-sm">
-          <AlertTriangle size={26} />
-        </div>
-        <h2 className="text-base font-bold text-black">Akses Dibatasi</h2>
-        <p className="text-xs text-zinc-500 max-w-xs mt-1 mb-5">
-          Halaman Dashboard Utama khusus untuk akun <strong>Fahri</strong> (Administrator).
+      <div className="min-h-screen bg-[#f6f3ed] flex flex-col items-center justify-center p-6 text-center">
+        <AlertTriangle size={28} className="text-stone-400 mb-3" />
+        <h2 className="text-base font-semibold text-stone-900">Akses Dibatasi</h2>
+        <p className="text-xs text-stone-400 max-w-xs mt-1">
+          Dashboard Admin khusus untuk akun Administrator.
         </p>
       </div>
     );
   }
 
+  const menuItems = [
+    {
+      icon: Users,
+      title: 'Kelola Staf',
+      meta: `${usersList.length} akun`,
+      onClick: () => setIsUserManageOpen(true),
+    },
+    {
+      icon: History,
+      title: 'Aktivitas Staf',
+      meta: `${mutationsCount} log`,
+      onClick: () => setIsUserHistoryOpen(true),
+    },
+    {
+      icon: Layers,
+      title: 'Ringkasan Lantai',
+      meta: 'Lt 1–4',
+      onClick: () => setIsFloorSummaryOpen(true),
+    },
+    {
+      icon: Send,
+      title: 'Backup Telegram',
+      meta: settings.telegram.autoBackup ? 'Aktif' : 'Manual',
+      onClick: () => setIsTelegramOpen(true),
+    },
+    {
+      icon: Database,
+      title: 'Master Database',
+      meta: 'JSON',
+      onClick: () => setIsDatabaseOpen(true),
+    },
+    {
+      icon: FileText,
+      title: 'Laporan Global',
+      meta: '4 Lantai',
+      onClick: handleOpenMasterReport,
+    },
+  ];
+
   return (
-    <div className="min-h-screen pb-28 pt-4 px-3.5 max-w-md mx-auto space-y-3.5">
-      {/* Header Bar */}
-      <header className="flex items-center justify-between py-1">
-        <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center shadow-xs">
-            <AdminCrestGlyph size={20} />
+    <div className="min-h-screen pb-28 pt-5 px-4 max-w-md mx-auto">
+      {/* Header */}
+      <header className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-stone-900 text-white flex items-center justify-center shrink-0">
+            <AdminCrestGlyph size={18} />
           </div>
           <div>
-            <div className="flex items-center gap-1.5">
-              <h1 className="text-sm font-extrabold text-black leading-tight">
-                Dashboard Admin
-              </h1>
-              <span className="text-[9px] font-extrabold bg-zinc-900 text-amber-300 border border-amber-500/40 px-1.5 py-0.2 rounded-md font-mono shadow-2xs">
-                v3.0.0
-              </span>
-            </div>
-            <span className="text-[10px] text-zinc-400 font-medium block mt-0.5">
+            <h1 className="text-base font-extrabold text-stone-900 leading-tight">
+              Dashboard Admin
+            </h1>
+            <span className="text-xs text-stone-400">
               Pengaturan & Master Data
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5">
-          {/* Sound Toggle */}
+        <div className="flex items-center gap-2">
           <button
             onClick={() => soundEffects.toggleSound()}
-            className={`p-2 rounded-xl border transition-all touch-press shadow-2xs ${
+            className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors touch-press ${
               isSoundOn
-                ? 'bg-white border-zinc-200 text-zinc-800'
-                : 'bg-zinc-100 border-zinc-300 text-zinc-400'
+                ? 'bg-white border-stone-200 text-stone-500'
+                : 'bg-stone-100 border-stone-200 text-stone-300'
             }`}
-            title={isSoundOn ? 'Suara Aktif (Klik untuk Mematikan)' : 'Suara Mati (Klik untuk Mengaktifkan)'}
           >
             {isSoundOn ? <Volume2 size={14} /> : <VolumeX size={14} />}
           </button>
 
           <button
             onClick={handleOpenMasterReport}
-            className="px-3 py-1.5 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 touch-press shadow-xs"
+            className="px-3 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 touch-press"
           >
             <FileText size={13} /> Laporan
           </button>
         </div>
       </header>
 
-      {/* Aggregate KPI Grid Cards */}
-      <div className="grid grid-cols-2 gap-2">
-        <div className="bg-white p-3 rounded-2xl border border-zinc-200 shadow-xs flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-zinc-100 text-black flex items-center justify-center shrink-0">
-            <Package size={15} />
-          </div>
-          <div>
-            <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider block">
-              Total Unit
-            </span>
-            <span className="text-base font-extrabold text-black font-mono leading-none">
-              {stats.totalStockQty} <span className="text-[10px] font-normal text-zinc-500 font-sans">unit</span>
-            </span>
-          </div>
+      {/* Quick Stats */}
+      <div className="flex items-center gap-5 mb-6 px-1">
+        <div>
+          <span className="text-xl font-extrabold text-stone-900 font-mono leading-none">
+            {stats.totalStockQty}
+          </span>
+          <span className="text-xs text-stone-400 ml-1">unit</span>
         </div>
-
-        <div className="bg-white p-3 rounded-2xl border border-zinc-200 shadow-xs flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-zinc-100 text-black flex items-center justify-center shrink-0">
-            <Layers size={15} />
-          </div>
-          <div>
-            <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider block">
-              Total Macam
-            </span>
-            <span className="text-base font-extrabold text-black font-mono leading-none">
-              {stats.totalItemsCount} <span className="text-[10px] font-normal text-zinc-500 font-sans">item</span>
-            </span>
-          </div>
+        <div className="w-px h-5 bg-stone-200" />
+        <div>
+          <span className="text-xl font-extrabold text-stone-900 font-mono leading-none">
+            {stats.totalItemsCount}
+          </span>
+          <span className="text-xs text-stone-400 ml-1">macam</span>
         </div>
-
-        <div className="bg-white p-3 rounded-2xl border border-zinc-200 shadow-xs flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-zinc-100 text-black flex items-center justify-center shrink-0">
-            <Users size={15} />
-          </div>
-          <div>
-            <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider block">
-              Petugas Staf
-            </span>
-            <span className="text-base font-extrabold text-black font-mono leading-none">
-              {usersList.length} <span className="text-[10px] font-normal text-zinc-500 font-sans">akun</span>
-            </span>
-          </div>
-        </div>
-
-        <div className="bg-white p-3 rounded-2xl border border-zinc-200 shadow-xs flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-zinc-100 text-black flex items-center justify-center shrink-0">
-            <Activity size={15} />
-          </div>
-          <div>
-            <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider block">
-              Log Mutasi
-            </span>
-            <span className="text-base font-extrabold text-black font-mono leading-none">
-              {mutationsCount} <span className="text-[10px] font-normal text-zinc-500 font-sans">log</span>
-            </span>
-          </div>
+        <div className="w-px h-5 bg-stone-200" />
+        <div>
+          <span className="text-xl font-extrabold text-stone-900 font-mono leading-none">
+            {usersList.length}
+          </span>
+          <span className="text-xs text-stone-400 ml-1">staf</span>
         </div>
       </div>
 
-      {/* Main Modular Admin Features: 2-Column Square Grid Cards */}
-      <div className="space-y-2 pt-1">
-        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider px-1 block">
+      {/* Menu Grid */}
+      <div>
+        <h2 className="text-xs font-semibold text-stone-400 mb-2 px-0.5">
           Menu Kontrol
-        </span>
+        </h2>
 
-        <div className="grid grid-cols-2 gap-2.5">
-          {/* 1. Kelola Akun Staf */}
-          <button
-            type="button"
-            onClick={() => {
-              soundEffects.playClickSound();
-              setIsUserManageOpen(true);
-            }}
-            className="p-3.5 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-black text-left cursor-pointer transition-all flex flex-col justify-between min-h-[110px] touch-press shadow-xs group"
-          >
-            <div className="flex items-center justify-between w-full">
-              <div className="w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
-                <Users size={16} />
+        <div className="grid grid-cols-2 gap-2">
+          {menuItems.map((item) => (
+            <button
+              key={item.title}
+              type="button"
+              onClick={() => {
+                soundEffects.playClickSound();
+                item.onClick();
+              }}
+              className="p-3.5 rounded-xl bg-white border border-stone-200 hover:border-stone-300 text-left transition-colors flex flex-col justify-between min-h-[88px] touch-press"
+            >
+              <div className="flex items-center justify-between w-full mb-2">
+                <div className="w-8 h-8 rounded-lg bg-stone-100 text-stone-600 flex items-center justify-center">
+                  <item.icon size={15} />
+                </div>
+                <span className="text-[10px] font-medium text-stone-400 font-mono">
+                  {item.meta}
+                </span>
               </div>
-              <span className="text-[9px] font-extrabold bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded-md font-mono">
-                {usersList.length} Akun
-              </span>
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-black group-hover:text-black">
-                Kelola Staf
-              </h4>
-              <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
-                Akun & hak akses
-              </p>
-            </div>
-          </button>
-
-          {/* 2. Audit Aktivitas */}
-          <button
-            type="button"
-            onClick={() => {
-              soundEffects.playClickSound();
-              setIsUserHistoryOpen(true);
-            }}
-            className="p-3.5 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-black text-left cursor-pointer transition-all flex flex-col justify-between min-h-[110px] touch-press shadow-xs group"
-          >
-            <div className="flex items-center justify-between w-full">
-              <div className="w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
-                <History size={16} />
+              <div>
+                <h4 className="text-xs font-bold text-stone-900 leading-tight">
+                  {item.title}
+                </h4>
               </div>
-              <span className="text-[9px] font-extrabold bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded-md font-mono">
-                {mutationsCount} Log
-              </span>
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-black group-hover:text-black">
-                Aktivitas Staf
-              </h4>
-              <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
-                Audit mutasi & aksi
-              </p>
-            </div>
-          </button>
-
-          {/* 3. Ringkasan Lantai */}
-          <button
-            type="button"
-            onClick={() => {
-              soundEffects.playClickSound();
-              setIsFloorSummaryOpen(true);
-            }}
-            className="p-3.5 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-black text-left cursor-pointer transition-all flex flex-col justify-between min-h-[110px] touch-press shadow-xs group"
-          >
-            <div className="flex items-center justify-between w-full">
-              <div className="w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
-                <Layers size={16} />
-              </div>
-              <span className="text-[9px] font-extrabold bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded-md">
-                Lt 1-4
-              </span>
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-black group-hover:text-black">
-                Ringkasan Lantai
-              </h4>
-              <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
-                Rekap stok per lantai
-              </p>
-            </div>
-          </button>
-
-          {/* 4. Cadangan Telegram */}
-          <button
-            type="button"
-            onClick={() => {
-              soundEffects.playClickSound();
-              setIsTelegramOpen(true);
-            }}
-            className="p-3.5 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-black text-left cursor-pointer transition-all flex flex-col justify-between min-h-[110px] touch-press shadow-xs group"
-          >
-            <div className="flex items-center justify-between w-full">
-              <div className="w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
-                <Send size={15} />
-              </div>
-              <span
-                className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-md ${
-                  settings.telegram.autoBackup
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-zinc-100 text-zinc-500'
-                }`}
-              >
-                {settings.telegram.autoBackup ? 'Auto Aktif' : 'Manual'}
-              </span>
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-black group-hover:text-black">
-                Backup Telegram
-              </h4>
-              <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
-                Cloud bot cadangan
-              </p>
-            </div>
-          </button>
-
-          {/* 5. Master Database */}
-          <button
-            type="button"
-            onClick={() => {
-              soundEffects.playClickSound();
-              setIsDatabaseOpen(true);
-            }}
-            className="p-3.5 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-black text-left cursor-pointer transition-all flex flex-col justify-between min-h-[110px] touch-press shadow-xs group"
-          >
-            <div className="flex items-center justify-between w-full">
-              <div className="w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
-                <Database size={16} />
-              </div>
-              <span className="text-[9px] font-extrabold bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded-md">
-                JSON
-              </span>
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-black group-hover:text-black">
-                Master Database
-              </h4>
-              <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
-                Ekspor, impor & reset
-              </p>
-            </div>
-          </button>
-
-          {/* 6. Laporan Lengkap */}
-          <button
-            type="button"
-            onClick={handleOpenMasterReport}
-            className="p-3.5 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-black text-left cursor-pointer transition-all flex flex-col justify-between min-h-[110px] touch-press shadow-xs group"
-          >
-            <div className="flex items-center justify-between w-full">
-              <div className="w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
-                <FileText size={16} />
-              </div>
-              <span className="text-[9px] font-extrabold bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded-md">
-                Teks / WA
-              </span>
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-black group-hover:text-black">
-                Laporan Global
-              </h4>
-              <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
-                Rekap teks 4 lantai
-              </p>
-            </div>
-          </button>
+            </button>
+          ))}
         </div>
       </div>
 

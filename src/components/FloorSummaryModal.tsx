@@ -23,19 +23,19 @@ export const FloorSummaryModal: React.FC<FloorSummaryModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 modal-backdrop animate-in fade-in duration-150">
-      <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 modal-backdrop anim-fade-in">
+      <div className="bg-white rounded-2xl max-w-md w-full shadow-xl overflow-hidden border border-stone-200 flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 bg-zinc-50 shrink-0">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-stone-100 bg-stone-50 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
+            <div className="w-8 h-8 rounded-xl bg-stone-900 text-white flex items-center justify-center shadow-xs">
               <Layers size={16} />
             </div>
             <div>
-              <h3 className="text-xs font-bold text-black leading-none">
+              <h3 className="text-xs font-bold text-stone-900 leading-none">
                 Ringkasan Lantai
               </h3>
-              <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
+              <p className="text-[10px] text-stone-400 font-medium mt-0.5">
                 Total {stats.totalStockQty} unit • {stats.totalItemsCount} macam
               </p>
             </div>
@@ -45,7 +45,7 @@ export const FloorSummaryModal: React.FC<FloorSummaryModalProps> = ({
               soundEffects.playClickSound();
               onClose();
             }}
-            className="p-1.5 rounded-full text-zinc-400 hover:text-black hover:bg-zinc-200 transition-colors touch-press"
+            className="p-1.5 rounded-full text-stone-400 hover:text-stone-900 hover:bg-stone-200 transition-colors touch-press"
           >
             <X size={16} />
           </button>
@@ -61,22 +61,22 @@ export const FloorSummaryModal: React.FC<FloorSummaryModalProps> = ({
                 onClose();
                 onSelectFloor(f.floorId);
               }}
-              className="p-3 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 hover:border-black cursor-pointer transition-all flex items-center justify-between touch-press shadow-2xs"
+              className="p-3 rounded-2xl bg-stone-50 hover:bg-stone-100 border border-stone-200 hover:border-black cursor-pointer transition-all flex items-center justify-between touch-press shadow-2xs"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-stone-900 text-white flex items-center justify-center shrink-0">
                   <FloorGlyph floorId={f.floorId} size={18} />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <h4 className="text-xs font-bold text-black">{f.name}</h4>
-                    <span className="text-[10px] text-zinc-400 font-medium">
+                    <h4 className="text-xs font-bold text-stone-900">{f.name}</h4>
+                    <span className="text-[10px] text-stone-400 font-medium">
                       ({f.subtitle})
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2 mt-0.5 text-[11px] text-zinc-600">
-                    <span className="font-bold text-black font-mono">
+                  <div className="flex items-center gap-2 mt-0.5 text-[11px] text-stone-500">
+                    <span className="font-bold text-stone-900 font-mono">
                       {f.stockQty} unit
                     </span>
                     <span className="text-zinc-300">•</span>
@@ -93,7 +93,7 @@ export const FloorSummaryModal: React.FC<FloorSummaryModalProps> = ({
                 </div>
               </div>
 
-              <ChevronRight size={16} className="text-zinc-400 shrink-0" />
+              <ChevronRight size={16} className="text-stone-400 shrink-0" />
             </div>
           ))}
         </div>

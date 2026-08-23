@@ -132,24 +132,24 @@ export const AutoBackupReceiverModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 modal-backdrop animate-in fade-in duration-150">
-      <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 modal-backdrop anim-fade-in">
+      <div className="bg-white rounded-2xl max-w-sm w-full shadow-xl overflow-hidden border border-stone-200 flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3.5 border-b border-zinc-100 bg-zinc-50">
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-stone-100 bg-stone-50">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
+            <div className="w-8 h-8 rounded-xl bg-stone-900 text-white flex items-center justify-center shadow-xs">
               <DownloadCloud size={16} />
             </div>
             <div>
-              <h3 className="text-xs font-bold text-black">File Backup Terdeteksi</h3>
-              <p className="text-[10px] text-zinc-500 font-medium mt-0.5 truncate max-w-[200px]">
+              <h3 className="text-xs font-bold text-stone-900">File Backup Terdeteksi</h3>
+              <p className="text-[10px] text-stone-500 font-medium mt-0.5 truncate max-w-[200px]">
                 {fileName}
               </p>
             </div>
           </div>
           <button
             onClick={() => setDetectedData(null)}
-            className="p-1.5 rounded-full text-zinc-400 hover:text-black hover:bg-zinc-200 transition-colors touch-press"
+            className="p-1.5 rounded-full text-stone-400 hover:text-stone-900 hover:bg-stone-200 transition-colors touch-press"
           >
             <X size={16} />
           </button>
@@ -157,28 +157,28 @@ export const AutoBackupReceiverModal: React.FC = () => {
 
         {/* Content */}
         <div className="p-4 space-y-3">
-          <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-3 space-y-2">
-            <div className="flex items-center justify-between text-xs font-bold text-black">
+          <div className="bg-stone-50 border border-stone-200 rounded-2xl p-3 space-y-2">
+            <div className="flex items-center justify-between text-xs font-bold text-stone-900">
               <span>Sumber Data:</span>
-              <span className="font-mono bg-black text-white px-2 py-0.5 rounded-lg text-[10px]">
+              <span className="font-mono bg-stone-900 text-white px-2 py-0.5 rounded-lg text-[10px]">
                 {sourceFloorName}
               </span>
             </div>
 
-            <div className="text-[11px] text-zinc-600 leading-relaxed">
+            <div className="text-[11px] text-stone-500 leading-relaxed">
               File cadangan ini dikirim dari Telegram / perangkat lain. Siap disinkronkan ke HP ini.
             </div>
           </div>
 
           <div className="space-y-2">
             <div>
-              <label className="text-[10px] font-bold text-zinc-600 block mb-1 uppercase tracking-wider">
+              <label className="text-[10px] font-bold text-stone-500 block mb-1 uppercase tracking-wider">
                 Terapkan Ke Lantai:
               </label>
               <select
                 value={targetFloor}
                 onChange={(e) => setTargetFloor(e.target.value as FloorId)}
-                className="w-full px-3 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-xl font-bold"
+                className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl font-bold"
               >
                 {(['1', '2', '3', '4'] as FloorId[]).map((f) => (
                   <option key={f} value={f}>
@@ -189,7 +189,7 @@ export const AutoBackupReceiverModal: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-zinc-600 block mb-1 uppercase tracking-wider">
+              <label className="text-[10px] font-bold text-stone-500 block mb-1 uppercase tracking-wider">
                 Metode Impor:
               </label>
               <div className="grid grid-cols-2 gap-1">
@@ -198,8 +198,8 @@ export const AutoBackupReceiverModal: React.FC = () => {
                   onClick={() => setImportMode('MERGE')}
                   className={`py-1.5 text-xs font-bold rounded-xl border transition-all touch-press ${
                     importMode === 'MERGE'
-                      ? 'bg-black text-white border-black'
-                      : 'bg-zinc-50 text-zinc-600 border-zinc-200'
+                      ? 'bg-stone-900 text-white border-black'
+                      : 'bg-stone-50 text-stone-500 border-stone-200'
                   }`}
                 >
                   Gabung / Update
@@ -209,8 +209,8 @@ export const AutoBackupReceiverModal: React.FC = () => {
                   onClick={() => setImportMode('REPLACE')}
                   className={`py-1.5 text-xs font-bold rounded-xl border transition-all touch-press ${
                     importMode === 'REPLACE'
-                      ? 'bg-black text-white border-black'
-                      : 'bg-zinc-50 text-zinc-600 border-zinc-200'
+                      ? 'bg-stone-900 text-white border-black'
+                      : 'bg-stone-50 text-stone-500 border-stone-200'
                   }`}
                 >
                   Timpa Semua
@@ -218,7 +218,7 @@ export const AutoBackupReceiverModal: React.FC = () => {
               </div>
 
               {importMode === 'REPLACE' && (
-                <p className="text-[10px] text-zinc-800 font-semibold bg-zinc-100 p-1.5 rounded-lg mt-1 border border-zinc-300">
+                <p className="text-[10px] text-stone-700 font-semibold bg-stone-100 p-1.5 rounded-lg mt-1 border border-stone-300">
                   ⚠️ Timpa Semua akan menghapus stok lama di lantai ini.
                 </p>
               )}
@@ -226,7 +226,7 @@ export const AutoBackupReceiverModal: React.FC = () => {
           </div>
 
           {statusMessage && (
-            <div className="p-2.5 bg-black text-white rounded-xl text-xs font-bold text-center">
+            <div className="p-2.5 bg-stone-900 text-white rounded-xl text-xs font-bold text-center">
               {statusMessage}
             </div>
           )}
@@ -234,7 +234,7 @@ export const AutoBackupReceiverModal: React.FC = () => {
           <div className="pt-1">
             <button
               onClick={handleApplyBackup}
-              className="w-full py-2.5 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 touch-press shadow-xs"
+              className="w-full py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 touch-press shadow-xs"
             >
               <CheckCircle size={14} /> Terapkan Backup ke Aplikasi
             </button>

@@ -11,59 +11,82 @@ import {
   AlertTriangle,
   Layers,
   ChevronDown,
+  Filter,
 } from 'lucide-react';
 import type { FloorId } from '../types/stock';
-import { ExportReportEngine } from '../services/exportReportEngine';
+import { FLOOR_DEFINITIONS } from '../types/stock';
+import { ExportReportEngine, type ReportFilterOptions } from '../services/exportReportEngine';
 import { soundEffects } from '../utils/audio';
 import { useRegisterModal } from '../utils/modalManager';
 import { FloorGlyph } from './CustomIcons';
+import { CustomPrintReportModal } from './CustomPrintReportModal';
 
 interface ReportGeneratorModalProps {
   isOpen: boolean;
   onClose: () => void;
+  defaultFloorId?: FloorId | 'ALL';
 }
 
 export const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
   isOpen,
   onClose,
+  defaultFloorId = 'ALL',
 }) => {
   useRegisterModal('ReportGeneratorModal', isOpen, onClose);
 
-  const [selectedFloor, setSelectedFloor] = useState<FloorId | 'ALL'>('ALL');
+  const [selectedFloor, setSelectedFloor] = useState<FloorId | 'ALL'>(defaultFloorId);
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'HABIS' | 'MENIPIS' | 'NORMAL'>('ALL');
   const [searchFilter, setSearchFilter] = useState<string>('');
+  const [isCustomPrintOpen, setIsCustomPrintOpen] = useState<boolean>(false);
   const [isSendingTelegram, setIsSendingTelegram] = useState<boolean>(false);
   const [telegramStatus, setTelegramStatus] = useState<{
     success?: boolean;
     message: string;
   } | null>(null);
 
-  // Get live grouped data based on selected floor
-  const reportData = useMemo(() => {
-    return ExportReportEngine.getGroupedData(selectedFloor);
+  // Active filter payload
+  const filterOptions: ReportFilterOptions = useMemo(
+    () => ({
+      floorId: selectedFloor,
+      category: selectedCategory,
+      searchQuery: searchFilter,
+      statusFilter: statusFilter,
+    }),
+    [selectedFloor, selectedCategory, searchFilter, statusFilter]
+  );
+
+  // Get raw grouped data to find all available categories for current floor
+  const baseFloorData = useMemo(() => {
+    return ExportReportEngine.getGroupedData({ floorId: selectedFloor, category: 'ALL' });
   }, [selectedFloor, isOpen]);
 
-  // Extract all categories available in the current selection
   const availableCategories = useMemo(() => {
     const cats = new Set<string>();
-    reportData.sections.forEach((sec) => {
+    baseFloorData.sections.forEach((sec) => {
       sec.categories.forEach((c) => cats.add(c.categoryName));
     });
-    return Array.from(cats);
-  }, [reportData]);
+    return Array.from(cats).sort((a, b) => a.localeCompare(b));
+  }, [baseFloorData]);
+
+  // Filtered live data
+  const reportData = useMemo(() => {
+    return ExportReportEngine.getGroupedData(filterOptions);
+  }, [filterOptions, isOpen]);
 
   if (!isOpen) return null;
 
   const handleExportPDF = () => {
-    ExportReportEngine.generatePDFPrint(selectedFloor);
+    soundEffects.playClickSound();
+    setIsCustomPrintOpen(true);
   };
 
   const handleExportExcel = () => {
-    ExportReportEngine.generateExcel(selectedFloor);
+    ExportReportEngine.generateExcel(filterOptions);
   };
 
   const handleExportWord = () => {
-    ExportReportEngine.generateWordDoc(selectedFloor);
+    ExportReportEngine.generateWordDoc(filterOptions);
   };
 
   const handleSendTelegram = async () => {
@@ -89,21 +112,27 @@ export const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
     }
   };
 
+  const currentFloorLabel =
+    selectedFloor === 'ALL' ? 'Semua Lantai' : FLOOR_DEFINITIONS[selectedFloor].name;
+
+  const currentCategoryLabel =
+    selectedCategory === 'ALL' ? 'Semua Jenis' : selectedCategory;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 modal-backdrop animate-in fade-in duration-150 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden border border-zinc-200 my-auto flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 modal-backdrop anim-fade-in overflow-y-auto">
+      <div className="bg-white rounded-2xl max-w-3xl w-full shadow-2xl overflow-hidden border border-stone-200 my-auto flex flex-col max-h-[94vh] anim-slide-up">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 bg-zinc-50 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-black text-white flex items-center justify-center shadow-xs">
-              <FileText size={18} />
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-stone-100 bg-stone-50/90 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-stone-900 text-white flex items-center justify-center shadow-xs">
+              <FileText size={17} />
             </div>
             <div>
-              <h3 className="text-sm font-extrabold text-black leading-tight">
-                Pusat Laporan & Ekspor
+              <h3 className="text-sm font-bold text-stone-900 leading-tight">
+                Pusat Laporan & Cetak Tabel
               </h3>
-              <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
-                Format PDF, Excel (XLSX), Word (DOCX), & Backup Telegram
+              <p className="text-xs text-stone-400 mt-0.5">
+                Kustomisasi filter per lantai & jenis barang untuk PDF, Excel, Word
               </p>
             </div>
           </div>
@@ -112,153 +141,240 @@ export const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
               soundEffects.playClickSound();
               onClose();
             }}
-            className="p-1.5 rounded-full text-zinc-400 hover:text-black hover:bg-zinc-200 transition-colors touch-press"
+            className="w-7 h-7 flex items-center justify-center rounded-full text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors touch-press"
           >
             <X size={16} />
           </button>
         </div>
 
-        {/* Floor Selection Bar */}
-        <div className="p-3 bg-zinc-100/90 border-b border-zinc-200 shrink-0 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-              Pilih Lantai Laporan:
-            </span>
-            <span className="text-[10px] font-mono text-zinc-600 font-bold">
-              {reportData.totalStockQty} unit • {reportData.totalItemCount} item
-            </span>
+        {/* Filter Controls Panel */}
+        <div className="p-3.5 bg-stone-50/70 border-b border-stone-200 shrink-0 space-y-3">
+          {/* Row 1: Floor Selector */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5 px-0.5">
+              <span className="text-[11px] font-semibold text-stone-500 flex items-center gap-1">
+                <Filter size={11} /> 1. Pilih Lantai Laporan:
+              </span>
+              <span className="text-[11px] font-mono text-stone-400">
+                {selectedFloor === 'ALL' ? '4 Lantai Terpilih' : FLOOR_DEFINITIONS[selectedFloor].subtitle}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-5 gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  soundEffects.playClickSound();
+                  setSelectedFloor('ALL');
+                  setSelectedCategory('ALL');
+                }}
+                className={`py-2 px-1 text-xs font-semibold rounded-xl border text-center transition-all touch-press ${
+                  selectedFloor === 'ALL'
+                    ? 'bg-stone-900 text-white border-stone-900 shadow-xs'
+                    : 'bg-white text-stone-600 border-stone-200 hover:border-stone-400'
+                }`}
+              >
+                Semua Lt
+              </button>
+
+              {(['1', '2', '3', '4'] as FloorId[]).map((fId) => {
+                const isSelected = selectedFloor === fId;
+                return (
+                  <button
+                    key={fId}
+                    type="button"
+                    onClick={() => {
+                      soundEffects.playClickSound();
+                      setSelectedFloor(fId);
+                      setSelectedCategory('ALL');
+                    }}
+                    className={`py-2 px-1 text-xs font-semibold rounded-xl border flex items-center justify-center gap-1.5 transition-all touch-press ${
+                      isSelected
+                        ? 'bg-stone-900 text-white border-stone-900 shadow-xs'
+                        : 'bg-white text-stone-600 border-stone-200 hover:border-stone-400'
+                    }`}
+                  >
+                    <FloorGlyph floorId={fId} size={13} />
+                    <span>Lt {fId}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          <div className="grid grid-cols-5 gap-1">
-            <button
-              type="button"
-              onClick={() => {
-                soundEffects.playClickSound();
-                setSelectedFloor('ALL');
-                setSelectedCategory('ALL');
-              }}
-              className={`py-1.5 px-2 text-[11px] font-bold rounded-xl border text-center transition-all touch-press ${
-                selectedFloor === 'ALL'
-                  ? 'bg-black text-white border-black shadow-xs'
-                  : 'bg-white text-zinc-700 border-zinc-200 hover:border-black'
-              }`}
-            >
-              Semua
-            </button>
-
-            {(['1', '2', '3', '4'] as FloorId[]).map((fId) => {
-              const isSelected = selectedFloor === fId;
-              return (
-                <button
-                  key={fId}
-                  type="button"
-                  onClick={() => {
+          {/* Row 2: Category / Jenis Selector & Status Filter */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-0.5">
+            {/* Category / Jenis Dropdown */}
+            <div>
+              <label className="text-[11px] font-semibold text-stone-500 block mb-1">
+                2. Jenis / Kategori:
+              </label>
+              <div className="relative">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => {
                     soundEffects.playClickSound();
-                    setSelectedFloor(fId);
-                    setSelectedCategory('ALL');
+                    setSelectedCategory(e.target.value);
                   }}
-                  className={`py-1.5 px-1 text-[11px] font-bold rounded-xl border flex items-center justify-center gap-1 transition-all touch-press ${
-                    isSelected
-                      ? 'bg-black text-white border-black shadow-xs'
-                      : 'bg-white text-zinc-700 border-zinc-200 hover:border-black'
-                  }`}
+                  className="w-full pl-3 pr-8 py-2 text-xs font-semibold bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-stone-400 appearance-none text-stone-900 shadow-2xs"
                 >
-                  <FloorGlyph floorId={fId} size={13} />
-                  <span>Lt {fId}</span>
-                </button>
-              );
-            })}
+                  <option value="ALL">Semua Jenis ({availableCategories.length} Kategori)</option>
+                  {availableCategories.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={14}
+                  className="absolute right-2.5 top-2.5 text-stone-400 pointer-events-none"
+                />
+              </div>
+            </div>
+
+            {/* Status Filter */}
+            <div>
+              <label className="text-[11px] font-semibold text-stone-500 block mb-1">
+                3. Filter Status Stok:
+              </label>
+              <div className="relative">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => {
+                    soundEffects.playClickSound();
+                    setStatusFilter(e.target.value as typeof statusFilter);
+                  }}
+                  className="w-full pl-3 pr-8 py-2 text-xs font-semibold bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-stone-400 appearance-none text-stone-900 shadow-2xs"
+                >
+                  <option value="ALL">Semua Status Produk</option>
+                  <option value="MENIPIS">⚠️ Stok Menipis Saja</option>
+                  <option value="HABIS">🚫 Stok Habis (0) Saja</option>
+                  <option value="NORMAL">✅ Stok Normal / Cukup</option>
+                </select>
+                <ChevronDown
+                  size={14}
+                  className="absolute right-2.5 top-2.5 text-stone-400 pointer-events-none"
+                />
+              </div>
+            </div>
+
+            {/* Search filter */}
+            <div>
+              <label className="text-[11px] font-semibold text-stone-500 block mb-1">
+                4. Cari Produk / SKU:
+              </label>
+              <div className="relative">
+                <Search size={13} className="absolute left-3 top-2.5 text-stone-300" />
+                <input
+                  type="text"
+                  placeholder="Ketik nama atau SKU..."
+                  value={searchFilter}
+                  onChange={(e) => setSearchFilter(e.target.value)}
+                  className="w-full pl-8 pr-3 py-2 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-stone-400 font-medium placeholder:text-stone-300 shadow-2xs"
+                />
+                {searchFilter && (
+                  <button
+                    onClick={() => setSearchFilter('')}
+                    className="absolute right-2.5 top-2 text-xs text-stone-400 hover:text-stone-700"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Export Formats Action Bar (4 Big Tiles) */}
-        <div className="p-3 bg-white border-b border-zinc-200 grid grid-cols-2 sm:grid-cols-4 gap-2 shrink-0">
-          {/* 1. PDF Multi-Page */}
-          <button
-            type="button"
-            onClick={handleExportPDF}
-            className="p-2.5 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 hover:border-black transition-all flex flex-col items-center text-center touch-press shadow-2xs group"
-          >
-            <div className="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center mb-1 shadow-xs">
-              <Printer size={15} />
+        {/* Live Filter Summary & Export Action Bar */}
+        <div className="p-3 bg-white border-b border-stone-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
+          {/* Summary Badges */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 text-xs text-stone-700">
+              <span className="font-bold text-stone-900 font-mono text-sm">
+                {reportData.totalStockQty}
+              </span>
+              <span className="text-stone-400 text-xs">unit</span>
+              <span className="text-stone-300">·</span>
+              <span className="font-bold text-stone-900 font-mono text-sm">
+                {reportData.totalItemCount}
+              </span>
+              <span className="text-stone-400 text-xs">macam</span>
             </div>
-            <span className="text-xs font-bold text-black group-hover:text-black">
-              Cetak / PDF
-            </span>
-            <span className="text-[9px] text-zinc-400 font-medium mt-0.5">
-              Multi-Halaman Rapi
-            </span>
-          </button>
 
-          {/* 2. Excel XLSX */}
-          <button
-            type="button"
-            onClick={handleExportExcel}
-            className="p-2.5 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 hover:border-black transition-all flex flex-col items-center text-center touch-press shadow-2xs group"
-          >
-            <div className="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center mb-1 shadow-xs">
-              <FileSpreadsheet size={15} />
-            </div>
-            <span className="text-xs font-bold text-black group-hover:text-black">
-              Excel (.XLSX)
-            </span>
-            <span className="text-[9px] text-zinc-400 font-medium mt-0.5">
-              Tabel Spreadsheet
-            </span>
-          </button>
+            {reportData.totalLowStock > 0 && (
+              <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md flex items-center gap-1">
+                <AlertTriangle size={10} /> {reportData.totalLowStock} menipis
+              </span>
+            )}
 
-          {/* 3. Word DOCX */}
-          <button
-            type="button"
-            onClick={handleExportWord}
-            className="p-2.5 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 hover:border-black transition-all flex flex-col items-center text-center touch-press shadow-2xs group"
-          >
-            <div className="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center mb-1 shadow-xs">
-              <FileCode size={15} />
-            </div>
-            <span className="text-xs font-bold text-black group-hover:text-black">
-              Word (.DOCX)
-            </span>
-            <span className="text-[9px] text-zinc-400 font-medium mt-0.5">
-              Dokumen Microsoft
-            </span>
-          </button>
+            {reportData.totalOutOfStock > 0 && (
+              <span className="text-[10px] font-semibold text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md">
+                {reportData.totalOutOfStock} habis
+              </span>
+            )}
+          </div>
 
-          {/* 4. Telegram Cloud Backup */}
-          <button
-            type="button"
-            disabled={isSendingTelegram}
-            onClick={handleSendTelegram}
-            className="p-2.5 rounded-2xl bg-zinc-950 hover:bg-zinc-900 text-white border border-zinc-800 transition-all flex flex-col items-center text-center touch-press shadow-xs disabled:opacity-50"
-          >
-            <div className="w-8 h-8 rounded-xl bg-zinc-800 text-white flex items-center justify-center mb-1">
+          {/* Export Buttons */}
+          <div className="flex items-center gap-1.5">
+            {/* PDF Button */}
+            <button
+              type="button"
+              onClick={handleExportPDF}
+              className="px-3.5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 touch-press shadow-xs"
+              title="Cetak atau simpan sebagai file PDF rapi"
+            >
+              <Printer size={14} /> Cetak / PDF
+            </button>
+
+            {/* Excel Button */}
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 touch-press"
+              title="Download format Spreadsheet Excel"
+            >
+              <FileSpreadsheet size={14} /> Excel
+            </button>
+
+            {/* Word Button */}
+            <button
+              type="button"
+              onClick={handleExportWord}
+              className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 touch-press"
+              title="Download format Word DOCX"
+            >
+              <FileCode size={14} /> Word
+            </button>
+
+            {/* Telegram Button */}
+            <button
+              type="button"
+              disabled={isSendingTelegram}
+              onClick={handleSendTelegram}
+              className="p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl touch-press disabled:opacity-50"
+              title="Kirim dokumen backup ke Telegram Bot"
+            >
               <Send size={14} />
-            </div>
-            <span className="text-xs font-bold text-white">
-              {isSendingTelegram ? 'Mengirim...' : 'Ke Telegram'}
-            </span>
-            <span className="text-[9px] text-zinc-400 font-medium mt-0.5">
-              Backup Cloud Bot
-            </span>
-          </button>
+            </button>
+          </div>
         </div>
 
         {/* Telegram Status Toast Alert */}
         {telegramStatus && (
           <div
-            className={`mx-3 mt-2 p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-between shrink-0 shadow-xs animate-in fade-in ${
+            className={`mx-4 mt-3 p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-between shrink-0 anim-fade-in ${
               telegramStatus.success
                 ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
                 : telegramStatus.success === false
                 ? 'bg-red-50 text-red-900 border-red-200'
-                : 'bg-zinc-100 text-black border-zinc-200'
+                : 'bg-stone-100 text-stone-900 border-stone-200'
             }`}
           >
             <div className="flex items-center gap-1.5">
               {telegramStatus.success ? (
                 <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
               ) : (
-                <AlertTriangle size={14} className="text-zinc-600 shrink-0" />
+                <AlertTriangle size={14} className="text-stone-500 shrink-0" />
               )}
               <span>{telegramStatus.message}</span>
             </div>
@@ -271,93 +387,50 @@ export const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
           </div>
         )}
 
-        {/* Live Filter Controls (Category & Search) */}
-        <div className="p-3 bg-zinc-50 border-b border-zinc-200 flex flex-wrap items-center justify-between gap-2 shrink-0">
-          <div className="relative flex-1 min-w-[160px]">
-            <Search size={13} className="absolute left-2.5 top-2.5 text-zinc-400" />
-            <input
-              type="text"
-              placeholder="Filter nama produk / barcode..."
-              value={searchFilter}
-              onChange={(e) => setSearchFilter(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-xl focus:outline-none focus:border-black font-medium"
-            />
-          </div>
-
-          <div className="relative min-w-[140px]">
-            <select
-              value={selectedCategory}
-              onChange={(e) => {
-                soundEffects.playClickSound();
-                setSelectedCategory(e.target.value);
-              }}
-              className="w-full pl-3 pr-7 py-1.5 text-xs font-bold bg-white border border-zinc-200 rounded-xl focus:outline-none focus:border-black appearance-none"
-            >
-              <option value="ALL">Semua Kategori</option>
-              {availableCategories.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              size={13}
-              className="absolute right-2.5 top-2.5 text-zinc-400 pointer-events-none"
-            />
-          </div>
+        {/* Active Filter Banner */}
+        <div className="px-4 py-2 bg-stone-100/60 border-b border-stone-200 text-[11px] text-stone-500 flex items-center justify-between shrink-0">
+          <span>
+            Target: <strong>{currentFloorLabel}</strong> · <strong>{currentCategoryLabel}</strong>
+            {statusFilter !== 'ALL' && ` · Status: ${statusFilter}`}
+            {searchFilter && ` · Cari: "${searchFilter}"`}
+          </span>
+          <span className="text-[10px] text-stone-400 font-mono">
+            Preview Live
+          </span>
         </div>
 
-        {/* Table Content Area (Categorized Sections) */}
-        <div className="p-3 sm:p-4 overflow-y-auto space-y-4 flex-1">
-          {reportData.sections.map((sec) => {
-            const filteredCategories = sec.categories
-              .map((cat) => {
-                if (selectedCategory !== 'ALL' && cat.categoryName !== selectedCategory) {
-                  return null;
-                }
-                const filteredRows = cat.items.filter((it) => {
-                  if (!searchFilter.trim()) return true;
-                  const q = searchFilter.toLowerCase().trim();
-                  return (
-                    it.name.toLowerCase().includes(q) ||
-                    it.barcode.toLowerCase().includes(q) ||
-                    it.location.toLowerCase().includes(q)
-                  );
-                });
-                if (filteredRows.length === 0) return null;
-                return {
-                  ...cat,
-                  items: filteredRows,
-                };
-              })
-              .filter(Boolean);
-
-            if (filteredCategories.length === 0) return null;
-
-            return (
+        {/* Live Table Content Area */}
+        <div className="p-4 overflow-y-auto space-y-4 flex-1">
+          {reportData.sections.length === 0 ? (
+            <div className="py-12 text-center text-stone-400">
+              <p className="text-sm font-semibold text-stone-600">Tidak ada produk ditemukan</p>
+              <p className="text-xs mt-1">Coba ubah pilihan lantai, jenis, atau filter status di atas.</p>
+            </div>
+          ) : (
+            reportData.sections.map((sec) => (
               <div key={sec.floorId} className="space-y-3">
-                {/* Floor Subheader */}
+                {/* Floor Header */}
                 <div className="flex items-center gap-2 px-1">
-                  <div className="w-5 h-5 rounded-md bg-black text-white flex items-center justify-center">
+                  <div className="w-5 h-5 rounded-md bg-stone-900 text-white flex items-center justify-center">
                     <FloorGlyph floorId={sec.floorId} size={12} />
                   </div>
-                  <h4 className="text-xs font-extrabold text-black uppercase tracking-wider">
+                  <h4 className="text-xs font-bold text-stone-900">
                     {sec.floorName}
                   </h4>
                 </div>
 
-                {filteredCategories.map((cat) => (
+                {sec.categories.map((cat) => (
                   <div
-                    key={cat!.categoryName}
-                    className="bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-2xs"
+                    key={cat.categoryName}
+                    className="bg-white border border-stone-200 rounded-xl overflow-hidden shadow-2xs"
                   >
                     {/* Category Title Bar */}
-                    <div className="px-3.5 py-2 bg-zinc-100 border-b border-zinc-200 flex items-center justify-between">
-                      <span className="text-xs font-bold text-black flex items-center gap-1.5">
-                        <Layers size={13} /> {cat!.categoryName}
+                    <div className="px-3.5 py-2 bg-stone-50 border-b border-stone-200 flex items-center justify-between">
+                      <span className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
+                        <Layers size={13} className="text-stone-400" /> {cat.categoryName}
                       </span>
-                      <span className="text-[10px] font-mono text-zinc-600 font-bold">
-                        {cat!.categoryTotalQty} unit ({cat!.items.length} item)
+                      <span className="text-[10px] font-mono text-stone-500 font-medium">
+                        {cat.categoryTotalQty} unit · {cat.items.length} macam
                       </span>
                     </div>
 
@@ -365,48 +438,52 @@ export const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-xs border-collapse">
                         <thead>
-                          <tr className="bg-zinc-50/80 text-[10px] text-zinc-500 font-bold border-b border-zinc-200 uppercase">
+                          <tr className="bg-stone-50/50 text-[10px] text-stone-400 font-semibold border-b border-stone-200">
                             <th className="py-2 px-3 text-center w-8">No</th>
                             <th className="py-2 px-3">Nama Produk</th>
-                            <th className="py-2 px-3 text-right">Stok</th>
+                            <th className="py-2 px-3 text-right">Stok Fisik</th>
                             <th className="py-2 px-3">Satuan</th>
                             <th className="py-2 px-3 text-right">Min</th>
-                            <th className="py-2 px-3">Lokasi</th>
+                            <th className="py-2 px-3 text-right">Max</th>
+                            <th className="py-2 px-3">Lokasi / Rak</th>
                             <th className="py-2 px-3 text-center">Status</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-zinc-100 font-medium">
-                          {cat!.items.map((it) => (
-                            <tr key={it.no} className="hover:bg-zinc-50/50 transition-colors">
-                              <td className="py-2 px-3 text-center text-[11px] text-zinc-400 font-mono">
+                        <tbody className="divide-y divide-stone-100 font-medium">
+                          {cat.items.map((it) => (
+                            <tr key={it.no} className="hover:bg-stone-50/50 transition-colors">
+                              <td className="py-2 px-3 text-center text-[11px] text-stone-400 font-mono">
                                 {it.no}
                               </td>
                               <td className="py-2 px-3">
-                                <span className="font-bold text-black block">{it.name}</span>
+                                <span className="font-semibold text-stone-900 block">{it.name}</span>
                                 {it.barcode !== '-' && (
-                                  <span className="text-[9px] text-zinc-400 font-mono block">
+                                  <span className="text-[9px] text-stone-400 font-mono block">
                                     SKU: {it.barcode}
                                   </span>
                                 )}
                               </td>
-                              <td className="py-2 px-3 text-right font-mono font-extrabold text-black text-sm">
+                              <td className="py-2 px-3 text-right font-mono font-bold text-stone-900 text-sm">
                                 {it.quantity}
                               </td>
-                              <td className="py-2 px-3 text-zinc-600 text-xs">{it.unit}</td>
-                              <td className="py-2 px-3 text-right font-mono text-zinc-500">
+                              <td className="py-2 px-3 text-stone-500 text-xs">{it.unit}</td>
+                              <td className="py-2 px-3 text-right font-mono text-stone-500">
                                 {it.minStock || 0}
                               </td>
-                              <td className="py-2 px-3 text-zinc-500 text-xs">{it.location}</td>
+                              <td className="py-2 px-3 text-right font-mono text-stone-400">
+                                {it.maxStock || '∞'}
+                              </td>
+                              <td className="py-2 px-3 text-stone-500 text-xs">{it.location}</td>
                               <td className="py-2 px-3 text-center">
                                 <span
-                                  className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                                  className={`px-1.5 py-0.5 rounded text-[9px] font-semibold ${
                                     it.status === 'HABIS'
-                                      ? 'bg-red-100 text-red-800'
+                                      ? 'bg-red-50 text-red-700'
                                       : it.status === 'MENIPIS'
-                                      ? 'bg-amber-100 text-amber-800'
+                                      ? 'bg-amber-50 text-amber-800'
                                       : it.status === 'PENUH'
-                                      ? 'bg-zinc-100 text-zinc-700'
-                                      : 'bg-emerald-100 text-emerald-800'
+                                      ? 'bg-stone-100 text-stone-600'
+                                      : 'bg-emerald-50 text-emerald-800'
                                   }`}
                                 >
                                   {it.status}
@@ -420,10 +497,17 @@ export const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
                   </div>
                 ))}
               </div>
-            );
-          })}
+            ))
+          )}
         </div>
       </div>
+
+      {/* Custom In-App Print Document Viewer */}
+      <CustomPrintReportModal
+        isOpen={isCustomPrintOpen}
+        filterOptions={filterOptions}
+        onClose={() => setIsCustomPrintOpen(false)}
+      />
     </div>
   );
 };

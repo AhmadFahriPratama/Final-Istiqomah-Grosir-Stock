@@ -141,19 +141,19 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 modal-backdrop animate-in fade-in duration-150">
-      <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 modal-backdrop anim-fade-in">
+      <div className="bg-white rounded-2xl max-w-md w-full shadow-xl overflow-hidden border border-stone-200 flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3.5 border-b border-zinc-100 bg-zinc-50/90 shrink-0">
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-stone-100 bg-stone-50/90 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
+            <div className="w-8 h-8 rounded-xl bg-stone-900 text-white flex items-center justify-center shadow-xs">
               <Database size={16} />
             </div>
             <div>
-              <h3 className="text-xs font-bold text-black leading-none">
+              <h3 className="text-xs font-bold text-stone-900 leading-none">
                 Master Database (JSON)
               </h3>
-              <p className="text-[10px] text-zinc-500 font-medium mt-0.5">
+              <p className="text-[10px] text-stone-500 font-medium mt-0.5">
                 Cadangkan, pulihkan, atau reset database toko
               </p>
             </div>
@@ -163,7 +163,7 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
               soundEffects.playClickSound();
               onClose();
             }}
-            className="w-7 h-7 flex items-center justify-center rounded-full text-zinc-400 hover:text-black hover:bg-zinc-200 transition-colors touch-press"
+            className="w-7 h-7 flex items-center justify-center rounded-full text-stone-400 hover:text-stone-900 hover:bg-stone-200 transition-colors touch-press"
           >
             <X size={16} />
           </button>
@@ -175,14 +175,14 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
             <div
               className={`p-3 rounded-2xl border text-xs font-semibold flex items-center gap-2 ${
                 importStatus.success
-                  ? 'bg-black text-white border-zinc-800 shadow-md'
-                  : 'bg-zinc-100 text-zinc-900 border-zinc-300'
+                  ? 'bg-stone-900 text-white border-stone-800 shadow-md'
+                  : 'bg-stone-100 text-stone-800 border-stone-300'
               }`}
             >
               {importStatus.success ? (
                 <CheckCircle2 size={16} className="text-white shrink-0" />
               ) : (
-                <AlertTriangle size={16} className="text-zinc-800 shrink-0" />
+                <AlertTriangle size={16} className="text-stone-700 shrink-0" />
               )}
               <span>{importStatus.message}</span>
             </div>
@@ -192,13 +192,13 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
           <div className="grid grid-cols-2 gap-2.5">
             <button
               onClick={handleDownloadAllJSON}
-              className="p-3.5 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 hover:border-black rounded-2xl text-left touch-press transition-all shadow-xs"
+              className="p-3.5 bg-stone-50 hover:bg-stone-100 border border-stone-200 hover:border-black rounded-2xl text-left touch-press transition-all shadow-xs"
             >
-              <div className="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center mb-2">
+              <div className="w-8 h-8 rounded-xl bg-stone-900 text-white flex items-center justify-center mb-2">
                 <Download size={15} />
               </div>
-              <span className="text-xs font-bold text-black block">Unduh File JSON</span>
-              <span className="text-[10px] text-zinc-500 block mt-0.5">
+              <span className="text-xs font-bold text-stone-900 block">Unduh File JSON</span>
+              <span className="text-[10px] text-stone-500 block mt-0.5">
                 Simpan seluruh database 4 lantai ke file lokal
               </span>
             </button>
@@ -213,13 +213,13 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
               />
               <button
                 onClick={() => fullImportRef.current?.click()}
-                className="w-full h-full p-3.5 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 hover:border-black rounded-2xl text-left touch-press transition-all shadow-xs"
+                className="w-full h-full p-3.5 bg-stone-50 hover:bg-stone-100 border border-stone-200 hover:border-black rounded-2xl text-left touch-press transition-all shadow-xs"
               >
-                <div className="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center mb-2">
+                <div className="w-8 h-8 rounded-xl bg-stone-900 text-white flex items-center justify-center mb-2">
                   <Upload size={15} />
                 </div>
-                <span className="text-xs font-bold text-black block">Pulihkan JSON</span>
-                <span className="text-[10px] text-zinc-500 block mt-0.5">
+                <span className="text-xs font-bold text-stone-900 block">Pulihkan JSON</span>
+                <span className="text-[10px] text-stone-500 block mt-0.5">
                   Import data dari file backup
                 </span>
               </button>
@@ -228,37 +228,37 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
 
           {/* Pending Restore Confirmation Card */}
           {pendingRestore && (
-            <div className="p-3.5 bg-zinc-50 border-2 border-black rounded-2xl space-y-3">
+            <div className="p-3.5 bg-stone-50 border-2 border-black rounded-2xl space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <FileCheck size={16} className="text-black" />
-                  <span className="text-xs font-bold text-black">Konfirmasi Pemulihan</span>
+                  <FileCheck size={16} className="text-stone-900" />
+                  <span className="text-xs font-bold text-stone-900">Konfirmasi Pemulihan</span>
                 </div>
                 <button
                   onClick={() => setPendingRestore(null)}
-                  className="text-[10px] text-zinc-400 hover:text-black font-semibold"
+                  className="text-[10px] text-stone-400 hover:text-stone-900 font-semibold"
                 >
                   Batal
                 </button>
               </div>
 
-              <div className="bg-white p-2.5 rounded-xl border border-zinc-200 text-xs space-y-1">
+              <div className="bg-white p-2.5 rounded-xl border border-stone-200 text-xs space-y-1">
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">File:</span>
-                  <span className="font-bold text-black truncate max-w-[180px]">
+                  <span className="text-stone-500">File:</span>
+                  <span className="font-bold text-stone-900 truncate max-w-[180px]">
                     {pendingRestore.fileName}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Total Barang:</span>
-                  <span className="font-mono font-bold text-black">
+                  <span className="text-stone-500">Total Barang:</span>
+                  <span className="font-mono font-bold text-stone-900">
                     {pendingRestore.itemCount} macam
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-zinc-600 block mb-1 uppercase tracking-wider">
+                <label className="text-[10px] font-bold text-stone-500 block mb-1 uppercase tracking-wider">
                   Pilih Metode:
                 </label>
                 <div className="grid grid-cols-2 gap-1">
@@ -267,8 +267,8 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
                     onClick={() => setRestoreMode('MERGE')}
                     className={`py-1.5 text-xs font-bold rounded-xl border transition-all touch-press ${
                       restoreMode === 'MERGE'
-                        ? 'bg-black text-white border-black'
-                        : 'bg-white text-zinc-600 border-zinc-200'
+                        ? 'bg-stone-900 text-white border-black'
+                        : 'bg-white text-stone-500 border-stone-200'
                     }`}
                   >
                     Gabung / Update
@@ -278,15 +278,15 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
                     onClick={() => setRestoreMode('REPLACE')}
                     className={`py-1.5 text-xs font-bold rounded-xl border transition-all touch-press ${
                       restoreMode === 'REPLACE'
-                        ? 'bg-black text-white border-black'
-                        : 'bg-white text-zinc-600 border-zinc-200'
+                        ? 'bg-stone-900 text-white border-black'
+                        : 'bg-white text-stone-500 border-stone-200'
                     }`}
                   >
                     Timpa Semua
                   </button>
                 </div>
                 {restoreMode === 'REPLACE' && (
-                  <p className="text-[10px] text-zinc-800 font-semibold bg-zinc-100 p-2 rounded-lg mt-1.5 border border-zinc-300">
+                  <p className="text-[10px] text-stone-700 font-semibold bg-stone-100 p-2 rounded-lg mt-1.5 border border-stone-300">
                     ⚠️ Mode Timpa Semua akan menghapus data lama dan menggantikannya dengan file ini.
                   </p>
                 )}
@@ -294,7 +294,7 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
 
               <button
                 onClick={handleConfirmRestore}
-                className="w-full py-2 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 touch-press shadow-xs"
+                className="w-full py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 touch-press shadow-xs"
               >
                 <CheckCircle2 size={13} /> Terapkan Pemulihan Sekarang
               </button>
@@ -302,18 +302,18 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
           )}
 
           {/* Info Card */}
-          <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-2xl space-y-1">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1">
+          <div className="p-3 bg-stone-50 border border-stone-200 rounded-2xl space-y-1">
+            <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider flex items-center gap-1">
               <FileCheck size={12} /> Format Data Backup
             </span>
-            <p className="text-[11px] text-zinc-600 leading-relaxed">
+            <p className="text-[11px] text-stone-500 leading-relaxed">
               File cadangan (<code>.json</code>) mencakup seluruh daftar barang, kategori, riwayat mutasi, dan akun dari Lantai 1 sampai 4.
             </p>
           </div>
 
           {/* Danger Zone: Reset all data with strict safeguard */}
-          <div className="pt-2 border-t border-zinc-200">
-            <span className="text-[10px] font-bold text-zinc-800 uppercase tracking-wider block mb-1.5">
+          <div className="pt-2 border-t border-stone-200">
+            <span className="text-[10px] font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
               Reset Database Toko
             </span>
             <button
@@ -322,24 +322,24 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
                 setIsResetModalOpen(true);
                 setResetConfirmText('');
               }}
-              className="w-full py-2.5 bg-zinc-900 hover:bg-black text-white border border-black rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 touch-press transition-colors shadow-xs"
+              className="w-full py-2.5 bg-stone-800 hover:bg-stone-900 text-white border border-black rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 touch-press transition-colors shadow-xs"
             >
               <Trash2 size={14} /> Kosongkan Semua Produk & Jenis (Reset ke 0)
             </button>
-            <p className="text-[9px] text-zinc-400 text-center mt-1">
+            <p className="text-[9px] text-stone-400 text-center mt-1">
               Data stok di semua lantai akan kembali kosong (0 macam item).
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="p-3 bg-zinc-50 border-t border-zinc-100 flex justify-end shrink-0">
+        <div className="p-3 bg-stone-50 border-t border-stone-100 flex justify-end shrink-0">
           <button
             onClick={() => {
               soundEffects.playClickSound();
               onClose();
             }}
-            className="px-4 py-2 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold touch-press shadow-xs"
+            className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold touch-press shadow-xs"
           >
             Tutup
           </button>
@@ -348,24 +348,24 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
 
       {/* Strict Security Confirmation Modal for RESET */}
       {isResetModalOpen && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/90 modal-backdrop animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border-2 border-black space-y-3.5">
-            <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center mx-auto">
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/90 modal-backdrop anim-fade-in">
+          <div className="bg-white rounded-2xl max-w-xs w-full p-5 shadow-xl border-2 border-black space-y-3.5">
+            <div className="w-10 h-10 rounded-2xl bg-stone-900 text-white flex items-center justify-center mx-auto">
               <ShieldAlert size={20} />
             </div>
 
             <div className="text-center space-y-1">
-              <h4 className="text-xs font-extrabold text-black uppercase tracking-wider">
+              <h4 className="text-xs font-extrabold text-stone-900 uppercase tracking-wider">
                 Konfirmasi Reset Total
               </h4>
-              <p className="text-[11px] text-zinc-600 leading-relaxed">
+              <p className="text-[11px] text-stone-500 leading-relaxed">
                 Tindakan ini akan <strong>menghapus seluruh produk & stok</strong> di Lantai 1, 2, 3, dan 4.
               </p>
             </div>
 
             <div className="space-y-1.5 pt-1">
-              <label className="text-[10px] font-bold text-zinc-700 block text-center">
-                Ketik kata <span className="font-mono text-black font-extrabold">RESET</span> untuk melanjutkan:
+              <label className="text-[10px] font-bold text-stone-600 block text-center">
+                Ketik kata <span className="font-mono text-stone-900 font-extrabold">RESET</span> untuk melanjutkan:
               </label>
               <input
                 type="text"
@@ -373,7 +373,7 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
                 placeholder="RESET"
                 value={resetConfirmText}
                 onChange={(e) => setResetConfirmText(e.target.value)}
-                className="w-full px-3 py-2 text-center text-xs font-mono font-extrabold tracking-widest bg-zinc-50 border border-zinc-300 rounded-xl focus:outline-none focus:border-black uppercase"
+                className="w-full px-3 py-2 text-center text-xs font-mono font-extrabold tracking-widest bg-stone-50 border border-stone-300 rounded-xl focus:outline-none focus:border-black uppercase"
               />
             </div>
 
@@ -381,7 +381,7 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
               <button
                 type="button"
                 onClick={() => setIsResetModalOpen(false)}
-                className="py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 rounded-xl text-xs font-bold touch-press"
+                className="py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold touch-press"
               >
                 Batal
               </button>
@@ -389,7 +389,7 @@ export const MasterDatabaseModal: React.FC<MasterDatabaseModalProps> = ({
                 type="button"
                 disabled={resetConfirmText.trim().toUpperCase() !== 'RESET'}
                 onClick={handleExecuteReset}
-                className="py-2 bg-black hover:bg-zinc-800 disabled:opacity-30 text-white rounded-xl text-xs font-bold touch-press shadow-xs"
+                className="py-2 bg-stone-900 hover:bg-stone-800 disabled:opacity-30 text-white rounded-xl text-xs font-bold touch-press shadow-xs"
               >
                 Reset Semua
               </button>

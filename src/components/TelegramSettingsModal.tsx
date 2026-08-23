@@ -88,19 +88,19 @@ export const TelegramSettingsModal: React.FC<TelegramSettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 modal-backdrop animate-in fade-in duration-150">
-      <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 modal-backdrop anim-fade-in">
+      <div className="bg-white rounded-2xl max-w-md w-full shadow-xl overflow-hidden border border-stone-200 flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3.5 border-b border-zinc-100 bg-zinc-50/90 shrink-0">
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-stone-100 bg-stone-50/90 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
+            <div className="w-8 h-8 rounded-xl bg-stone-900 text-white flex items-center justify-center shadow-xs">
               <Bot size={16} />
             </div>
             <div>
-              <h3 className="text-xs font-bold text-black leading-none">
+              <h3 className="text-xs font-bold text-stone-900 leading-none">
                 Telegram Bot & Auto-Backup
               </h3>
-              <p className="text-[10px] text-zinc-500 font-medium mt-0.5">
+              <p className="text-[10px] text-stone-500 font-medium mt-0.5">
                 Pusat integrasi backup data cloud otomatis
               </p>
             </div>
@@ -110,7 +110,7 @@ export const TelegramSettingsModal: React.FC<TelegramSettingsModalProps> = ({
               soundEffects.playClickSound();
               onClose();
             }}
-            className="w-7 h-7 flex items-center justify-center rounded-full text-zinc-400 hover:text-black hover:bg-zinc-200 transition-colors touch-press"
+            className="w-7 h-7 flex items-center justify-center rounded-full text-stone-400 hover:text-stone-900 hover:bg-stone-200 transition-colors touch-press"
           >
             <X size={16} />
           </button>
@@ -119,7 +119,7 @@ export const TelegramSettingsModal: React.FC<TelegramSettingsModalProps> = ({
         {/* Content */}
         <div className="p-4 overflow-y-auto space-y-3.5 flex-1">
           <div>
-            <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider block mb-1">
+            <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
               Bot Token (@BotFather):
             </label>
             <input
@@ -127,15 +127,15 @@ export const TelegramSettingsModal: React.FC<TelegramSettingsModalProps> = ({
               value={botToken}
               onChange={(e) => setBotToken(e.target.value)}
               placeholder="123456789:ABCdefGhIJKlm..."
-              className="w-full px-3 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-xl font-mono focus:outline-none focus:border-black font-bold"
+              className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl font-mono focus:outline-none focus:border-black font-bold"
             />
-            <p className="text-[10px] text-zinc-400 mt-1">
+            <p className="text-[10px] text-stone-400 mt-1">
               Dapatkan token bot pribadi dari <strong>@BotFather</strong> di Telegram.
             </p>
           </div>
 
           <div>
-            <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider block mb-1">
+            <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
               Chat ID / Channel ID:
             </label>
             <input
@@ -143,26 +143,26 @@ export const TelegramSettingsModal: React.FC<TelegramSettingsModalProps> = ({
               value={chatId}
               onChange={(e) => setChatId(e.target.value)}
               placeholder="-100123456789"
-              className="w-full px-3 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-xl font-mono focus:outline-none focus:border-black font-bold"
+              className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl font-mono focus:outline-none focus:border-black font-bold"
             />
-            <p className="text-[10px] text-zinc-400 mt-1">
+            <p className="text-[10px] text-stone-400 mt-1">
               Chat ID akun pribadi atau Channel ID tujuan backup file JSON.
             </p>
           </div>
 
-          <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-2xl">
+          <div className="p-3 bg-stone-50 border border-stone-200 rounded-2xl">
             <label className="flex items-center gap-2.5 cursor-pointer">
               <input
                 type="checkbox"
                 checked={autoBackup}
                 onChange={(e) => setAutoBackup(e.target.checked)}
-                className="rounded text-black w-4 h-4 focus:ring-0 cursor-pointer"
+                className="rounded text-stone-900 w-4 h-4 focus:ring-0 cursor-pointer"
               />
               <div>
-                <span className="text-xs font-bold text-black block">
+                <span className="text-xs font-bold text-stone-900 block">
                   Auto-Backup Otomatis
                 </span>
-                <span className="text-[10px] text-zinc-500 block">
+                <span className="text-[10px] text-stone-500 block">
                   Kirim backup database otomatis ke Telegram setiap kali terjadi perubahan data saat online.
                 </span>
               </div>
@@ -170,8 +170,8 @@ export const TelegramSettingsModal: React.FC<TelegramSettingsModalProps> = ({
           </div>
 
           {telegramStatus && (
-            <div className="p-2.5 rounded-xl bg-zinc-100 border border-zinc-200 text-xs text-black font-semibold flex items-center gap-2">
-              <CheckCircle2 size={15} className="text-black shrink-0" />
+            <div className="p-2.5 rounded-xl bg-stone-100 border border-stone-200 text-xs text-stone-900 font-semibold flex items-center gap-2">
+              <CheckCircle2 size={15} className="text-stone-900 shrink-0" />
               <span>{telegramStatus}</span>
             </div>
           )}
@@ -180,7 +180,7 @@ export const TelegramSettingsModal: React.FC<TelegramSettingsModalProps> = ({
             <button
               onClick={handleTestTelegram}
               disabled={isTestingTelegram}
-              className="py-2.5 bg-zinc-100 hover:bg-zinc-200 text-black border border-zinc-200 rounded-xl text-xs font-bold touch-press disabled:opacity-50 flex items-center justify-center gap-1.5"
+              className="py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-900 border border-stone-200 rounded-xl text-xs font-bold touch-press disabled:opacity-50 flex items-center justify-center gap-1.5"
             >
               <ShieldCheck size={14} />
               {isTestingTelegram ? 'Menguji...' : 'Tes Koneksi Bot'}
@@ -189,7 +189,7 @@ export const TelegramSettingsModal: React.FC<TelegramSettingsModalProps> = ({
             <button
               onClick={handleSendFullTelegramBackup}
               disabled={isSendingBackup}
-              className="py-2.5 bg-zinc-900 hover:bg-black text-white rounded-xl text-xs font-bold touch-press disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm"
+              className="py-2.5 bg-stone-800 hover:bg-stone-900 text-white rounded-xl text-xs font-bold touch-press disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm"
             >
               <Send size={13} />
               {isSendingBackup ? 'Mengirim...' : 'Kirim Backup Sekarang'}
@@ -198,19 +198,19 @@ export const TelegramSettingsModal: React.FC<TelegramSettingsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-3 bg-zinc-50 border-t border-zinc-100 flex justify-end gap-2 shrink-0">
+        <div className="p-3 bg-stone-50 border-t border-stone-100 flex justify-end gap-2 shrink-0">
           <button
             onClick={() => {
               soundEffects.playClickSound();
               onClose();
             }}
-            className="px-4 py-2 bg-zinc-200 hover:bg-zinc-300 text-black rounded-xl text-xs font-bold touch-press"
+            className="px-4 py-2 bg-stone-200 hover:bg-zinc-300 text-stone-900 rounded-xl text-xs font-bold touch-press"
           >
             Batal
           </button>
           <button
             onClick={handleSaveTelegram}
-            className="px-4 py-2 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold touch-press shadow-xs"
+            className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold touch-press shadow-xs"
           >
             Simpan Pengaturan
           </button>

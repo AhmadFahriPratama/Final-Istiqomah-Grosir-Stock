@@ -231,19 +231,19 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 modal-backdrop animate-in fade-in duration-150 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden border border-zinc-200 my-auto max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 modal-backdrop anim-fade-in overflow-y-auto">
+      <div className="bg-white rounded-2xl max-w-sm w-full shadow-xl overflow-hidden border border-stone-200 my-auto max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 bg-zinc-50">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100 bg-stone-50">
           <div className="flex items-center gap-2">
-            <Share2 size={16} className="text-black" />
-            <h3 className="text-xs font-bold text-black">
+            <Share2 size={16} className="text-stone-900" />
+            <h3 className="text-xs font-bold text-stone-900">
               Sinkronisasi & Multi-HP ({floorInfo.name})
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full text-zinc-400 hover:text-black hover:bg-zinc-200 transition-colors"
+            className="p-1.5 rounded-full text-stone-400 hover:text-stone-900 hover:bg-stone-200 transition-colors"
           >
             <X size={16} />
           </button>
@@ -251,17 +251,17 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
 
         <div className="p-5 space-y-3 overflow-y-auto flex-1">
           {/* Telegram Backup */}
-          <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-2xl space-y-2">
-            <span className="text-xs font-bold text-black flex items-center gap-1.5">
+          <div className="p-3 bg-stone-50 border border-stone-200 rounded-2xl space-y-2">
+            <span className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
               <Send size={13} /> Backup ke Telegram
             </span>
-            <p className="text-[11px] text-zinc-500">
+            <p className="text-[11px] text-stone-500">
               Kirim database {floorInfo.name} ke Telegram bot untuk dibagikan ke HP lain.
             </p>
             <button
               onClick={handleSendTelegram}
               disabled={isSendingTelegram}
-              className="w-full py-2 bg-black hover:bg-zinc-800 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 touch-press"
+              className="w-full py-2 bg-stone-900 hover:bg-stone-800 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 touch-press"
             >
               {isSendingTelegram ? (
                 <RefreshCw size={12} className="animate-spin" />
@@ -271,31 +271,31 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
               {isSendingTelegram ? 'Mengirim...' : 'Kirim Backup ke Telegram'}
             </button>
             {telegramStatus && (
-              <p className="text-[10px] text-zinc-700 bg-white p-1.5 rounded border border-zinc-200">
+              <p className="text-[10px] text-stone-600 bg-white p-1.5 rounded border border-stone-200">
                 {telegramStatus}
               </p>
             )}
           </div>
 
           {/* Offline File Export */}
-          <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-2xl space-y-2">
-            <span className="text-xs font-bold text-black flex items-center gap-1.5">
+          <div className="p-3 bg-stone-50 border border-stone-200 rounded-2xl space-y-2">
+            <span className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
               <FileJson size={13} /> Ekspor File JSON (Offline)
             </span>
-            <p className="text-[11px] text-zinc-500">
+            <p className="text-[11px] text-stone-500">
               Download file data stok {floorInfo.name} untuk dikirim via WA / Bluetooth.
             </p>
             <button
               onClick={handleDownloadJSON}
-              className="w-full py-2 bg-white hover:bg-zinc-100 border border-zinc-200 text-black rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 touch-press"
+              className="w-full py-2 bg-white hover:bg-stone-100 border border-stone-200 text-stone-900 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 touch-press"
             >
               <Download size={13} /> Unduh File JSON
             </button>
           </div>
 
           {/* Multi-HP Smart Import */}
-          <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-2xl space-y-2">
-            <span className="text-xs font-bold text-black flex items-center gap-1.5">
+          <div className="p-3 bg-stone-50 border border-stone-200 rounded-2xl space-y-2">
+            <span className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
               <Upload size={13} /> Impor Data dari HP Lain
             </span>
 
@@ -310,19 +310,19 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
             {!pendingFileContent ? (
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full py-2 bg-zinc-200 hover:bg-zinc-300 text-black rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 touch-press"
+                className="w-full py-2 bg-stone-200 hover:bg-zinc-300 text-stone-900 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 touch-press"
               >
                 <Upload size={13} /> Pilih File Backup JSON / CSV Excel
               </button>
             ) : (
-              <div className="bg-white p-3 rounded-xl border border-zinc-200 space-y-2">
+              <div className="bg-white p-3 rounded-xl border border-stone-200 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-black">
+                  <span className="text-[10px] font-bold text-stone-900">
                     File: {FLOOR_DEFINITIONS[detectedSourceFloorId]?.name || 'Lantai Asal'}
                   </span>
                   <button
                     onClick={() => setPendingFileContent(null)}
-                    className="text-[10px] text-zinc-400 hover:text-black"
+                    className="text-[10px] text-stone-400 hover:text-stone-900"
                   >
                     Ganti
                   </button>
@@ -330,13 +330,13 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
 
                 <div className="space-y-1.5">
                   <div>
-                    <label className="text-[10px] font-semibold text-zinc-500 block mb-0.5">
+                    <label className="text-[10px] font-semibold text-stone-500 block mb-0.5">
                       Lantai Tujuan di HP ini:
                     </label>
                     <select
                       value={targetFloorChoice}
                       onChange={(e) => setTargetFloorChoice(e.target.value as FloorId)}
-                      className="w-full px-2 py-1.5 text-xs bg-zinc-50 border border-zinc-200 rounded-lg font-bold"
+                      className="w-full px-2 py-1.5 text-xs bg-stone-50 border border-stone-200 rounded-lg font-bold"
                     >
                       {(['1', '2', '3', '4'] as FloorId[]).map((f) => (
                         <option key={f} value={f}>
@@ -347,7 +347,7 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-semibold text-zinc-500 block mb-0.5">
+                    <label className="text-[10px] font-semibold text-stone-500 block mb-0.5">
                       Metode:
                     </label>
                     <div className="grid grid-cols-2 gap-1">
@@ -356,8 +356,8 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
                         onClick={() => setImportMode('MERGE')}
                         className={`py-1 text-[10px] font-bold rounded-lg border ${
                           importMode === 'MERGE'
-                            ? 'bg-black text-white border-black'
-                            : 'bg-zinc-50 text-zinc-600 border-zinc-200'
+                            ? 'bg-stone-900 text-white border-black'
+                            : 'bg-stone-50 text-stone-500 border-stone-200'
                         }`}
                       >
                         Gabung / Update
@@ -367,15 +367,15 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
                         onClick={() => setImportMode('REPLACE')}
                         className={`py-1 text-[10px] font-bold rounded-lg border ${
                           importMode === 'REPLACE'
-                            ? 'bg-black text-white border-black'
-                            : 'bg-zinc-50 text-zinc-600 border-zinc-200'
+                            ? 'bg-stone-900 text-white border-black'
+                            : 'bg-stone-50 text-stone-500 border-stone-200'
                         }`}
                       >
                         Timpa Semua
                       </button>
                     </div>
                     {importMode === 'REPLACE' && (
-                      <p className="text-[10px] text-zinc-800 font-semibold bg-zinc-100 p-1.5 rounded-lg mt-1 border border-zinc-300">
+                      <p className="text-[10px] text-stone-700 font-semibold bg-stone-100 p-1.5 rounded-lg mt-1 border border-stone-300">
                         ⚠️ Timpa Semua akan menghapus stok lama di lantai ini.
                       </p>
                     )}
@@ -384,7 +384,7 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
 
                 <button
                   onClick={handleConfirmImport}
-                  className="w-full py-2 bg-black hover:bg-zinc-800 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 touch-press"
+                  className="w-full py-2 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 touch-press"
                 >
                   <CheckCircle size={13} /> Konfirmasi Impor
                 </button>
@@ -392,7 +392,7 @@ export const FloorExportImportModal: React.FC<FloorExportImportModalProps> = ({
             )}
 
             {importStatus && (
-              <div className="p-2 rounded-lg text-xs bg-zinc-100 text-black">
+              <div className="p-2 rounded-lg text-xs bg-stone-100 text-stone-900">
                 {importStatus.message}
               </div>
             )}

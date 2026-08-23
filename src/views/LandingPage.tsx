@@ -108,49 +108,38 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onSelectFloor, onOpenA
   );
 
   return (
-    <div className="min-h-screen pb-28 pt-4 px-3.5 max-w-md mx-auto space-y-3.5">
+    <div className="min-h-screen pb-28 pt-5 px-4 max-w-md mx-auto">
       {/* Header */}
-      <header className="flex items-center justify-between py-1">
+      <header className="flex items-center justify-between mb-6">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-base font-black text-black tracking-tight leading-none">
-              Istiqomah Grosir
-            </h1>
-            <span className="text-[9px] font-extrabold bg-zinc-900 text-amber-300 border border-amber-500/40 px-1.5 py-0.2 rounded-md font-mono shadow-2xs">
-              v3.0.0
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 mt-1">
-            <p className="text-[11px] text-zinc-500 font-medium">
-              {currentUser ? `Petugas: ${currentUser.name}` : 'Sistem Stok'}
+          <h1 className="text-lg font-extrabold text-stone-900 tracking-tight leading-none">
+            Istiqomah Grosir
+          </h1>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-xs text-stone-400">
+              {currentUser ? currentUser.name : 'Sistem Stok'}
             </p>
             {currentUser && (
               <button
                 onClick={() => setIsPasswordModalOpen(true)}
-                className="text-[10px] font-semibold text-zinc-400 hover:text-black flex items-center gap-0.5 ml-1 transition-colors"
+                className="text-stone-400 hover:text-stone-700 transition-colors"
                 title="Ganti Password"
               >
-                <KeyRound size={9} />
-                <span>Ganti Password</span>
+                <KeyRound size={11} />
               </button>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <OfflineBadge />
 
-          {/* Sound Toggle */}
           <button
             onClick={() => soundEffects.toggleSound()}
-            className={`p-2 rounded-xl border transition-all touch-press shadow-2xs ${
-              isSoundOn
-                ? 'bg-white border-zinc-200 text-zinc-800'
-                : 'bg-zinc-100 border-zinc-300 text-zinc-400'
-            }`}
-            title={isSoundOn ? 'Suara Aktif (Klik untuk Mematikan)' : 'Suara Mati (Klik untuk Mengaktifkan)'}
+            className="w-9 h-9 rounded-xl flex items-center justify-center border border-stone-200 text-stone-500 hover:text-stone-700 hover:border-stone-300 transition-colors bg-white touch-press"
+            title={isSoundOn ? 'Suara Aktif' : 'Suara Mati'}
           >
-            {isSoundOn ? <Volume2 size={14} /> : <VolumeX size={14} />}
+            {isSoundOn ? <Volume2 size={15} /> : <VolumeX size={15} />}
           </button>
 
           <button
@@ -158,150 +147,143 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onSelectFloor, onOpenA
               soundEffects.playClickSound();
               setIsScannerOpen(true);
             }}
-            className="p-2 rounded-xl bg-black text-white hover:bg-zinc-800 touch-press shadow-xs flex items-center justify-center"
-            title="Scan Barcode Cepat"
+            className="w-9 h-9 rounded-xl flex items-center justify-center bg-stone-900 text-white hover:bg-stone-800 touch-press"
+            title="Scan Barcode"
           >
-            <ScannerGlyph size={16} />
+            <ScannerGlyph size={15} />
           </button>
         </div>
       </header>
 
-      {/* Global Quick Stats */}
-      <div className="bg-white rounded-2xl p-4 border border-zinc-200 shadow-xs grid grid-cols-2 gap-2">
+      {/* Quick Stats */}
+      <div className="flex items-center gap-5 mb-6 px-1">
         <div>
-          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
-            Total Unit
+          <span className="text-2xl font-extrabold text-stone-900 font-mono leading-none">
+            {stats.totalStockQty}
           </span>
-          <span className="text-2xl font-black text-black mt-0.5 block font-mono">
-            {stats.totalStockQty} <span className="text-xs font-normal text-zinc-400 font-sans">unit</span>
-          </span>
+          <span className="text-xs text-stone-400 ml-1.5">unit</span>
         </div>
-
-        <div className="text-right">
-          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
-            Total Macam
+        <div className="w-px h-6 bg-stone-200" />
+        <div>
+          <span className="text-2xl font-extrabold text-stone-900 font-mono leading-none">
+            {stats.totalItemsCount}
           </span>
-          <span className="text-2xl font-black text-black mt-0.5 block font-mono">
-            {stats.totalItemsCount} <span className="text-xs font-normal text-zinc-400 font-sans">item</span>
-          </span>
+          <span className="text-xs text-stone-400 ml-1.5">macam</span>
         </div>
       </div>
 
-      {/* Barcode Search Alert */}
+      {/* Barcode Search Result */}
       {scannedResult && (
-        <div className="bg-zinc-100 border border-zinc-300 rounded-2xl p-3.5 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-black uppercase">
-              Hasil Scan ({scannedResult.barcode})
+        <div className="mb-4 bg-stone-100 rounded-xl p-3.5 anim-slide-up">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-stone-500">
+              Hasil Scan: <span className="font-mono text-stone-700">{scannedResult.barcode}</span>
             </span>
             <button
               onClick={() => setScannedResult(null)}
-              className="text-zinc-500 hover:text-black text-xs"
+              className="text-stone-400 hover:text-stone-700 text-xs px-1"
             >
               ✕
             </button>
           </div>
 
           {scannedResult.foundFloorId ? (
-            <div className="flex items-center justify-between bg-white p-2.5 rounded-xl border border-zinc-200">
+            <div className="flex items-center justify-between bg-white p-3 rounded-lg">
               <div>
-                <span className="text-xs font-bold text-black block">
+                <span className="text-sm font-semibold text-stone-900 block">
                   {scannedResult.itemName}
                 </span>
-                <span className="text-[11px] text-zinc-600 font-medium">
-                  {FLOOR_DEFINITIONS[scannedResult.foundFloorId].name} (
-                  {FLOOR_DEFINITIONS[scannedResult.foundFloorId].subtitle})
+                <span className="text-xs text-stone-400">
+                  {FLOOR_DEFINITIONS[scannedResult.foundFloorId].name}
                 </span>
               </div>
               <button
                 onClick={() => handleFloorClick(scannedResult.foundFloorId!)}
-                className="px-3 py-1.5 bg-black text-white rounded-lg text-xs font-bold touch-press"
+                className="px-3 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold touch-press"
               >
                 Buka
               </button>
             </div>
           ) : (
-            <p className="text-xs text-zinc-600 bg-white p-2.5 rounded-xl border border-zinc-200">
-              Barang tidak ditemukan di lantai 1 s/d 4.
+            <p className="text-xs text-stone-500 bg-white p-3 rounded-lg">
+              Barang tidak ditemukan di lantai 1–4.
             </p>
           )}
         </div>
       )}
 
-      {/* Floor Cards List */}
+      {/* Floor Cards */}
       <div className="space-y-2">
-        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider px-1 block">
+        <h2 className="text-xs font-semibold text-stone-400 px-0.5 mb-1">
           Daftar Lantai
-        </span>
+        </h2>
 
-        <div className="space-y-2">
-          {accessibleFloors.map((f) => (
-            <div
-              key={f.floorId}
-              onClick={() => handleFloorClick(f.floorId)}
-              className="bg-white rounded-2xl p-3.5 border border-zinc-200 hover:border-black cursor-pointer transition-all flex items-center justify-between shadow-xs touch-press group"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-11 h-11 rounded-2xl bg-black text-white flex items-center justify-center shrink-0 shadow-xs">
-                  <FloorGlyph floorId={f.floorId} size={20} />
-                </div>
-
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="text-xs font-bold text-black group-hover:text-black">
-                      {f.name}
-                    </h3>
-                    <span className="text-[10px] text-zinc-400 font-medium">
-                      • {f.subtitle}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 mt-0.5 text-[11px] text-zinc-600">
-                    <span className="font-bold text-black font-mono">
-                      {f.stockQty} unit
-                    </span>
-                    <span className="text-zinc-300">•</span>
-                    <span>{f.itemCount} macam</span>
-                    {f.lowStock > 0 && (
-                      <>
-                        <span className="text-zinc-300">•</span>
-                        <span className="text-amber-800 bg-amber-100/90 px-1.5 py-0.2 rounded text-[10px] font-bold flex items-center gap-0.5">
-                          <AlertTriangle size={9} /> {f.lowStock} tipis
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
+        {accessibleFloors.map((f) => (
+          <div
+            key={f.floorId}
+            onClick={() => handleFloorClick(f.floorId)}
+            className="bg-white rounded-xl p-4 border border-stone-150 hover:border-stone-300 cursor-pointer transition-all flex items-center justify-between touch-press group"
+            style={{ borderColor: '#e7e5e4' }}
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-10 h-10 rounded-lg bg-stone-100 text-stone-600 flex items-center justify-center shrink-0">
+                <FloorGlyph floorId={f.floorId} size={18} />
               </div>
 
-              <ChevronRight size={16} className="text-zinc-400 group-hover:text-black shrink-0" />
+              <div className="min-w-0">
+                <h3 className="text-sm font-semibold text-stone-900 group-hover:text-stone-900">
+                  {f.name}
+                  <span className="text-stone-400 font-normal ml-1.5 text-xs">
+                    {f.subtitle}
+                  </span>
+                </h3>
+
+                <div className="flex items-center gap-2.5 mt-0.5 text-xs text-stone-400">
+                  <span className="font-mono font-medium text-stone-600">
+                    {f.stockQty}
+                  </span>
+                  <span>·</span>
+                  <span>{f.itemCount} macam</span>
+                  {f.lowStock > 0 && (
+                    <>
+                      <span>·</span>
+                      <span className="text-amber-700 font-medium flex items-center gap-0.5">
+                        <AlertTriangle size={10} />
+                        {f.lowStock}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
-          ))}
-        </div>
+
+            <ChevronRight size={16} className="text-stone-300 group-hover:text-stone-500 shrink-0 transition-colors" />
+          </div>
+        ))}
       </div>
 
-      {/* Admin Quick Entry Card (For Fahri) */}
+      {/* Admin Entry */}
       {isFahri && (
-        <div className="pt-1">
+        <div className="mt-3">
           <div
             onClick={() => {
               soundEffects.playClickSound();
               onOpenAdmin();
             }}
-            className="bg-zinc-950 text-white rounded-2xl p-3.5 border border-zinc-800 hover:border-zinc-600 cursor-pointer transition-all flex items-center justify-between shadow-md touch-press"
+            className="bg-stone-900 text-white rounded-xl p-4 hover:bg-stone-800 cursor-pointer transition-colors flex items-center justify-between touch-press"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-zinc-800 text-white flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-lg bg-stone-800 flex items-center justify-center shrink-0">
                 <AdminCrestGlyph size={18} />
               </div>
               <div>
-                <h3 className="text-xs font-bold text-white">Dashboard Admin</h3>
-                <p className="text-[10px] text-zinc-400 font-medium">
-                  Kelola staf, cadangan data, & laporan master
+                <h3 className="text-sm font-semibold">Dashboard Admin</h3>
+                <p className="text-xs text-stone-400 mt-0.5">
+                  Kelola staf, cadangan data & laporan
                 </p>
               </div>
             </div>
-            <ChevronRight size={16} className="text-zinc-400" />
+            <ChevronRight size={16} className="text-stone-500" />
           </div>
         </div>
       )}
