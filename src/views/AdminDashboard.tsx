@@ -9,8 +9,6 @@ import {
   AlertTriangle,
   Volume2,
   VolumeX,
-  ShoppingCart,
-  Tag,
 } from 'lucide-react';
 import type { FloorId, AdminSettings, UserAccount } from '../types/stock';
 import { StockStorageEngine } from '../services/db';
@@ -21,8 +19,6 @@ import { TelegramSettingsModal } from '../components/TelegramSettingsModal';
 import { MasterDatabaseModal } from '../components/MasterDatabaseModal';
 import { FloorSummaryModal } from '../components/FloorSummaryModal';
 import { ReportGeneratorModal } from '../components/ReportGeneratorModal';
-import { RestockPlannerModal } from '../components/RestockPlannerModal';
-import { BarcodeLabelPrinterModal } from '../components/BarcodeLabelPrinterModal';
 import { AdminCrestGlyph } from '../components/CustomIcons';
 
 interface AdminDashboardProps {
@@ -55,8 +51,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
   const [isTelegramOpen, setIsTelegramOpen] = useState(false);
   const [isDatabaseOpen, setIsDatabaseOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [isRestockPlannerOpen, setIsRestockPlannerOpen] = useState(false);
-  const [isBarcodeLabelOpen, setIsBarcodeLabelOpen] = useState(false);
 
   const refreshAll = () => {
     const s = StockStorageEngine.getAdminSettings();
@@ -90,11 +84,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
   // Access Denied guard
   if (!isFahri) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center mb-3">
-          <AlertTriangle size={24} />
-        </div>
-        <h2 className="text-sm font-bold text-stone-900">Akses Dibatasi</h2>
+      <div className="min-h-screen bg-[#f6f3ed] flex flex-col items-center justify-center p-6 text-center">
+        <AlertTriangle size={28} className="text-stone-400 mb-3" />
+        <h2 className="text-base font-semibold text-stone-900">Akses Dibatasi</h2>
         <p className="text-xs text-stone-400 max-w-xs mt-1">
           Dashboard Admin khusus untuk akun Administrator.
         </p>
@@ -103,18 +95,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
   }
 
   const menuItems = [
-    {
-      icon: ShoppingCart,
-      title: 'Rencana Kulakan',
-      meta: 'Restock PO',
-      onClick: () => setIsRestockPlannerOpen(true),
-    },
-    {
-      icon: Tag,
-      title: 'Cetak Label Barcode',
-      meta: 'Stiker & Rak',
-      onClick: () => setIsBarcodeLabelOpen(true),
-    },
     {
       icon: Users,
       title: 'Kelola Staf',
@@ -287,16 +267,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectFloor })
       <ReportGeneratorModal
         isOpen={isReportModalOpen}
         onClose={() => setIsReportModalOpen(false)}
-      />
-
-      <RestockPlannerModal
-        isOpen={isRestockPlannerOpen}
-        onClose={() => setIsRestockPlannerOpen(false)}
-      />
-
-      <BarcodeLabelPrinterModal
-        isOpen={isBarcodeLabelOpen}
-        onClose={() => setIsBarcodeLabelOpen(false)}
       />
     </div>
   );

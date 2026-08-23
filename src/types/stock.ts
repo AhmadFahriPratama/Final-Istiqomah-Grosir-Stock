@@ -66,43 +66,7 @@ export interface MutationLog {
   timestamp: string;
   userName?: string;
   floorId?: FloorId;
-  actionType?:
-    | 'STOCK_IN'
-    | 'STOCK_OUT'
-    | 'STOCK_ADJUST'
-    | 'ITEM_ADD'
-    | 'ITEM_UPDATE'
-    | 'ITEM_DELETE'
-    | 'TRANSFER_IN'
-    | 'TRANSFER_OUT'
-    | 'STOCK_OPNAME';
-}
-
-export interface StockOpnameEntry {
-  itemId: string;
-  name: string;
-  category: string;
-  barcode?: string;
-  systemStock: number;
-  physicalStock: number;
-  variance: number;
-  unit: string;
-  location?: string;
-}
-
-export interface RestockItem {
-  id: string;
-  floorId: FloorId;
-  floorName: string;
-  name: string;
-  category: string;
-  barcode?: string;
-  currentStock: number;
-  minStock: number;
-  maxStock?: number;
-  suggestedRestock: number;
-  unit: string;
-  location?: string;
+  actionType?: 'STOCK_IN' | 'STOCK_OUT' | 'STOCK_ADJUST' | 'ITEM_ADD' | 'ITEM_UPDATE' | 'ITEM_DELETE';
 }
 
 export interface FloorData {
