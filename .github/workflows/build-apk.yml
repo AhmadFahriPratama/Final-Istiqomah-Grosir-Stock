@@ -62,8 +62,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
         with:
-          tag_name: v3.2.0
-          name: "Istiqomah Grosir Stock v3.2.0 (Release APK)"
+          tag_name: v3.3.0
+          name: "Istiqomah Grosir Stock v3.3.0 (Release APK)"
           files: ./Istiqomah-Grosir-Stock.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -9,12 +9,14 @@
         <!-- Layer 1 (Top diamond in ivory) -->
         <path
             android:pathData="M28,34 L50,22 L72,34 L50,46 Z"
+            android:fillColor="#00000000"
             android:strokeColor="#FAF5E8"
             android:strokeWidth="6"
             android:strokeLineJoin="round" />
         <!-- Layer 2 (Middle layer in warm amber caramel) -->
         <path
             android:pathData="M28,50 L50,62 L72,50"
+            android:fillColor="#00000000"
             android:strokeColor="#C56F1F"
             android:strokeWidth="6"
             android:strokeLineCap="round"
@@ -22,6 +24,7 @@
         <!-- Layer 3 (Bottom layer in saddle cognac) -->
         <path
             android:pathData="M28,66 L50,78 L72,66"
+            android:fillColor="#00000000"
             android:strokeColor="#8A4F25"
             android:strokeWidth="6"
             android:strokeLineCap="round"
