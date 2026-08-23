@@ -1,15 +1,24 @@
-# Istiqomah Grosir Stock v2.7.0 🏢
+# Istiqomah Grosir Stock v3.1.0 🏢
 
 Sistem Manajemen Stok Multi-Lantai Offline-First & Aplikasi Android Native untuk Toko Grosir Istiqomah.
 
-[![Android APK Release](https://img.shields.io/badge/Download-Android_APK_v2.7.0-000000?style=for-the-badge&logo=android&logoColor=white)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock/releases/download/v1.0.0/Istiqomah-Grosir-Stock.apk)
-[![Audio & Navigation](https://img.shields.io/badge/UX-Velvet_Audio_&_Hardware_Back-000000?style=for-the-badge)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock)
+[![Android APK Release](https://img.shields.io/badge/Download-Android_APK_v3.1.0-2A1A10?style=for-the-badge&logo=android&logoColor=FAF5E8)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock/releases/download/v3.1.0/Istiqomah-Grosir-Stock.apk)
+[![Theme](https://img.shields.io/badge/Theme-Vintage_Autumn_&_Espresso-8A4F25?style=for-the-badge)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock)
+[![Offline First](https://img.shields.io/badge/Architecture-Offline--First_Capacitor-C56F1F?style=for-the-badge)](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock)
 
 ---
 
 ## 📥 Unduh Aplikasi Android (.APK)
-👉 **[Unduh File APK Istiqomah Stock](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock/releases/download/v1.0.0/Istiqomah-Grosir-Stock.apk)**  
-👉 **[Halaman Rilis GitHub Releases](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock/releases)**
+👉 **[Unduh File APK Istiqomah Stock v3.1.0](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock/releases/download/v3.1.0/Istiqomah-Grosir-Stock.apk)**  
+👉 **[Halaman Rilis GitHub Releases](https://github.com/AhmadFahriPratama/Final-Istiqomah-Grosir-Stock/releases/tag/v3.1.0)**
+
+---
+
+## 🎨 Tampilan & Desain Baru (v3.1.0):
+- **Palet Warna Coklat Vintage & Ivory-Espresso**: Perpaduan warna Dark Espresso (`#2A1A10`), Ivory Cream (`#FAF5E8`), Autumn Amber (`#C56F1F`), dan Roasted Saddle (`#8A4F25`) yang elegan, hangat, dan nyaman di mata untuk penggunaan operasional harian.
+- **Logo Asli 3-Tier Diamond**: Logo khas Istiqomah Stock yang dipulihkan ke geometri aslinya dengan balutan warna coklat vintage di seluruh launcher icon Android native (Vector Drawable & Mipmap PNGs semua resolusi).
+- **Halaman Login Kontras Tinggi**: Desain kartu ivory yang tegas, kotak input teks putih murni anti-silau, dan viewport stabil (`100dvh`) saat keyboard virtual HP muncul maupun tertutup.
+- **Navigasi Sistem HP Bebas Kedip**: Warna status bar dan navigasi bar hardware sistem Android dikunci solid di `styles.xml` dengan proteksi safe-area inset.
 
 ---
 
@@ -29,31 +38,40 @@ Sistem Manajemen Stok Multi-Lantai Offline-First & Aplikasi Android Native untuk
 
 ---
 
-## ✨ Pembaruan & Fitur Unggulan (v2.7.0):
+## ✨ Fitur Inti Aplikasi:
 
-1. 🔙 **Fungsi Tombol Kembali HP & Callback Bertingkat (Hardware Back Button)**:
-   - **Tutup Pop-up/Modal Terlebih Dahulu**: Jika sedang membuka Scanner, Form Edit, Mutasi Stok, Kelola Jenis, atau Backup, menekan tombol kembali HP otomatis menutup pop-up tersebut tanpa keluar aplikasi.
-   - **Kembali ke Halaman Utama**: Jika berada di dalam lantai kerja/admin, tombol kembali akan mengarahkan kembali ke Dashboard Utama (*Home*).
-   - **Konfirmasi Keluar Aplikasi**: Jika sudah mentok di halaman utama, aplikasi menampilkan notifikasi dialog konfirmasi *"Apakah Anda Ingin Keluar dari Aplikasi?"* sehingga tidak keluar secara tidak sengaja.
+1. 📄 **Custom Viewer Cetak Laporan**:
+   - Pratinjau cetak internal mandiri dengan pilihan ukuran kertas langsung: **A4**, **F4 (Folio)**, **A5**, dan **Struk Thermal 80mm**.
+   - Opsi cetak langsung, salin teks, atau unduh berkas HTML dokumen.
 
-2. 🎵 **Audio Synthesizer Ultra-Smooth & Velvet**:
-   - Efek suara dirancang ulang dengan gelombang sinus murni (*pure sine*), filter *lowpass* akustik lembut, dan kurva *attack/decay* velvet yang sangat halus, elegan, dan menenangkan saat digunakan sehari-hari.
+2. 🚪 **Konfirmasi Logout & Tombol Kembali HP**:
+   - Peringatan konfirmasi keamanan sebelum keluar akun: *"Anda akan keluar dari akun (Nama Akun), Anda yakin?"*.
+   - Integrasi *Hardware Back Button* Android: menutup modal/dialog aktif secara berjenjang sebelum keluar aplikasi.
 
-3. ⚖️ **Batas Min (0) & Batas Max (Unlimited) Opsional**:
-   - Input batas stok minimal dan kapasitas maksimal diletakkan tepat di bawah Stok Awal produk.
+3. 📷 **Pemindai Barcode Kamera Cepat**:
+   - Dukungan scan barcode kamera instan dengan autofokus dan switch kamera depan/belakang.
 
-4. 🏷️ **Pemilihan Jenis Barang Compact & Rapi**:
-   - Filter jenis berbasis dropdown instan dan chip wrap yang responsif di segala ukuran layar.
+4. 🏢 **Manajemen Multi-Lantai**:
+   - **Lantai 1**: Kebutuhan & Sembako
+   - **Lantai 2**: Pakaian & Fashion
+   - **Lantai 3**: Perabotan & Home Living
+   - **Lantai 4**: Gudang Utama & Bulk Stock
 
-5. 🔒 **Proteksi Aksi Berisiko Tinggi**:
-   - Konfirmasi ketik `"RESET"` untuk reset database dan dialog konfirmasi mode Timpa Semua.
+5. 💾 **Cadangan Data & Sinkronisasi**:
+   - Ekspor/Impor berkas JSON (per lantai atau master 4 lantai).
+   - Integrasi Backup otomatis ke Bot Telegram.
 
 ---
 
 ## 🛠️ Menjalankan Lokal:
 ```bash
+# Pasang dependensi
 npm install
-npm run build
+
+# Jalankan dev server
 npm run dev
+
+# Bangun versi produksi
+npm run build
 ```
-Buka di browser: `http://localhost:3333/`
+Buka di browser: `http://localhost:3000/`
