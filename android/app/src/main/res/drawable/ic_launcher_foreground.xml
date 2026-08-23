@@ -1,0 +1,36 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.9"
+        android:scaleY="0.9"
+        android:translateX="5.4"
+        android:translateY="5.4">
+        <!-- Layer 1 (Top diamond in warm ivory) -->
+        <path
+            android:pathData="M30,37 L54,23 L78,37 L54,51 Z"
+            android:strokeColor="#FAF5E8"
+            android:strokeWidth="6"
+            android:strokeLineJoin="round" />
+        <!-- Layer 2 (Middle layer in autumn amber) -->
+        <path
+            android:pathData="M30,55 L54,69 L78,55"
+            android:strokeColor="#C56F1F"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <!-- Layer 3 (Bottom layer in roasted cognac) -->
+        <path
+            android:pathData="M30,73 L54,87 L78,73"
+            android:strokeColor="#8A4F25"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <!-- Center accent amber pip -->
+        <path
+            android:pathData="M54,34 A3,3 0 1,0 54,40 A3,3 0 1,0 54,34 Z"
+            android:fillColor="#C56F1F" />
+    </group>
+</vector>

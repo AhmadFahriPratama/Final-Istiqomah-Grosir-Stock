@@ -105,7 +105,7 @@ export const LiquidNavbar: React.FC<LiquidNavbarProps> = ({
 
   return (
     <>
-      <nav className="fixed bottom-4 left-0 right-0 z-40 max-w-sm mx-auto px-3 pointer-events-none">
+      <nav className="fixed bottom-3 left-0 right-0 z-40 max-w-sm mx-auto px-3 pointer-events-none pb-[env(safe-area-inset-bottom,0px)]">
         <div
           className="relative pointer-events-auto bg-[#faf5e8]/95 text-[#2a1a10] rounded-2xl shadow-xl backdrop-blur-xl border-2 border-[#2a1a10] grid items-center overflow-hidden"
           style={{

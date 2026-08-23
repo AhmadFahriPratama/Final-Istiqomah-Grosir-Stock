@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, User, Lock, ShieldCheck } from 'lucide-react';
 import type { UserAccount } from '../types/stock';
 import { StockStorageEngine } from '../services/db';
 import { soundEffects } from '../utils/audio';
@@ -52,80 +52,108 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5eedc] flex flex-col justify-center px-5 py-8 max-w-sm mx-auto">
-      {/* Brand */}
-      <div className="mb-10">
-        <h1 className="text-2xl font-extrabold text-[#2a1a10] tracking-tight">
-          Istiqomah Grosir
-        </h1>
-        <p className="text-sm text-[#78604d] mt-0.5 font-medium">
-          Sistem Manajemen Stok
-        </p>
-      </div>
-
-      {/* Form */}
-      <div className={shake ? 'anim-shake' : ''}>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="text-xs font-semibold text-stone-600 block mb-1.5">
-              Nama
-            </label>
-            <input
-              type="text"
-              required
-              autoFocus
-              value={username}
-              onChange={(e) => {
-                setUsername(e.target.value);
-                setErrorMsg('');
-              }}
-              placeholder="Masukkan nama"
-              className="w-full px-3.5 py-3 text-sm bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900/10 transition-all text-stone-900 placeholder:text-stone-300 font-medium"
-            />
+    <div className="min-h-[100dvh] bg-[#f5eedc] flex flex-col justify-center items-center px-4 py-8 select-none">
+      <div className="w-full max-w-sm">
+        {/* Brand Logo & Heading */}
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#2a1a10] border-2 border-[#8a4f25]/40 shadow-lg mb-3">
+            <svg width="28" height="28" viewBox="0 0 100 100" fill="none">
+              <path d="M26 35L50 22L74 35L50 48L26 35Z" stroke="#faf5e8" strokeWidth="7" strokeLinejoin="round" />
+              <path d="M26 51L50 64L74 51" stroke="#c56f1f" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M26 67L50 80L74 67" stroke="#8a4f25" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx="50" cy="35" r="4" fill="#c56f1f" />
+            </svg>
           </div>
+          <h1 className="text-2xl font-black text-[#2a1a10] tracking-tight">
+            Istiqomah Stock
+          </h1>
+          <p className="text-xs text-[#78604d] font-semibold mt-1">
+            Sistem Manajemen Stok Multi-Lantai
+          </p>
+        </div>
 
-          <div>
-            <label className="text-xs font-semibold text-stone-600 block mb-1.5">
-              Password
-            </label>
-            <div className="relative">
+        {/* Elevated Form Card */}
+        <div className={`bg-[#faf5e8] rounded-3xl p-6 sm:p-7 shadow-xl border-2 border-[#ded2b8] ${shake ? 'anim-shake' : ''}`}>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Username Input */}
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-bold text-[#2a1a10] mb-1.5">
+                <User size={13} className="text-[#8a4f25]" />
+                <span>Nama Pengguna / Petugas</span>
+              </label>
               <input
-                type={showPassword ? 'text' : 'password'}
+                type="text"
                 required
-                value={password}
+                autoFocus
+                value={username}
                 onChange={(e) => {
-                  setPassword(e.target.value);
+                  setUsername(e.target.value);
                   setErrorMsg('');
                 }}
-                placeholder="Masukkan password"
-                className="w-full px-3.5 py-3 pr-11 text-sm bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900/10 transition-all font-mono tracking-wider text-stone-900 placeholder:text-stone-300 placeholder:font-sans placeholder:tracking-normal"
+                placeholder="Contoh: Fahri"
+                className="w-full px-3.5 py-3 text-sm bg-white border-2 border-[#ded2b8] focus:border-[#2a1a10] rounded-xl focus:outline-none transition-colors text-[#2a1a10] placeholder:text-[#9e8b74] font-medium"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3.5 text-stone-400 hover:text-stone-700 transition-colors"
-                tabIndex={-1}
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
             </div>
+
+            {/* Password Input */}
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-bold text-[#2a1a10] mb-1.5">
+                <Lock size={13} className="text-[#8a4f25]" />
+                <span>Password</span>
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setErrorMsg('');
+                  }}
+                  placeholder="Masukkan password"
+                  className="w-full px-3.5 py-3 pr-11 text-sm bg-white border-2 border-[#ded2b8] focus:border-[#2a1a10] rounded-xl focus:outline-none transition-colors font-mono text-[#2a1a10] placeholder:text-[#9e8b74] placeholder:font-sans"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3.5 text-[#78604d] hover:text-[#2a1a10] transition-colors"
+                  tabIndex={-1}
+                  title={showPassword ? 'Sembunyikan password' : 'Lihat password'}
+                >
+                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {errorMsg && (
+              <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
+                {errorMsg}
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full py-3.5 bg-[#2a1a10] hover:bg-[#3d2618] active:scale-[0.98] disabled:opacity-50 text-[#faf5e8] rounded-xl text-sm font-bold flex items-center justify-center gap-2 touch-press shadow-md transition-all pt-3.5 mt-2"
+            >
+              <span>Masuk ke Sistem</span>
+              <ArrowRight size={16} />
+            </button>
+          </form>
+
+          {/* Security note */}
+          <div className="mt-4 pt-3 border-t border-[#ded2b8] flex items-center justify-center gap-1.5 text-[11px] text-[#78604d] font-medium">
+            <ShieldCheck size={13} className="text-emerald-700" />
+            <span>Offline-First Storage Ready</span>
           </div>
+        </div>
 
-          {errorMsg && (
-            <p className="text-xs text-red-600 font-medium px-1">
-              {errorMsg}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full py-3 bg-stone-900 hover:bg-stone-800 disabled:opacity-40 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 touch-press transition-colors mt-2"
-          >
-            <span>Masuk</span>
-            <ArrowRight size={15} />
-          </button>
-        </form>
+        {/* Footer info */}
+        <p className="text-center text-[11px] text-[#9e8b74] font-medium mt-6">
+          Istiqomah Grosir Stock • by Fahri Pratama
+        </p>
       </div>
     </div>
   );
