@@ -15,6 +15,8 @@ import {
   AlertTriangle,
   Volume2,
   VolumeX,
+  ArrowRightLeft,
+  ClipboardCheck,
 } from 'lucide-react';
 import type { FloorId, StockItem, UserAccount } from '../types/stock';
 import { FLOOR_DEFINITIONS } from '../types/stock';
@@ -29,6 +31,8 @@ import { CategoryManagerModal } from '../components/CategoryManagerModal';
 import { FloorExportImportModal } from '../components/FloorExportImportModal';
 import { ReportGeneratorModal } from '../components/ReportGeneratorModal';
 import { ChangePasswordModal } from '../components/ChangePasswordModal';
+import { FloorTransferModal } from '../components/FloorTransferModal';
+import { StockOpnameModal } from '../components/StockOpnameModal';
 import { FloorGlyph, ScannerGlyph } from '../components/CustomIcons';
 
 interface FloorViewProps {
@@ -67,6 +71,9 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
   const [categoryPickerSearch, setCategoryPickerSearch] = useState<string>('');
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [isTableReportModalOpen, setIsTableReportModalOpen] = useState<boolean>(false);
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState<boolean>(false);
+  const [transferSourceItem, setTransferSourceItem] = useState<StockItem | null>(null);
+  const [isOpnameModalOpen, setIsOpnameModalOpen] = useState<boolean>(false);
 
   const refreshData = useCallback(() => {
     const data = StockStorageEngine.getFloorData(floorId);
@@ -275,6 +282,27 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
             title={isSoundOn ? 'Suara Aktif' : 'Suara Mati'}
           >
             {isSoundOn ? <Volume2 size={14} /> : <VolumeX size={14} />}
+          </button>
+          <button
+            onClick={() => {
+              soundEffects.playClickSound();
+              setTransferSourceItem(null);
+              setIsTransferModalOpen(true);
+            }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center bg-white border border-stone-200 text-stone-600 hover:border-stone-400 touch-press"
+            title="Mutasi Antar Lantai"
+          >
+            <ArrowRightLeft size={13} />
+          </button>
+          <button
+            onClick={() => {
+              soundEffects.playClickSound();
+              setIsOpnameModalOpen(true);
+            }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center bg-white border border-stone-200 text-stone-600 hover:border-stone-400 touch-press"
+            title="Mode Stok Opname"
+          >
+            <ClipboardCheck size={14} />
           </button>
           <button
             onClick={() => {
@@ -534,6 +562,19 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
                     onClick={(e) => {
                       e.stopPropagation();
                       soundEffects.playClickSound();
+                      setTransferSourceItem(item);
+                      setIsTransferModalOpen(true);
+                    }}
+                    className="p-1.5 text-stone-300 hover:text-stone-700 hover:bg-stone-50 rounded-lg transition-colors"
+                    title="Pindahkan ke Lantai Lain"
+                  >
+                    <ArrowRightLeft size={13} />
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      soundEffects.playClickSound();
                       setEditingItem(item);
                       setIsItemFormOpen(true);
                     }}
@@ -594,59 +635,39 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
                     : 'bg-white text-stone-700 border-stone-200 hover:border-stone-400'
                 }`}
               >
-                <span className="block font-semibold">Semua</span>
-                <span className="text-[11px] opacity-60 mt-0.5 block">
-                  {floorData.items.length} produk
-                </span>
+                <span className="block font-semibold">Semua Kategori</span>
               </button>
 
               {floorData.categories
-                .filter((c) =>
-                  c.toLowerCase().includes(categoryPickerSearch.toLowerCase().trim())
+                .filter((cat) =>
+                  cat.toLowerCase().includes(categoryPickerSearch.toLowerCase())
                 )
-                .map((cat) => {
-                  const count = floorData.items.filter((it) => it.category === cat).length;
-                  const isSelected = selectedCategory === cat;
-                  return (
-                    <button
-                      key={cat}
-                      onClick={() => {
-                        soundEffects.playClickSound();
-                        setSelectedCategory(cat);
-                        setIsCategoryPickerOpen(false);
-                      }}
-                      className={`p-3 rounded-lg border text-left text-xs transition-colors touch-press ${
-                        isSelected
-                          ? 'bg-stone-900 text-white border-stone-900'
-                          : 'bg-white text-stone-700 border-stone-200 hover:border-stone-400'
-                      }`}
-                    >
-                      <span className="block font-semibold truncate">{cat}</span>
-                      <span className="text-[11px] opacity-60 mt-0.5 block">
-                        {count} produk
-                      </span>
-                    </button>
-                  );
-                })}
+                .map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => {
+                      soundEffects.playClickSound();
+                      setSelectedCategory(cat);
+                      setIsCategoryPickerOpen(false);
+                    }}
+                    className={`p-3 rounded-lg border text-left text-xs transition-colors touch-press ${
+                      selectedCategory === cat
+                        ? 'bg-stone-900 text-white border-stone-900'
+                        : 'bg-white text-stone-700 border-stone-200 hover:border-stone-400'
+                    }`}
+                  >
+                    <span className="font-semibold block truncate">{cat}</span>
+                    <span className="text-[10px] text-stone-400">
+                      {floorData.items.filter((i) => i.category === cat).length} barang
+                    </span>
+                  </button>
+                ))}
             </div>
           </div>
         </div>
       )}
 
-      {/* Modals */}
-      <BarcodeScannerModal
-        isOpen={isScannerOpen}
-        onClose={() => setIsScannerOpen(false)}
-        onScan={handleBarcodeScanned}
-      />
-
-      <StockAdjustModal
-        isOpen={!!adjustingItem}
-        item={adjustingItem}
-        onClose={() => setAdjustingItem(null)}
-        onConfirm={handleStockAdjustConfirm}
-      />
-
+      {/* Item Form Modal */}
       <ItemFormModal
         isOpen={isItemFormOpen}
         itemToEdit={editingItem}
@@ -657,6 +678,23 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
         }}
         onSave={handleSaveItem}
         onDelete={handleDeleteItem}
+      />
+
+      {/* Stock Adjust Modal */}
+      {adjustingItem && (
+        <StockAdjustModal
+          isOpen={Boolean(adjustingItem)}
+          item={adjustingItem}
+          onClose={() => setAdjustingItem(null)}
+          onConfirm={handleStockAdjustConfirm}
+        />
+      )}
+
+      {/* Barcode Scanner Modal */}
+      <BarcodeScannerModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        onScan={handleBarcodeScanned}
       />
 
       <CategoryManagerModal
@@ -679,6 +717,26 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
         isOpen={isTableReportModalOpen}
         defaultFloorId={floorId}
         onClose={() => setIsTableReportModalOpen(false)}
+      />
+
+      {/* Floor Transfer Modal */}
+      <FloorTransferModal
+        isOpen={isTransferModalOpen}
+        sourceFloorId={floorId}
+        initialItem={transferSourceItem}
+        onClose={() => {
+          setIsTransferModalOpen(false);
+          setTransferSourceItem(null);
+        }}
+        onTransferComplete={refreshData}
+      />
+
+      {/* Stock Opname Modal */}
+      <StockOpnameModal
+        isOpen={isOpnameModalOpen}
+        floorId={floorId}
+        onClose={() => setIsOpnameModalOpen(false)}
+        onOpnameComplete={refreshData}
       />
 
       {currentUser && (
