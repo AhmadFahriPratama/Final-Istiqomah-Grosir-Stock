@@ -4,33 +4,27 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     <group
-        android:scaleX="0.9"
-        android:scaleY="0.9"
-        android:translateX="5.4"
-        android:translateY="5.4">
-        <!-- Layer 1 (Top diamond in warm ivory) -->
+        android:translateX="4"
+        android:translateY="4">
+        <!-- Layer 1 (Top diamond in ivory) -->
         <path
-            android:pathData="M30,37 L54,23 L78,37 L54,51 Z"
+            android:pathData="M28,34 L50,22 L72,34 L50,46 Z"
             android:strokeColor="#FAF5E8"
             android:strokeWidth="6"
             android:strokeLineJoin="round" />
-        <!-- Layer 2 (Middle layer in autumn amber) -->
+        <!-- Layer 2 (Middle layer in warm amber caramel) -->
         <path
-            android:pathData="M30,55 L54,69 L78,55"
+            android:pathData="M28,50 L50,62 L72,50"
             android:strokeColor="#C56F1F"
             android:strokeWidth="6"
             android:strokeLineCap="round"
             android:strokeLineJoin="round" />
-        <!-- Layer 3 (Bottom layer in roasted cognac) -->
+        <!-- Layer 3 (Bottom layer in saddle cognac) -->
         <path
-            android:pathData="M30,73 L54,87 L78,73"
+            android:pathData="M28,66 L50,78 L72,66"
             android:strokeColor="#8A4F25"
             android:strokeWidth="6"
             android:strokeLineCap="round"
             android:strokeLineJoin="round" />
-        <!-- Center accent amber pip -->
-        <path
-            android:pathData="M54,34 A3,3 0 1,0 54,40 A3,3 0 1,0 54,34 Z"
-            android:fillColor="#C56F1F" />
     </group>
 </vector>

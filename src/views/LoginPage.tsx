@@ -58,10 +58,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#2a1a10] border-2 border-[#8a4f25]/40 shadow-lg mb-3">
             <svg width="28" height="28" viewBox="0 0 100 100" fill="none">
-              <path d="M26 35L50 22L74 35L50 48L26 35Z" stroke="#faf5e8" strokeWidth="7" strokeLinejoin="round" />
-              <path d="M26 51L50 64L74 51" stroke="#c56f1f" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M26 67L50 80L74 67" stroke="#8a4f25" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx="50" cy="35" r="4" fill="#c56f1f" />
+              <path d="M28 34L50 22L72 34L50 46L28 34Z" stroke="#FAF5E8" strokeWidth="6" strokeLinejoin="round" />
+              <path d="M28 50L50 62L72 50" stroke="#C56F1F" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M28 66L50 78L72 66" stroke="#8A4F25" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
           <h1 className="text-2xl font-black text-[#2a1a10] tracking-tight">
