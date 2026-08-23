@@ -288,7 +288,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="Contoh: 8991234567890"
+                    placeholder="Nomor Barcode / SKU"
                     value={barcode}
                     onChange={(e) => setBarcode(e.target.value)}
                     className="flex-1 px-3.5 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:border-stone-400 font-mono transition-colors font-semibold"
@@ -344,7 +344,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                   ref={nameInputRef}
                   type="text"
                   required
-                  placeholder="Contoh: Beras Rojo Lele 5kg, Minyak Fortune 2L"
+                  placeholder="Nama Produk"
                   value={name}
                   onChange={(e) => {
                     setName(e.target.value);
@@ -560,7 +560,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                 </label>
                 <input
                   type="text"
-                  placeholder="Contoh: Rak A-02, Etalase Depan, Lorong 3"
+                  placeholder="Kode Rak / Lokasi"
                   value={locationDetails}
                   onChange={(e) => setLocationDetails(e.target.value)}
                   className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:border-stone-400"
@@ -570,11 +570,11 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
               {/* Catatan */}
               <div>
                 <label className="text-xs font-semibold text-stone-700 block mb-1.5">
-                  Catatan Tambahan <span className="text-stone-400 font-normal">(opsional)</span>
+                  Catatan <span className="text-stone-400 font-normal">(opsional)</span>
                 </label>
                 <input
                   type="text"
-                  placeholder="Contoh: Expire 2027, Supplier CV Berkah"
+                  placeholder="Catatan tambahan"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:border-stone-400"

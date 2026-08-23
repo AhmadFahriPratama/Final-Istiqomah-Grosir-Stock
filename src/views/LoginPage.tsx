@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, ArrowRight, User, Lock, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, User, Lock } from 'lucide-react';
 import type { UserAccount } from '../types/stock';
 import { StockStorageEngine } from '../services/db';
 import { soundEffects } from '../utils/audio';
@@ -89,7 +89,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   setUsername(e.target.value);
                   setErrorMsg('');
                 }}
-                placeholder="Contoh: Fahri"
+                placeholder="Nama akun"
                 className="w-full px-3.5 py-3 text-sm bg-white border-2 border-[#ded2b8] focus:border-[#2a1a10] rounded-xl focus:outline-none transition-colors text-[#2a1a10] placeholder:text-[#9e8b74] font-medium"
               />
             </div>
@@ -109,7 +109,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     setPassword(e.target.value);
                     setErrorMsg('');
                   }}
-                  placeholder="Masukkan password"
+                  placeholder="Password"
                   className="w-full px-3.5 py-3 pr-11 text-sm bg-white border-2 border-[#ded2b8] focus:border-[#2a1a10] rounded-xl focus:outline-none transition-colors font-mono text-[#2a1a10] placeholder:text-[#9e8b74] placeholder:font-sans"
                 />
                 <button
@@ -137,22 +137,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               disabled={isSubmitting}
               className="w-full py-3.5 bg-[#2a1a10] hover:bg-[#3d2618] active:scale-[0.98] disabled:opacity-50 text-[#faf5e8] rounded-xl text-sm font-bold flex items-center justify-center gap-2 touch-press shadow-md transition-all pt-3.5 mt-2"
             >
-              <span>Masuk ke Sistem</span>
+              <span>Masuk</span>
               <ArrowRight size={16} />
             </button>
           </form>
-
-          {/* Security note */}
-          <div className="mt-4 pt-3 border-t border-[#ded2b8] flex items-center justify-center gap-1.5 text-[11px] text-[#78604d] font-medium">
-            <ShieldCheck size={13} className="text-emerald-700" />
-            <span>Offline-First Storage Ready</span>
-          </div>
         </div>
-
-        {/* Footer info */}
-        <p className="text-center text-[11px] text-[#9e8b74] font-medium mt-6">
-          Istiqomah Grosir Stock • by Fahri Pratama
-        </p>
       </div>
     </div>
   );

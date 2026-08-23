@@ -10,7 +10,6 @@ import type { FloorId, UserAccount } from '../types/stock';
 import { FLOOR_DEFINITIONS } from '../types/stock';
 import { StockStorageEngine } from '../services/db';
 import { soundEffects } from '../utils/audio';
-import { OfflineBadge } from '../components/OfflineBadge';
 import { BarcodeScannerModal } from '../components/BarcodeScannerModal';
 import { ChangePasswordModal } from '../components/ChangePasswordModal';
 import { FloorGlyph, ScannerGlyph, AdminCrestGlyph } from '../components/CustomIcons';
@@ -132,8 +131,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onSelectFloor, onOpenA
         </div>
 
         <div className="flex items-center gap-2">
-          <OfflineBadge />
-
           <button
             onClick={() => soundEffects.toggleSound()}
             className="w-9 h-9 rounded-xl flex items-center justify-center border border-stone-200 text-stone-500 hover:text-stone-700 hover:border-stone-300 transition-colors bg-white touch-press"

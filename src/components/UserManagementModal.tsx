@@ -205,7 +205,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
                   <input
                     type="text"
                     required
-                    placeholder="Contoh: Eza"
+                    placeholder="Nama Petugas"
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
                     className="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-200 rounded-xl font-bold focus:outline-none focus:border-black"
@@ -219,7 +219,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
                   <input
                     type="text"
                     required
-                    placeholder="eza"
+                    placeholder="Username"
                     value={formUsername}
                     onChange={(e) => setFormUsername(e.target.value)}
                     className="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-200 rounded-xl font-mono font-bold focus:outline-none focus:border-black"

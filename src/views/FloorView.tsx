@@ -21,7 +21,6 @@ import { FLOOR_DEFINITIONS } from '../types/stock';
 import { StockStorageEngine } from '../services/db';
 import { soundEffects } from '../utils/audio';
 import { SkeletonLoader } from '../components/SkeletonLoader';
-import { OfflineBadge } from '../components/OfflineBadge';
 import { BarcodeScannerModal } from '../components/BarcodeScannerModal';
 import { StockAdjustModal } from '../components/StockAdjustModal';
 import { ItemFormModal } from '../components/ItemFormModal';
@@ -264,7 +263,6 @@ export const FloorView: React.FC<FloorViewProps> = ({ floorId }) => {
         </div>
 
         <div className="flex items-center gap-1.5">
-          <OfflineBadge />
           <button
             onClick={() => soundEffects.toggleSound()}
             className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors touch-press ${

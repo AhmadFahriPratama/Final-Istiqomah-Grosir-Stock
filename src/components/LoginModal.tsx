@@ -169,7 +169,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   setUsername(e.target.value);
                   setErrorMsg('');
                 }}
-                placeholder="Contoh: zahra / rani / admin"
+                placeholder="Nama atau Username"
                 className="w-full px-3 py-2 text-xs font-bold bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:border-black"
               />
               <User size={14} className="absolute right-3 top-2.5 text-stone-400" />
